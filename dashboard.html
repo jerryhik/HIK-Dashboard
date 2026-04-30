@@ -46,13 +46,13 @@
     .alert.r{background:var(--red-d);border-color:rgba(224,82,82,.25);}
     .alert.a{background:var(--amber-d);border-color:rgba(224,154,43,.25);}
     /* Table */
-    .tbl{width:100%;border-collapse:separate;border-spacing:0;}
-    .tbl th{background:rgba(226,217,206,.5);color:var(--text2);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+    .tbl{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;}
+    .tbl th{background:rgba(226,217,206,.85);color:var(--text2);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2;backdrop-filter:blur(4px);}
     .tbl td{padding:11px 10px;border-bottom:1px solid rgba(226,217,206,.7);font-size:13px;vertical-align:middle;}
     .tbl tr:hover td{background:rgba(226,217,206,.3);}
     .tbl tr:last-child td{border-bottom:none;}
     .tbl tr.expired td{opacity:.42;}
-    .tbl tfoot td{padding:9px 10px;font-size:12px;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);}
+    .tbl tfoot td{padding:9px 10px;font-size:12px;background:rgba(226,217,206,.92);border-top:2px solid var(--border2);position:sticky;bottom:0;z-index:2;backdrop-filter:blur(4px);}
     /* Badges */
     .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
     .b-lump{background:var(--green-d);color:var(--green);border:1px solid rgba(76,175,138,.2);}
@@ -284,24 +284,24 @@
           <input type="text" class="srch" placeholder="이름, 주소 검색..." oninput="filterTable(this.value)">
         </div>
       </div>
-      <div class="card" style="overflow:hidden;">
-        <div style="overflow-x:auto;">
+      <div class="card" style="overflow:clip;">
+        <div style="overflow:auto;max-height:calc(100vh - 420px);min-height:200px;">
           <table class="tbl">
             <thead>
               <tr>
-                <th style="min-width:88px;">성사일</th>
-                <th style="min-width:80px;">주 담당자</th>
-                <th style="min-width:100px;">게스트</th>
-                <th style="min-width:200px;">주소</th>
-                <th style="min-width:100px;">보증금</th>
-                <th style="min-width:100px;">월세</th>
-                <th style="min-width:100px;">HIK 수수료</th>
-                <th style="min-width:140px;">호스트 연락처</th>
-                <th style="min-width:120px;">게스트 연락처</th>
-                <th style="min-width:150px;">계약 기간</th>
-                <th style="min-width:130px;">납부 방식</th>
-                <th style="min-width:200px;">비고</th>
-                <th style="min-width:70px;text-align:center;">관리</th>
+                <th style="width:80px;">성사일</th>
+                <th style="width:72px;">주 담당자</th>
+                <th style="width:90px;">게스트</th>
+                <th style="width:140px;">주소</th>
+                <th style="width:88px;">보증금</th>
+                <th style="width:88px;">월세</th>
+                <th style="width:90px;">HIK 수수료</th>
+                <th style="width:130px;">호스트 연락처</th>
+                <th style="width:110px;">게스트 연락처</th>
+                <th style="width:140px;">계약 기간</th>
+                <th style="width:120px;">납부 방식</th>
+                <th style="min-width:180px;">비고</th>
+                <th style="width:64px;text-align:center;">관리</th>
               </tr>
             </thead>
             <tbody id="tbl-body"></tbody>
