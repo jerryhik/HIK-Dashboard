@@ -212,7 +212,7 @@
 
     <!-- SECTION TABS -->
     <div class="f3">
-      <div style="display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;">
+      <div id="tab-bar" style="display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;flex-wrap:wrap;">
         <button id="tab-list" class="tab-btn tab-on">전체 중개건 목록</button>
         <button id="tab-rev" class="tab-btn">월별 매출 집계</button>
       </div>
@@ -492,6 +492,7 @@
     let payType = 'lump';
     let editId = null;
     let fq = '';
+    let activeManager = null;
 
     function save() { localStorage.setItem('re_entries', JSON.stringify(entries)); }
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -605,7 +606,8 @@
 
     function buildAlerts() {
       _urgAll = []; _warnAll = [];
-      entries.forEach(e => {
+      const alertEntries = activeManager ? entries.filter(e => e.manager === activeManager) : entries;
+      alertEntries.forEach(e => {
         const id = daysTo(e.startDate);
         if (id >= 0 && id <= 7)  _urgAll.push({ kind:'checkin',  days:id, e, date:e.startDate });
         else if (id > 7 && id <= 14) _warnAll.push({ kind:'checkin', days:id, e, date:e.startDate });
@@ -632,7 +634,8 @@
       const empty = document.getElementById('empty-st');
       const cnt = document.getElementById('tbl-cnt');
       const filtered = entries.filter(e =>
-        !fq || e.guestName?.toLowerCase().includes(fq) || e.address?.toLowerCase().includes(fq)
+        (!activeManager || e.manager === activeManager) &&
+        (!fq || e.guestName?.toLowerCase().includes(fq) || e.address?.toLowerCase().includes(fq))
       );
       cnt.textContent = `${filtered.length}건`;
       if (!filtered.length) { tbody.innerHTML=''; document.getElementById('tbl-foot').innerHTML=''; empty.style.display='block'; return; }
@@ -694,10 +697,11 @@
     }
 
     function updateStats() {
-      document.getElementById('st-total').textContent = entries.length;
+      const base = activeManager ? entries.filter(e => e.manager === activeManager) : entries;
+      document.getElementById('st-total').textContent = base.length;
     }
 
-    function render() { buildAlerts(); renderTable(); updateStats(); }
+    function render() { buildManagerTabs(); buildAlerts(); renderTable(); updateStats(); }
 
     // ── MODAL ──
     function openModal(id = null) {
@@ -1059,13 +1063,35 @@
       </tr>`;
     }
 
+    function getManagerList() {
+      const seen = new Set();
+      const list = [];
+      entries.forEach(e => { if (e.manager && !seen.has(e.manager)) { seen.add(e.manager); list.push(e.manager); } });
+      return list;
+    }
+
+    function buildManagerTabs() {
+      const bar = document.getElementById('tab-bar');
+      bar.querySelectorAll('.tab-mgr').forEach(b => b.remove());
+      getManagerList().forEach(mgr => {
+        const btn = document.createElement('button');
+        btn.className = 'tab-btn tab-mgr' + (activeManager === mgr ? ' tab-on' : '');
+        btn.textContent = mgr;
+        btn.addEventListener('click', () => switchTab('mgr:' + mgr));
+        bar.appendChild(btn);
+      });
+    }
+
     function switchTab(tab) {
       const isRev = tab === 'rev';
-      document.getElementById('tab-list').classList.toggle('tab-on', !isRev);
+      const isMgr = tab.startsWith('mgr:');
+      activeManager = isMgr ? tab.slice(4) : null;
+      document.getElementById('tab-list').classList.toggle('tab-on', tab === 'list');
       document.getElementById('tab-rev').classList.toggle('tab-on', isRev);
+      document.querySelectorAll('.tab-mgr').forEach(b => b.classList.toggle('tab-on', b.textContent === activeManager));
       document.getElementById('list-section').style.display = isRev ? 'none' : 'block';
       document.getElementById('rev-section').style.display  = isRev ? 'block' : 'none';
-      if (isRev) renderRevenue();
+      if (isRev) renderRevenue(); else render();
     }
 
     // ── ROUTING ──
