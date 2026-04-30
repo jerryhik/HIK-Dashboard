@@ -405,8 +405,8 @@
                 </label>
               </div>
             </div>
-            <div id="payday-fixed-wrap" style="margin-bottom:14px;">
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;align-items:flex-end;gap:12px;margin-bottom:10px;">
+            <div id="payday-fixed-wrap" style="margin-bottom:14px;display:flex;flex-direction:column;gap:10px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div>
                   <label class="flabel">입실일</label>
                   <input type="date" id="f4-start" class="finput">
@@ -415,6 +415,8 @@
                   <label class="flabel">퇴실일</label>
                   <input type="date" id="f4-end" class="finput">
                 </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;align-items:flex-end;gap:12px;">
                 <div>
                   <label class="flabel">납입일 (매월 며칠)</label>
                   <input type="number" id="f-payday" class="finput" placeholder="15" min="1" max="31">
@@ -423,17 +425,15 @@
                   <label class="flabel">월세 고정액 (원)</label>
                   <input type="number" id="f4-rent" class="finput" placeholder="0">
                 </div>
-                <div style="display:flex;align-items:flex-end;">
-                  <div>
-                    <label class="flabel">HIK 수수료 (원)</label>
-                    <input type="number" id="f4-hik" class="finput" placeholder="0">
-                  </div>
+                <div>
+                  <label class="flabel">HIK 수수료 (원)</label>
+                  <input type="number" id="f4-hik" class="finput" placeholder="0">
                 </div>
-              </div>
-              <div style="display:flex;justify-content:flex-end;">
-                <button type="button" id="btn-auto-brow" class="btn-i" style="color:var(--gold);border-color:rgba(245,82,0,.3);display:flex;align-items:center;gap:5px;padding:9px 14px;">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/></svg>회차 자동 생성
-                </button>
+                <div style="display:flex;align-items:flex-end;">
+                  <button type="button" id="btn-auto-brow" class="btn-i" style="color:var(--gold);border-color:rgba(245,82,0,.3);display:flex;align-items:center;gap:5px;padding:9px 14px;margin-bottom:1px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/></svg>회차 자동 생성
+                  </button>
+                </div>
               </div>
             </div>
             <div>
@@ -770,12 +770,12 @@
       const end   = document.getElementById('f4-end').value;
       const pd    = parseInt(document.getElementById('f-payday').value);
       if (!start || !end || !pd) { alert('입실일, 퇴실일, 납입일을 먼저 입력하세요.'); return; }
-      const endDate = new Date(end);
-      if (isNaN(endDate)) { alert('퇴실일이 유효한 날짜 형식이어야 합니다.'); return; }
+      const [startY, startM] = start.split('-').map(Number);
+      const [endY, endM]     = end.split('-').map(Number);
+      if (!startY || !startM || !endY || !endM) { alert('퇴실일이 유효한 날짜 형식이어야 합니다.'); return; }
       document.getElementById('b-body').innerHTML = '';
-      let y = new Date(start).getFullYear();
-      let m = new Date(start).getMonth() + 1;
-      const endY = endDate.getFullYear(), endM = endDate.getMonth() + 1;
+      let y = startY;
+      let m = startM;
       const rentVal = document.getElementById('f4-rent').value;
       const hikVal  = document.getElementById('f4-hik').value;
       while (y < endY || (y === endY && m <= endM)) {
