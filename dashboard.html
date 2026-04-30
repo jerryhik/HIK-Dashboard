@@ -765,8 +765,9 @@
       let m = new Date(start).getMonth() + 1;
       const endY = endDate.getFullYear(), endM = endDate.getMonth() + 1;
       while (y < endY || (y === endY && m <= endM)) {
-        const dueDate = new Date(y, m - 1, pd);
-        addBrow({ period: `${y}년 ${m}월분`, dueDate: dueDate.toISOString().slice(0,10) });
+        const mm = String(m).padStart(2, '0');
+        const dd = String(pd).padStart(2, '0');
+        addBrow({ period: `${y}년 ${m}월분`, dueDate: `${y}-${mm}-${dd}` });
         m++; if (m > 12) { m = 1; y++; }
       }
       updateBrowTotals();
