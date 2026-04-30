@@ -53,8 +53,6 @@
     .tbl tr:last-child td{border-bottom:none;}
     .tbl tr.expired td{opacity:.42;}
     .tbl tfoot td{padding:9px 10px;font-size:12px;background:#E6DFDA;border-top:2px solid var(--border2);position:sticky;bottom:0;z-index:2;}
-    /* 납부방식(11번째) 열 오른쪽 스크롤 경계 */
-    .tbl th:nth-child(11),.tbl td:nth-child(11){box-shadow:inset -3px 0 0 var(--border2);}
     /* Badges */
     .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
     .b-lump{background:var(--green-d);color:var(--green);border:1px solid rgba(76,175,138,.2);}
@@ -301,7 +299,7 @@
                 <th style="min-width:122px;">호스트 연락처</th>
                 <th style="min-width:108px;">게스트 연락처</th>
                 <th style="min-width:132px;">계약 기간</th>
-                <th style="min-width:112px;">납부 방식</th>
+                <th style="min-width:84px;">납부 방식</th>
                 <th style="min-width:200px;">비고</th>
                 <th style="min-width:64px;text-align:center;">관리</th>
               </tr>
@@ -661,10 +659,10 @@
         if (!isNaN(od) && od < 0) sbadgeParts.push(`<span class="badge b-exp">만료</span>`);
         const sbadge = sbadgeParts.length ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">${sbadgeParts.join('')}</div>` : '';
         const pb = e.payType === 'lump'
-          ? `<span class="badge b-lump">일괄</span>`
+          ? `<span class="badge b-lump">일괄납부</span>`
           : e.payDay
-            ? `<span class="badge b-mo">분할·매월${e.payDay}일</span>`
-            : `<span class="badge b-mo">분할·수동설정</span>`;
+            ? `<span class="badge b-mo">매월${e.payDay}일</span>`
+            : `<span class="badge b-mo">수동설정</span>`;
         const bdbtn = e.payType === 'monthly' && e.breakdown?.length
           ? `<button data-bd="${e.id}" class="btn-i" style="display:block;margin-top:5px;">내역</button>` : '';
         const isExpired = !isNaN(od) && od < 0;
