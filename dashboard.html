@@ -401,6 +401,21 @@
             <button type="button" class="tbtn on" id="btn-lump">일괄납부</button>
             <button type="button" class="tbtn" id="btn-mo">월세 분할납부</button>
           </div>
+          <!-- 일괄납부 납입 내역 -->
+          <div id="lump-opts" style="margin-top:16px;">
+            <label class="flabel">납입 내역</label>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;">
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+                <div><label class="flabel" style="font-size:10px;">실제납입일</label><input type="date" id="f-lump-actual" class="finput"></div>
+                <div><label class="flabel" style="font-size:10px;">보증금 (원)</label><input type="number" id="f-lump-deposit" class="finput" placeholder="10000000"></div>
+                <div><label class="flabel" style="font-size:10px;">월세 (원)</label><input type="number" id="f-lump-rent" class="finput" placeholder="0"></div>
+                <div><label class="flabel" style="font-size:10px;">HIK 수수료 (원)</label><input type="number" id="f-lump-hik" class="finput" placeholder="0"></div>
+                <div><label class="flabel" style="font-size:10px;">납입여부</label>
+                  <select id="f-lump-status" class="finput"><option value="scheduled">예정</option><option value="done">완료</option></select>
+                </div>
+              </div>
+            </div>
+          </div>
           <div id="mo-opts" style="display:none;margin-top:16px;">
             <!-- 납입일 설정 방식 -->
             <div style="margin-bottom:14px;">
@@ -690,6 +705,8 @@
         const el = document.getElementById(k);
         if (el.tagName === 'TEXTAREA' || el.type === 'text' || el.type === 'number' || el.type === 'date') el.value = '';
       });
+      ['f-lump-actual','f-lump-deposit','f-lump-rent','f-lump-hik'].forEach(k => { document.getElementById(k).value = ''; });
+      document.getElementById('f-lump-status').value = 'scheduled';
       document.getElementById('b-body').innerHTML = '';
       document.getElementById('rd-fixed').checked = true;
       document.getElementById('payday-fixed-wrap').style.display = 'block';
@@ -711,6 +728,13 @@
           document.getElementById('f-payday').value = e.payDay||'';
           document.getElementById('f-notes').value = e.notes||'';
           setPay(e.payType || 'lump');
+          if (e.lumpDetail) {
+            document.getElementById('f-lump-actual').value   = e.lumpDetail.actualDate || '';
+            document.getElementById('f-lump-deposit').value  = e.lumpDetail.deposit ?? '';
+            document.getElementById('f-lump-rent').value     = e.lumpDetail.monthlyRent ?? '';
+            document.getElementById('f-lump-hik').value      = e.lumpDetail.hikFee ?? '';
+            document.getElementById('f-lump-status').value   = e.lumpDetail.status || 'scheduled';
+          }
           const isManual = e.payType === 'monthly' && !e.payDay;
           document.getElementById('rd-fixed').checked = !isManual;
           document.getElementById('rd-manual').checked = isManual;
@@ -726,6 +750,7 @@
       payType = t;
       document.getElementById('btn-lump').classList.toggle('on', t==='lump');
       document.getElementById('btn-mo').classList.toggle('on', t==='monthly');
+      document.getElementById('lump-opts').style.display = t==='lump' ? 'block' : 'none';
       document.getElementById('mo-opts').style.display = t==='monthly' ? 'block' : 'none';
     }
 
@@ -779,6 +804,13 @@
             });
         });
       }
+      const lumpDetail = payType === 'lump' ? {
+        actualDate:   document.getElementById('f-lump-actual').value || null,
+        deposit:      document.getElementById('f-lump-deposit').value ? Number(document.getElementById('f-lump-deposit').value) : null,
+        monthlyRent:  document.getElementById('f-lump-rent').value ? Number(document.getElementById('f-lump-rent').value) : null,
+        hikFee:       document.getElementById('f-lump-hik').value ? Number(document.getElementById('f-lump-hik').value) : null,
+        status:       document.getElementById('f-lump-status').value
+      } : null;
       const entry = {
         id: editId || uid(),
         dealDate: document.getElementById('f-dealdate').value || null,
@@ -794,11 +826,18 @@
         payDay: document.getElementById('f-payday').value ? Number(document.getElementById('f-payday').value) : null,
         notes: document.getElementById('f-notes').value.trim(),
         breakdown: bd,
+        lumpDetail,
         createdAt: editId ? entries.find(x=>x.id===editId)?.createdAt : new Date().toISOString()
       };
+      const savedId = entry.id;
       if (editId) { const i = entries.findIndex(x=>x.id===editId); if (i!==-1) entries[i]=entry; }
       else entries.unshift(entry);
       save(); render(); closeModal();
+      // 상세 페이지 열려 있으면 즉시 재렌더
+      if (document.getElementById('detail-view').style.display !== 'none') {
+        const updated = entries.find(x => x.id === savedId);
+        if (updated) renderDetail(updated);
+      }
     }
 
     function delEntry(id) {
@@ -891,11 +930,20 @@
               items.push({ e, r, source: e.payType === 'lump' ? '일괄' : (e.payDay ? `분할·${e.payDay}일` : '분할·수동') });
             }
           });
-        } else if (e.payType === 'lump' && e.startDate) {
-          // 일괄납부 — breakdown 없는 경우 startDate 기준
-          const d = new Date(e.startDate);
+        } else if (e.payType === 'lump') {
+          // 일괄납부 — lumpDetail 기준, 없으면 startDate 폴백
+          const ld = e.lumpDetail;
+          const refDate = (ld?.actualDate) || e.startDate;
+          if (!refDate) return;
+          const d = new Date(refDate);
           if (!isNaN(d) && d.getFullYear() === year && d.getMonth() + 1 === month) {
-            items.push({ e, r: { dueDate: e.startDate, actualDate: '', amount: e.deposit, hikFee: e.hikFee, status: 'scheduled' }, source: '일괄' });
+            items.push({ e, r: {
+              dueDate: e.startDate,
+              actualDate: ld?.actualDate || '',
+              amount: ld?.monthlyRent ?? ld?.deposit ?? e.deposit,
+              hikFee: ld?.hikFee ?? e.hikFee,
+              status: ld?.status || 'scheduled'
+            }, source: '일괄' });
           }
         }
       });
@@ -1090,6 +1138,29 @@
         <div class="card" style="padding:20px;margin-bottom:14px;">
           <div class="detail-section-title">납부 방식</div>
           ${payBadge}
+          ${e.payType === 'lump' && e.lumpDetail ? (() => {
+            const ld = e.lumpDetail;
+            const statusLabel = ld.status === 'done'
+              ? `<span class="status-done">완료</span>`
+              : `<span class="status-sched">예정</span>`;
+            return `<div style="margin-top:14px;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+              <table style="width:100%;border-collapse:collapse;">
+                <thead><tr>
+                  <th style="${thStyle}">실제납입일</th>
+                  <th style="${thStyle}">보증금</th>
+                  <th style="${thStyle}">월세</th>
+                  <th style="${thStyle}">HIK 수수료</th>
+                  <th style="${thStyle}">납입여부</th>
+                </tr></thead>
+                <tbody><tr style="border-bottom:none;">
+                  <td style="padding:10px 14px;font-size:13px;">${fmt(ld.actualDate)}</td>
+                  <td style="padding:10px 14px;font-size:13px;font-weight:600;">${ld.deposit ? krw(ld.deposit) : '—'}</td>
+                  <td style="padding:10px 14px;font-size:13px;font-weight:600;">${ld.monthlyRent ? krw(ld.monthlyRent) : '—'}</td>
+                  <td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--gold);">${ld.hikFee ? krw(ld.hikFee) : '—'}</td>
+                  <td style="padding:10px 14px;font-size:13px;">${statusLabel}</td>
+                </tr></tbody>
+              </table></div>`;
+          })() : ''}
           ${bdHTML}
         </div>
 
