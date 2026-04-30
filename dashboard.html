@@ -109,6 +109,10 @@
     .divl{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);flex:1;}
     .dbadge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;}
     .tbl tbody tr[data-row]{cursor:pointer;}
+    /* Tabs */
+    .tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-size:13px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;margin-bottom:-1px;}
+    .tab-btn:hover{color:var(--text);}
+    .tab-btn.tab-on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700;}
     #detail-view{max-width:1280px;margin:0 auto;padding:32px 24px;display:none;position:relative;z-index:1;}
     .detail-section-title{font-size:10.5px;font-weight:700;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;margin-bottom:12px;}
     .detail-info-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
@@ -202,8 +206,70 @@
       </div>
     </div>
 
-    <!-- TABLE -->
+    <!-- SECTION TABS -->
     <div class="f3">
+      <div style="display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;">
+        <button id="tab-list" class="tab-btn tab-on">전체 중개건 목록</button>
+        <button id="tab-rev" class="tab-btn">월별 매출 집계</button>
+      </div>
+
+      <!-- 월별 매출 집계 -->
+      <div id="rev-section" style="display:none;">
+        <!-- 월 네비게이터 -->
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+          <button id="rev-prev" class="btn-s" style="padding:6px 14px;font-size:13px;">‹</button>
+          <div id="rev-month-label" style="font-size:16px;font-weight:700;min-width:110px;text-align:center;"></div>
+          <button id="rev-next" class="btn-s" style="padding:6px 14px;font-size:13px;">›</button>
+        </div>
+        <!-- 요약 카드 -->
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;" id="rev-cards">
+          <div class="card" style="padding:18px 22px;">
+            <div style="font-size:10.5px;font-weight:700;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">✓ 완료 합계</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--text2);">월세</span>
+              <span id="rev-done-rent" style="font-size:17px;font-weight:700;">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--text2);">HIK 수수료</span>
+              <span id="rev-done-hik" style="font-size:17px;font-weight:700;color:var(--gold);">—</span>
+            </div>
+          </div>
+          <div class="card" style="padding:18px 22px;">
+            <div style="font-size:10.5px;font-weight:700;color:var(--amber);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">◎ 예정 포함 합계</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:12px;color:var(--text2);">월세</span>
+              <span id="rev-all-rent" style="font-size:17px;font-weight:700;">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--text2);">HIK 수수료</span>
+              <span id="rev-all-hik" style="font-size:17px;font-weight:700;color:var(--gold);">—</span>
+            </div>
+          </div>
+        </div>
+        <!-- 상세 내역 -->
+        <div class="card" style="overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tbl" id="rev-tbl">
+              <thead><tr>
+                <th>게스트</th>
+                <th style="min-width:160px;">주소</th>
+                <th>납입예정일</th>
+                <th>실제납입일</th>
+                <th>금액</th>
+                <th>HIK 수수료</th>
+                <th>납입여부</th>
+                <th>출처</th>
+              </tr></thead>
+              <tbody id="rev-body"></tbody>
+              <tfoot id="rev-foot"></tfoot>
+            </table>
+          </div>
+          <div id="rev-empty" style="text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;display:none;">해당 월 납입내역이 없습니다</div>
+        </div>
+      </div>
+
+      <!-- 전체 중개건 목록 -->
+      <div id="list-section">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <div style="display:flex;align-items:center;gap:10px;">
           <div class=""style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;">전체 중개건 목록</div>
@@ -244,7 +310,8 @@
           <div style="font-size:12px;margin-top:4px;">상단 버튼으로 새 중개건을 등록하세요</div>
         </div>
       </div>
-    </div>
+      </div><!-- /list-section -->
+    </div><!-- /f3 -->
   </main>
 
   <!-- DETAIL VIEW -->
@@ -807,6 +874,99 @@
     }
     function closeBD() { document.getElementById('bd-ov').classList.remove('on'); }
 
+    // ── MONTHLY REVENUE ──
+    let revYear = new Date().getFullYear();
+    let revMonth = new Date().getMonth() + 1; // 1-based
+
+    function revItems(year, month) {
+      const items = [];
+      entries.forEach(e => {
+        // breakdown 항목
+        if (e.breakdown?.length) {
+          e.breakdown.forEach(r => {
+            if (!r.dueDate) return;
+            const d = new Date(r.dueDate);
+            if (isNaN(d)) return;
+            if (d.getFullYear() === year && d.getMonth() + 1 === month) {
+              items.push({ e, r, source: e.payType === 'lump' ? '일괄' : (e.payDay ? `분할·${e.payDay}일` : '분할·수동') });
+            }
+          });
+        } else if (e.payType === 'lump' && e.startDate) {
+          // 일괄납부 — breakdown 없는 경우 startDate 기준
+          const d = new Date(e.startDate);
+          if (!isNaN(d) && d.getFullYear() === year && d.getMonth() + 1 === month) {
+            items.push({ e, r: { dueDate: e.startDate, actualDate: '', amount: e.deposit, hikFee: e.hikFee, status: 'scheduled' }, source: '일괄' });
+          }
+        }
+      });
+      return items;
+    }
+
+    function renderRevenue() {
+      const label = `${revYear}년 ${String(revMonth).padStart(2,'0')}월`;
+      document.getElementById('rev-month-label').textContent = label;
+      const items = revItems(revYear, revMonth);
+
+      let doneRent = 0, doneHik = 0, allRent = 0, allHik = 0;
+      items.forEach(({ r }) => {
+        const amt = r.amount ? Number(r.amount) : 0;
+        const hik = r.hikFee ? Number(r.hikFee) : 0;
+        allRent += amt; allHik += hik;
+        if (r.status === 'done') { doneRent += amt; doneHik += hik; }
+      });
+
+      document.getElementById('rev-done-rent').textContent = items.length ? krw(doneRent) : '—';
+      document.getElementById('rev-done-hik').textContent  = items.length ? krw(doneHik)  : '—';
+      document.getElementById('rev-all-rent').textContent  = items.length ? krw(allRent)  : '—';
+      document.getElementById('rev-all-hik').textContent   = items.length ? krw(allHik)   : '—';
+
+      const body = document.getElementById('rev-body');
+      const foot = document.getElementById('rev-foot');
+      const empty = document.getElementById('rev-empty');
+
+      if (!items.length) {
+        body.innerHTML = ''; foot.innerHTML = '';
+        empty.style.display = 'block';
+        document.getElementById('rev-tbl').style.display = 'none';
+        return;
+      }
+      empty.style.display = 'none';
+      document.getElementById('rev-tbl').style.display = '';
+
+      const statusTag = s => s === 'done'
+        ? `<span class="badge" style="background:rgba(42,110,70,.12);color:var(--green);border:1px solid rgba(42,110,70,.2);">완료</span>`
+        : `<span class="badge" style="background:var(--amber-d);color:var(--amber);border:1px solid rgba(154,104,0,.2);">예정</span>`;
+
+      body.innerHTML = items.map(({ e, r, source }) =>
+        `<tr>
+          <td><div style="font-weight:600;font-size:13px;">${e.guestName||'—'}</div></td>
+          <td><div style="font-size:12px;color:var(--text2);">${e.address||'—'}</div></td>
+          <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.dueDate)}</div></td>
+          <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.actualDate)}</div></td>
+          <td><div style="font-weight:500;">${r.amount ? krw(r.amount) : '—'}${r.status==='scheduled'?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
+          <td><div style="font-weight:500;color:var(--gold);">${r.hikFee ? krw(r.hikFee) : '—'}${r.status==='scheduled'&&r.hikFee?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
+          <td>${statusTag(r.status)}</td>
+          <td><span style="font-size:11px;color:var(--dim);">${source}</span></td>
+        </tr>`
+      ).join('');
+
+      foot.innerHTML = `<tr>
+        <td colspan="4" style="font-weight:700;color:var(--text2);">합계</td>
+        <td style="font-weight:700;">${krw(allRent)} <span style="font-size:10.5px;color:var(--green);font-weight:500;">완료 ${krw(doneRent)}</span></td>
+        <td style="font-weight:700;color:var(--gold);">${krw(allHik)} <span style="font-size:10.5px;color:var(--green);font-weight:500;">완료 ${krw(doneHik)}</span></td>
+        <td colspan="2"></td>
+      </tr>`;
+    }
+
+    function switchTab(tab) {
+      const isRev = tab === 'rev';
+      document.getElementById('tab-list').classList.toggle('tab-on', !isRev);
+      document.getElementById('tab-rev').classList.toggle('tab-on', isRev);
+      document.getElementById('list-section').style.display = isRev ? 'none' : 'block';
+      document.getElementById('rev-section').style.display  = isRev ? 'block' : 'none';
+      if (isRev) renderRevenue();
+    }
+
     // ── ROUTING ──
     function showViewSwitch(listMode) {
       document.querySelector('main').style.display = listMode ? 'block' : 'none';
@@ -1005,6 +1165,20 @@
           const card = e.target.closest('[data-detail]');
           if (card) showDetail(card.dataset.detail);
         });
+      });
+
+      // Tabs
+      document.getElementById('tab-list').addEventListener('click', () => switchTab('list'));
+      document.getElementById('tab-rev').addEventListener('click',  () => switchTab('rev'));
+
+      // Revenue month nav
+      document.getElementById('rev-prev').addEventListener('click', () => {
+        revMonth--; if (revMonth < 1) { revMonth = 12; revYear--; }
+        renderRevenue();
+      });
+      document.getElementById('rev-next').addEventListener('click', () => {
+        revMonth++; if (revMonth > 12) { revMonth = 1; revYear++; }
+        renderRevenue();
       });
 
       // Browser back/forward
