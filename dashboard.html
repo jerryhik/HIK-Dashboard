@@ -289,6 +289,7 @@
           <table class="tbl">
             <thead>
               <tr>
+                <th style="min-width:34px;text-align:center;">No.</th>
                 <th style="min-width:78px;">성사일</th>
                 <th style="min-width:70px;">주 담당자</th>
                 <th style="min-width:88px;">게스트</th>
@@ -637,6 +638,12 @@
         (!activeManager || e.manager === activeManager) &&
         (!fq || e.guestName?.toLowerCase().includes(fq) || e.address?.toLowerCase().includes(fq))
       );
+      filtered.sort((a, b) => {
+        if (!a.dealDate && !b.dealDate) return 0;
+        if (!a.dealDate) return 1;
+        if (!b.dealDate) return -1;
+        return a.dealDate.localeCompare(b.dealDate);
+      });
       cnt.textContent = `${filtered.length}건`;
       if (!filtered.length) { tbody.innerHTML=''; document.getElementById('tbl-foot').innerHTML=''; empty.style.display='block'; return; }
       empty.style.display = 'none';
@@ -646,11 +653,11 @@
         totRent += s.amount !== null ? s.amount : (e.monthlyRent ? Number(e.monthlyRent) : 0);
         totHik  += s.hikFee !== null ? s.hikFee : (e.hikFee ? Number(e.hikFee) : 0);
       });
-      // tfoot 합계 행 (열 위치: 보증금=4, 월세=5, HIK=6, 총 13열)
+      // tfoot 합계 행 (순번 포함 총 14열)
       document.getElementById('tbl-foot').innerHTML =
-        `<tr><td colspan="5" style="font-weight:700;color:var(--text2);">합계</td><td style="font-weight:700;">${krw(totRent)}</td><td style="font-weight:700;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
+        `<tr><td colspan="6" style="font-weight:700;color:var(--text2);">합계</td><td style="font-weight:700;">${krw(totRent)}</td><td style="font-weight:700;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
 
-      tbody.innerHTML = filtered.map(e => {
+      tbody.innerHTML = filtered.map((e, idx) => {
         const id = daysTo(e.startDate), od = daysTo(e.endDate);
         let sbadgeParts = [];
         if (!isNaN(id) && id >= 0 && id <= 7) sbadgeParts.push(`<span class="badge b-urg">입실 D-${id}</span>`);
@@ -667,6 +674,7 @@
           ? `<button data-bd="${e.id}" class="btn-i" style="display:block;margin-top:5px;">내역</button>` : '';
         const isExpired = !isNaN(od) && od < 0;
         return `<tr data-row="${e.id}"${isExpired?' class="expired"':''}>
+          <td style="text-align:center;color:var(--dim);font-size:11.5px;font-weight:600;">${idx + 1}</td>
           <td><div style="font-size:12px;color:var(--text2);white-space:nowrap;">${fmt(e.dealDate)}</div></td>
           <td><div style="font-size:13px;font-weight:500;">${e.manager||'—'}</div></td>
           <td><div style="font-weight:600;font-size:13px;">${e.guestName||'—'}</div>${sbadge}</td>
