@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>중개건 관리 대시보드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #F7F7F8;
+      --surface: #FFFFFF;
+      --card: #FFFFFF;
+      --border: #E4E4E7;
+      --border2: #C4C4CC;
+      --gold: #F55200;
+      --gold-l: #FF6B1A;
+      --gold-d: rgba(245,82,0,0.10);
+      --text: #1E1A14;
+      --text2: #6B5E50;
+      --dim: #A89880;
+      --red: #B83232;
+      --red-d: rgba(184,50,50,0.08);
+      --amber: #9A6800;
+      --amber-d: rgba(154,104,0,0.08);
+      --green: #2A6E46;
+      --green-d: rgba(42,110,70,0.08);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 10%,rgba(139,101,16,.03) 0%,transparent 50%),radial-gradient(ellipse at 85% 85%,rgba(42,110,70,.03) 0%,transparent 50%);pointer-events:none;z-index:0;}
+    /* Header */
+    .hdr{background:rgba(255,255,255,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;}
+    /* Cards */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;}
+    /* Stat cards */
+    .scard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;position:relative;overflow:hidden;}
+    .scard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+    .scard.g::after{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+    .scard.r::after{background:linear-gradient(90deg,transparent,var(--red),transparent);}
+    .scard.a::after{background:linear-gradient(90deg,transparent,var(--amber),transparent);}
+    .scard.gr::after{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+    /* Alerts */
+    .alert{border-radius:10px;padding:14px 16px;border:1px solid;}
+    .alert.r{background:var(--red-d);border-color:rgba(224,82,82,.25);}
+    .alert.a{background:var(--amber-d);border-color:rgba(224,154,43,.25);}
+    /* Table */
+    .tbl{width:100%;border-collapse:separate;border-spacing:0;}
+    .tbl th{background:rgba(226,217,206,.5);color:var(--text2);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+    .tbl td{padding:11px 10px;border-bottom:1px solid rgba(226,217,206,.7);font-size:13px;vertical-align:middle;}
+    .tbl tr:hover td{background:rgba(226,217,206,.3);}
+    .tbl tr:last-child td{border-bottom:none;}
+    .tbl tr.expired td{opacity:.42;}
+    .tbl tfoot td{padding:9px 10px;font-size:12px;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);}
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+    .b-lump{background:var(--green-d);color:var(--green);border:1px solid rgba(76,175,138,.2);}
+    .b-mo{background:var(--gold-d);color:var(--gold);border:1px solid rgba(201,168,76,.2);}
+    .b-urg{background:var(--red-d);color:var(--red);border:1px solid rgba(224,82,82,.2);animation:pulse 2s infinite;}
+    .b-exp{background:rgba(85,87,112,.15);color:var(--dim);border:1px solid var(--border);}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.65;}}
+    /* Buttons */
+    .btn-p{background:var(--gold);color:#FFFFFF;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .2s;}
+    .btn-p:hover{background:var(--gold-l);transform:translateY(-1px);box-shadow:0 4px 20px rgba(201,168,76,.3);}
+    .btn-s{background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:14px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .2s;}
+    .btn-s:hover{border-color:var(--border2);color:var(--text);}
+    .btn-i{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 9px;cursor:pointer;transition:all .2s;color:var(--text2);font-size:12px;font-family:'Noto Sans KR',sans-serif;}
+    .btn-i:hover{border-color:var(--border2);color:var(--text);}
+    .btn-i.del:hover{border-color:rgba(224,82,82,.4);color:var(--red);background:var(--red-d);}
+    /* Modal */
+    .overlay{position:fixed;inset:0;background:rgba(30,26,20,.55);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .25s;}
+    .overlay.on{opacity:1;pointer-events:all;}
+    .modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:700px;transform:translateY(-16px);transition:transform .25s;position:relative;}
+    .overlay.on .modal{transform:translateY(0);}
+    /* Form */
+    .flabel{display:block;font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px;}
+    .finput{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color .2s;}
+    .finput:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,82,0,.1);}
+    .finput::placeholder{color:var(--dim);}
+    select.finput{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B8D9F' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+    /* Toggle */
+    .tgroup{display:flex;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px;}
+    .tbtn{flex:1;padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:500;transition:all .2s;background:transparent;color:var(--text2);}
+    .tbtn.on{background:var(--gold);color:#FFFFFF;}
+    /* Breakdown table */
+    .btbl{width:100%;border-collapse:collapse;font-size:13px;}
+    .btbl th{background:rgba(226,217,206,.5);color:var(--text2);font-size:11px;padding:8px 10px;text-align:left;font-weight:500;border-bottom:1px solid var(--border);}
+    .btbl td{padding:6px 5px;border-bottom:1px solid rgba(226,217,206,.7);}
+    .btbl td input,.btbl td select{width:100%;background:#FDFAF6;border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--text);font-size:12.5px;font-family:'Noto Sans KR',sans-serif;outline:none;}
+    .btbl td input:focus,.btbl td select:focus{border-color:var(--gold);}
+    .btbl td select{cursor:pointer;min-width:70px;}
+    .btbl tfoot td{padding:8px 10px;font-size:12px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);}
+    .status-done{color:var(--green);font-weight:600;}
+    .status-sched{color:var(--amber);font-weight:600;}
+    /* Search */
+    .srch-wrap{position:relative;}
+    .srch-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;}
+    .srch{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 14px 9px 36px;color:var(--text);font-size:13.5px;font-family:'Noto Sans KR',sans-serif;outline:none;transition:all .2s;width:200px;}
+    .srch:focus{border-color:var(--gold);width:260px;}
+    /* Misc */
+    ::-webkit-scrollbar{width:5px;height:5px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+    .f1{animation:fadeUp .4s .05s both;}
+    .f2{animation:fadeUp .4s .1s both;}
+    .f3{animation:fadeUp .4s .15s both;}
+    .divl{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);flex:1;}
+    .dbadge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;}
+    .tbl tbody tr[data-row]{cursor:pointer;}
+    #detail-view{max-width:1280px;margin:0 auto;padding:32px 24px;display:none;position:relative;z-index:1;}
+    .detail-section-title{font-size:10.5px;font-weight:700;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;margin-bottom:12px;}
+    .detail-info-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+    .detail-info-row:last-child{margin-bottom:0;}
+    .flt-btn{background:transparent;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11.5px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .15s;color:var(--text2);white-space:nowrap;}
+    .flt-btn:hover{border-color:var(--border2);color:var(--text);}
+    .flt-btn.on{background:var(--gold-d);border-color:rgba(245,82,0,.4);color:var(--gold);font-weight:600;}
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="hdr px-6 py-4">
+    <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img src="HomesinKorea.webp" alt="HomesinKorea" style="height:36px;width:auto;object-fit:contain;">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);line-height:1.2;">중개건 관리 대시보드</div>
+          <div style="font-size:11.5px;color:var(--text2);">부동산 임대차 총괄 트래킹</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span id="hdr-date" style="font-size:12px;color:var(--text2);"></span>
+        <button id="btn-register" class="btn-p" style="display:flex;align-items:center;gap:6px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          새 중개건 등록
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width:1280px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;">
+
+    <!-- STATS -->
+    <div class="f1" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;">
+      <div class="scard" style="border-bottom:2px solid var(--gold);">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">총 중개건</div>
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <div style="font-size:32px;font-weight:700;color:var(--gold);" id="st-total">0</div>
+          <div style="font-size:11.5px;color:var(--dim);">등록된 임대차 계약</div>
+        </div>
+      </div>
+      <div class="scard r">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">긴급 알림</div>
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <div style="font-size:32px;font-weight:700;color:var(--red);" id="st-urg">0</div>
+          <div style="font-size:11.5px;color:var(--dim);">7일 이내 중요 일정</div>
+        </div>
+      </div>
+      <div class="scard" style="border-bottom:2px solid #F97316;">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">예정 알림</div>
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <div style="font-size:32px;font-weight:700;color:#EA580C;" id="st-warn">0</div>
+          <div style="font-size:11.5px;color:var(--dim);">8–14일 이내 중요 일정</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="f2" style="margin-bottom:32px;">
+      <!-- 긴급: ≤7일 -->
+      <div style="margin-bottom:22px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0;animation:pulse 2s infinite;"></div>
+          <div class=""style="font-size:11.5px;font-weight:600;color:var(--red);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;">긴급 알림 — 7일 이내</div>
+          <div class="divl"></div>
+          <div style="display:flex;gap:5px;">
+            <button class="flt-btn on" id="uf-all">전체</button>
+            <button class="flt-btn"    id="uf-pay">월세</button>
+            <button class="flt-btn"    id="uf-checkin">입실</button>
+            <button class="flt-btn"    id="uf-checkout">퇴실</button>
+          </div>
+        </div>
+        <div id="urg-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;"></div>
+        <div id="urg-none" style="font-size:13px;color:var(--dim);padding:6px 0;display:none;"></div>
+      </div>
+      <!-- 예정: 8–14일 -->
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;"></div>
+          <div class=""style="font-size:11.5px;font-weight:600;color:var(--amber);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;">예정 알림 — 8~14일 이내</div>
+          <div class="divl"></div>
+          <div style="display:flex;gap:5px;">
+            <button class="flt-btn on" id="wf-all">전체</button>
+            <button class="flt-btn"    id="wf-pay">월세</button>
+            <button class="flt-btn"    id="wf-checkin">입실</button>
+            <button class="flt-btn"    id="wf-checkout">퇴실</button>
+          </div>
+        </div>
+        <div id="warn-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;"></div>
+        <div id="warn-none" style="font-size:13px;color:var(--dim);padding:6px 0;display:none;"></div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="f3">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class=""style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;">전체 중개건 목록</div>
+          <span id="tbl-cnt" style="font-size:11px;padding:2px 9px;border-radius:20px;background:var(--card);color:var(--text2);border:1px solid var(--border);">0건</span>
+        </div>
+        <div class="srch-wrap">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="srch" placeholder="이름, 주소 검색..." oninput="filterTable(this.value)">
+        </div>
+      </div>
+      <div class="card" style="overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>성사일</th>
+                <th>주 담당자</th>
+                <th>게스트</th>
+                <th style="min-width:200px;">주소</th>
+                <th>보증금</th>
+                <th>월세</th>
+                <th>HIK 수수료</th>
+                <th>호스트 연락처</th>
+                <th>게스트 연락처</th>
+                <th>계약 기간</th>
+                <th style="min-width:130px;">납부 방식</th>
+                <th style="min-width:200px;">비고</th>
+                <th style="text-align:center;">관리</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-body"></tbody>
+            <tfoot id="tbl-foot"></tfoot>
+          </table>
+        </div>
+        <div id="empty-st" style="text-align:center;padding:56px 20px;color:var(--dim);">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="var(--border2)" stroke-width="1.5" style="margin:0 auto 12px;display:block;"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <div style="font-size:13px;font-weight:500;color:var(--dim);">등록된 중개건이 없습니다</div>
+          <div style="font-size:12px;margin-top:4px;">상단 버튼으로 새 중개건을 등록하세요</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- DETAIL VIEW -->
+  <section id="detail-view">
+    <div id="detail-content"></div>
+  </section>
+
+  <!-- ADD/EDIT MODAL -->
+  <div class="overlay" id="modal-ov">
+    <div class="modal">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);">
+        <div>
+          <div class=""style="font-size:15px;font-weight:600;" id="modal-title">새 중개건 등록</div>
+          <div style="font-size:11.5px;color:var(--text2);margin-top:2px;">계약 정보를 입력하세요</div>
+        </div>
+        <button id="btn-modal-close" style="background:transparent;border:none;cursor:pointer;color:var(--text2);padding:4px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div style="padding:20px 24px;max-height:72vh;overflow-y:auto;">
+        <input type="hidden" id="f-id">
+
+        <!-- 01 기본 정보 -->
+        <div style="margin-bottom:22px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">01</span>
+            <div class="divl"></div>
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">계약 기본 정보</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:12px;">
+            <div><label class="flabel">성사일</label><input type="date" id="f-dealdate" class="finput"></div>
+            <div><label class="flabel">주 담당자</label><input type="text" id="f-manager" class="finput" placeholder="홍길동"></div>
+            <div><label class="flabel">게스트 이름 *</label><input type="text" id="f-name" class="finput" placeholder="이서연"></div>
+            <div><label class="flabel">집 주소 *</label><input type="text" id="f-addr" class="finput" placeholder="서울시 강남구 테헤란로 123, 101호"></div>
+          </div>
+        </div>
+
+        <!-- 02 연락처 -->
+        <div style="margin-bottom:22px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">02</span>
+            <div class="divl"></div>
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">연락처</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><label class="flabel">호스트 연락처</label><input type="text" id="f-host" class="finput" placeholder="전화번호, 카카오톡 ID, 이름 등"></div>
+            <div><label class="flabel">게스트 연락처</label><input type="text" id="f-guest" class="finput" placeholder="010-0000-0000"></div>
+          </div>
+        </div>
+
+        <!-- 03 금액 -->
+        <div style="margin-bottom:22px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">03</span>
+            <div class="divl"></div>
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">계약 금액</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div><label class="flabel">보증금 (원)</label><input type="number" id="f-deposit" class="finput" placeholder="10000000"></div>
+            <div><label class="flabel">월세 (원)</label><input type="number" id="f-rent" class="finput" placeholder="800000"></div>
+            <div><label class="flabel">HIK 수수료 (원)</label><input type="number" id="f-hik" class="finput" placeholder="850000"></div>
+          </div>
+        </div>
+
+        <!-- 04 기간 -->
+        <div style="margin-bottom:22px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">04</span>
+            <div class="divl"></div>
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">계약 기간</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><label class="flabel">입실일 *</label><input type="date" id="f-start" class="finput"></div>
+            <div><label class="flabel">퇴실일 *</label><input type="text" id="f-end" class="finput" placeholder="2026-12-31 또는 미정, 협의 중 등"></div>
+          </div>
+        </div>
+
+        <!-- 05 납부 방식 -->
+        <div style="margin-bottom:22px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">05</span>
+            <div class="divl"></div>
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">납부 방식</span>
+          </div>
+          <label class="flabel">납부 유형</label>
+          <div class="tgroup">
+            <button type="button" class="tbtn on" id="btn-lump">일괄납부</button>
+            <button type="button" class="tbtn" id="btn-mo">월세 분할납부</button>
+          </div>
+          <div id="mo-opts" style="display:none;margin-top:16px;">
+            <!-- 납입일 설정 방식 -->
+            <div style="margin-bottom:14px;">
+              <label class="flabel">납입일 설정 방식</label>
+              <div style="display:flex;gap:16px;">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text);">
+                  <input type="radio" name="payday-mode" id="rd-fixed" value="fixed" checked style="accent-color:var(--gold);">
+                  매월 고정일
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text);">
+                  <input type="radio" name="payday-mode" id="rd-manual" value="manual" style="accent-color:var(--gold);">
+                  수동 설정 (회차별 직접 입력)
+                </label>
+              </div>
+            </div>
+            <div id="payday-fixed-wrap" style="margin-bottom:14px;">
+              <label class="flabel">월세 납입일 (매월 며칠)</label>
+              <input type="number" id="f-payday" class="finput" placeholder="15" min="1" max="31" style="width:110px;">
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <label class="flabel" style="margin:0;">납입 내역 Breakdown</label>
+                <button type="button" id="btn-add-brow" class="btn-i" style="color:var(--gold);border-color:rgba(201,168,76,.3);display:flex;align-items:center;gap:4px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>행 추가
+                </button>
+              </div>
+              <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+                <table class="btbl" id="b-tbl"><thead><tr><th>몇월분</th><th>납입예정일</th><th>실제납입일</th><th>금액 (원)</th><th>HIK 수수료 (원)</th><th>납입여부</th><th style="width:28px;"></th></tr></thead>
+                <tbody id="b-body"></tbody>
+                <tfoot id="b-foot"><tr><td colspan="3" style="color:var(--text2);font-weight:600;">합계</td><td id="b-sum-amt">—</td><td id="b-sum-hik">—</td><td colspan="2"></td></tr></tfoot></table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 06 비고 -->
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">06</span>
+            <div class="divl"></div>
+            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">비고</span>
+          </div>
+          <label class="flabel">메모</label>
+          <textarea id="f-notes" class="finput" rows="3" placeholder="특이사항, 계약 조건 등..." style="resize:vertical;"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);">
+        <button id="btn-cancel" class="btn-s">취소</button>
+        <button id="btn-save" class="btn-p">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN VIEW MODAL -->
+  <div class="overlay" id="bd-ov">
+    <div class="modal" style="max-width:540px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);">
+        <div>
+          <div class=""style="font-size:15px;font-weight:600;" id="bd-title">납입 내역</div>
+          <div style="font-size:11.5px;color:var(--text2);margin-top:2px;" id="bd-sub"></div>
+        </div>
+        <button id="btn-bd-close" style="background:transparent;border:none;cursor:pointer;color:var(--text2);padding:4px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="bd-content" style="padding:20px 24px;"></div>
+    </div>
+  </div>
+
+  <script>
+    // ── DATA ──
+    let entries = JSON.parse(localStorage.getItem('re_entries') || '[]');
+    let payType = 'lump';
+    let editId = null;
+    let fq = '';
+
+    function save() { localStorage.setItem('re_entries', JSON.stringify(entries)); }
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+    // ── DATE HELPERS ──
+    function daysTo(ds) {
+      if (!ds) return Infinity;
+      const t = new Date(); t.setHours(0,0,0,0);
+      const d = new Date(ds); d.setHours(0,0,0,0);
+      return Math.round((d - t) / 86400000);
+    }
+    function fmt(ds) {
+      if (!ds) return '—';
+      const d = new Date(ds);
+      if (isNaN(d.getTime())) return ds;
+      return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function krw(n) {
+      if (n === null || n === undefined || n === '') return '—';
+      return '₩' + Number(n).toLocaleString('ko-KR');
+    }
+    function nextPayDates(e, days=14) {
+      if (e.payType !== 'monthly' || !e.payDay) return [];
+      const res = [];
+      const t = new Date(); t.setHours(0,0,0,0);
+      const end = new Date(e.endDate);
+      for (let m = 0; m <= 2; m++) {
+        const d = new Date(t.getFullYear(), t.getMonth() + m, e.payDay);
+        if (d > end) break;
+        const diff = Math.round((d - t) / 86400000);
+        if (diff >= 0 && diff <= days) res.push({ date: d.toISOString().slice(0,10), days: diff });
+      }
+      return res;
+    }
+
+    // ── BREAKDOWN HELPERS ──
+    function bdDoneSum(e) {
+      if (e.payType !== 'monthly' || !e.breakdown?.length) return { amount: null, hikFee: null };
+      const done = e.breakdown.filter(r => r.status === 'done');
+      if (!done.length) return { amount: null, hikFee: null };
+      return {
+        amount: done.reduce((s, r) => s + (r.amount ? Number(r.amount) : 0), 0),
+        hikFee: done.reduce((s, r) => s + (r.hikFee ? Number(r.hikFee) : 0), 0)
+      };
+    }
+
+    // ── ALERTS ──
+    let urgFilter = 'all', warnFilter = 'all';
+    let _urgAll = [], _warnAll = [];
+
+    function setUrgFilter(cat) {
+      urgFilter = cat;
+      ['all','pay','checkin','checkout'].forEach(k => {
+        document.getElementById(`uf-${k}`)?.classList.toggle('on', k === cat);
+      });
+      renderSection('urg', _urgAll, urgFilter);
+    }
+    function setWarnFilter(cat) {
+      warnFilter = cat;
+      ['all','pay','checkin','checkout'].forEach(k => {
+        document.getElementById(`wf-${k}`)?.classList.toggle('on', k === cat);
+      });
+      renderSection('warn', _warnAll, warnFilter);
+    }
+
+    function alertCard(al) {
+      const urg = al.days <= 7;
+      const col = urg ? 'var(--red)' : 'var(--amber)';
+      const cls = urg ? 'r' : 'a';
+      const dtext = al.days === 0 ? '오늘' : `D-${al.days}`;
+      const icons = { checkin:'🏠', checkout:'🚪', pay:'💳' };
+      const labels = { checkin:'입실일', checkout:'퇴실일', pay:'월세 납입일' };
+      return `<div class="alert ${cls}" data-detail="${al.e.id}" style="cursor:pointer;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;min-width:0;">
+            <span style="font-size:18px;line-height:1;margin-top:2px;flex-shrink:0;">${icons[al.kind]}</span>
+            <div style="min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="font-weight:600;font-size:13px;color:${col};">${labels[al.kind]}</span>
+                <span class="dbadge" style="background:${urg?'rgba(224,82,82,.15)':'rgba(224,154,43,.15)'};color:${col};">${dtext}</span>
+              </div>
+              <div style="font-size:13px;font-weight:500;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${al.e.guestName}</div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${al.e.address}</div>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:12px;font-weight:500;color:${col};">${fmt(al.date)}</div>
+            ${al.kind==='pay'?`<div style="font-size:11.5px;color:var(--text2);margin-top:2px;">${krw(al.e.monthlyRent)}</div>`:''}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function renderSection(pfx, all, filter) {
+      const grid = document.getElementById(`${pfx}-grid`);
+      const none = document.getElementById(`${pfx}-none`);
+      const filtered = filter === 'all' ? all : all.filter(a => a.kind === filter);
+      if (!all.length) {
+        grid.innerHTML = ''; grid.style.display = 'none';
+        none.textContent = '해당 기간 내 알림이 없습니다.'; none.style.display = 'block';
+        return;
+      }
+      if (!filtered.length) {
+        grid.innerHTML = ''; grid.style.display = 'none';
+        none.textContent = '해당 카테고리의 알림이 없습니다.'; none.style.display = 'block';
+        return;
+      }
+      none.style.display = 'none'; grid.style.display = 'grid';
+      grid.innerHTML = filtered.map(al => alertCard(al)).join('');
+    }
+
+    function buildAlerts() {
+      _urgAll = []; _warnAll = [];
+      entries.forEach(e => {
+        const id = daysTo(e.startDate);
+        if (id >= 0 && id <= 7)  _urgAll.push({ kind:'checkin',  days:id, e, date:e.startDate });
+        else if (id > 7 && id <= 14) _warnAll.push({ kind:'checkin', days:id, e, date:e.startDate });
+        const od = daysTo(e.endDate);
+        if (od >= 0 && od <= 7)  _urgAll.push({ kind:'checkout', days:od, e, date:e.endDate });
+        else if (od > 7 && od <= 14) _warnAll.push({ kind:'checkout', days:od, e, date:e.endDate });
+        nextPayDates(e, 14).forEach(p => {
+          const item = { kind:'pay', days:p.days, e, date:p.date };
+          if (p.days <= 7) _urgAll.push(item); else _warnAll.push(item);
+        });
+      });
+      _urgAll.sort((a,b)  => a.days - b.days);
+      _warnAll.sort((a,b) => a.days - b.days);
+      document.getElementById('st-urg').textContent  = _urgAll.length;
+      document.getElementById('st-warn').textContent = _warnAll.length;
+      renderSection('urg',  _urgAll,  urgFilter);
+      renderSection('warn', _warnAll, warnFilter);
+    }
+
+    // ── TABLE ──
+    function filterTable(q) { fq = q.toLowerCase(); renderTable(); }
+    function renderTable() {
+      const tbody = document.getElementById('tbl-body');
+      const empty = document.getElementById('empty-st');
+      const cnt = document.getElementById('tbl-cnt');
+      const filtered = entries.filter(e =>
+        !fq || e.guestName?.toLowerCase().includes(fq) || e.address?.toLowerCase().includes(fq)
+      );
+      cnt.textContent = `${filtered.length}건`;
+      if (!filtered.length) { tbody.innerHTML=''; document.getElementById('tbl-foot').innerHTML=''; empty.style.display='block'; return; }
+      empty.style.display = 'none';
+      let totRent = 0, totHik = 0;
+      filtered.forEach(e => {
+        const s = bdDoneSum(e);
+        totRent += s.amount !== null ? s.amount : (e.monthlyRent ? Number(e.monthlyRent) : 0);
+        totHik  += s.hikFee !== null ? s.hikFee : (e.hikFee ? Number(e.hikFee) : 0);
+      });
+      // tfoot 합계 행 (열 위치: 보증금=4, 월세=5, HIK=6, 총 13열)
+      document.getElementById('tbl-foot').innerHTML =
+        `<tr><td colspan="5" style="font-weight:700;color:var(--text2);">합계</td><td style="font-weight:700;">${krw(totRent)}</td><td style="font-weight:700;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
+
+      tbody.innerHTML = filtered.map(e => {
+        const id = daysTo(e.startDate), od = daysTo(e.endDate);
+        let sbadgeParts = [];
+        if (!isNaN(id) && id >= 0 && id <= 7) sbadgeParts.push(`<span class="badge b-urg">입실 D-${id}</span>`);
+        if (!isNaN(od) && od >= 0 && od <= 7) sbadgeParts.push(`<span class="badge b-urg">퇴실 D-${od}</span>`);
+        nextPayDates(e, 7).forEach(p => sbadgeParts.push(`<span class="badge b-urg">월세 D-${p.days}</span>`));
+        if (!isNaN(od) && od < 0) sbadgeParts.push(`<span class="badge b-exp">만료</span>`);
+        const sbadge = sbadgeParts.length ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">${sbadgeParts.join('')}</div>` : '';
+        const pb = e.payType === 'lump'
+          ? `<span class="badge b-lump">일괄</span>`
+          : e.payDay
+            ? `<span class="badge b-mo">분할·매월${e.payDay}일</span>`
+            : `<span class="badge b-mo">분할·수동설정</span>`;
+        const bdbtn = e.payType === 'monthly' && e.breakdown?.length
+          ? `<button data-bd="${e.id}" class="btn-i" style="display:block;margin-top:5px;">내역</button>` : '';
+        const isExpired = !isNaN(od) && od < 0;
+        return `<tr data-row="${e.id}"${isExpired?' class="expired"':''}>
+          <td><div style="font-size:12px;color:var(--text2);white-space:nowrap;">${fmt(e.dealDate)}</div></td>
+          <td><div style="font-size:13px;font-weight:500;">${e.manager||'—'}</div></td>
+          <td><div style="font-weight:600;font-size:13px;">${e.guestName||'—'}</div>${sbadge}</td>
+          <td><div style="font-size:12px;color:var(--text2);max-width:170px;">${e.address||'—'}</div></td>
+          <td><div style="font-weight:500;">${krw(e.deposit)}</div></td>
+          <td>${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="font-weight:500;">${krw(s.amount)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;">${krw(e.monthlyRent)}</div>`; })()}</td>
+          <td>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:500;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</td>
+          <td><div style="font-size:12px;color:var(--text2);">${e.hostContact||'—'}</div></td>
+          <td><div style="font-size:12px;color:var(--text2);">${e.guestContact||'—'}</div></td>
+          <td>
+            <div style="font-size:12px;color:var(--text2);white-space:nowrap;">${fmt(e.startDate)}</div>
+            <div style="font-size:11.5px;color:var(--dim);">→ ${fmt(e.endDate)}</div>
+          </td>
+          <td style="white-space:nowrap;">${pb}${bdbtn}</td>
+          <td><div style="font-size:12px;color:var(--text2);min-width:200px;max-width:280px;line-height:1.5;">${e.notes ? e.notes.slice(0,80)+(e.notes.length>80?'…':'') : '—'}</div></td>
+          <td style="text-align:center;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:5px;">
+              <button data-edit="${e.id}" class="btn-i" title="수정">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button data-del="${e.id}" class="btn-i del" title="삭제">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function updateStats() {
+      document.getElementById('st-total').textContent = entries.length;
+    }
+
+    function render() { buildAlerts(); renderTable(); updateStats(); }
+
+    // ── MODAL ──
+    function openModal(id = null) {
+      editId = id;
+      ['f-dealdate','f-manager','f-name','f-addr','f-host','f-guest','f-deposit','f-rent','f-hik','f-start','f-end','f-payday','f-notes'].forEach(k => {
+        const el = document.getElementById(k);
+        if (el.tagName === 'TEXTAREA' || el.type === 'text' || el.type === 'number' || el.type === 'date') el.value = '';
+      });
+      document.getElementById('b-body').innerHTML = '';
+      document.getElementById('rd-fixed').checked = true;
+      document.getElementById('payday-fixed-wrap').style.display = 'block';
+      setPay('lump');
+      document.getElementById('modal-title').textContent = id ? '중개건 수정' : '새 중개건 등록';
+      if (id) {
+        const e = entries.find(x => x.id === id);
+        if (e) {
+          document.getElementById('f-dealdate').value = e.dealDate||'';
+          document.getElementById('f-manager').value = e.manager||'';
+          document.getElementById('f-name').value = e.guestName||'';
+          document.getElementById('f-addr').value = e.address||'';
+          document.getElementById('f-host').value = e.hostContact||'';
+          document.getElementById('f-guest').value = e.guestContact||'';
+          document.getElementById('f-deposit').value = e.deposit||'';
+          document.getElementById('f-rent').value = e.monthlyRent||'';
+          document.getElementById('f-start').value = e.startDate||'';
+          document.getElementById('f-end').value = e.endDate||'';
+          document.getElementById('f-payday').value = e.payDay||'';
+          document.getElementById('f-notes').value = e.notes||'';
+          setPay(e.payType || 'lump');
+          const isManual = e.payType === 'monthly' && !e.payDay;
+          document.getElementById('rd-fixed').checked = !isManual;
+          document.getElementById('rd-manual').checked = isManual;
+          document.getElementById('payday-fixed-wrap').style.display = isManual ? 'none' : 'block';
+          (e.breakdown||[]).forEach(r => addBrow(r));
+        }
+      }
+      document.getElementById('modal-ov').classList.add('on');
+    }
+    function closeModal() { document.getElementById('modal-ov').classList.remove('on'); editId = null; }
+
+    function setPay(t) {
+      payType = t;
+      document.getElementById('btn-lump').classList.toggle('on', t==='lump');
+      document.getElementById('btn-mo').classList.toggle('on', t==='monthly');
+      document.getElementById('mo-opts').style.display = t==='monthly' ? 'block' : 'none';
+    }
+
+    function updateBrowTotals() {
+      let sumAmt = 0, sumHik = 0, hasAmt = false, hasHik = false;
+      document.querySelectorAll('#b-body tr').forEach(tr => {
+        const ins = tr.querySelectorAll('input');
+        if (ins[3]?.value) { sumAmt += Number(ins[3].value); hasAmt = true; }
+        if (ins[4]?.value) { sumHik += Number(ins[4].value); hasHik = true; }
+      });
+      document.getElementById('b-sum-amt').textContent = hasAmt ? '₩' + sumAmt.toLocaleString('ko-KR') : '—';
+      document.getElementById('b-sum-hik').textContent = hasHik ? '₩' + sumHik.toLocaleString('ko-KR') : '—';
+    }
+
+    function addBrow(d = {}) {
+      const tr = document.createElement('tr');
+      const status = d.status || 'scheduled';
+      tr.innerHTML = `
+        <td><input type="text" placeholder="2026년 5월분" value="${d.period||''}"></td>
+        <td><input type="date" value="${d.dueDate||''}"></td>
+        <td><input type="date" value="${d.actualDate||''}"></td>
+        <td><input type="number" placeholder="800000" value="${d.amount||''}" oninput="updateBrowTotals()"></td>
+        <td><input type="number" placeholder="0" value="${d.hikFee||''}" oninput="updateBrowTotals()"></td>
+        <td><select><option value="scheduled"${status==='scheduled'?' selected':''}>예정</option><option value="done"${status==='done'?' selected':''}>완료</option></select></td>
+        <td style="text-align:center;"><button type="button" data-rm-row class="rm-row-btn" style="background:transparent;border:none;cursor:pointer;color:var(--red);padding:3px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button></td>`;
+      document.getElementById('b-body').appendChild(tr);
+      updateBrowTotals();
+    }
+
+    function saveEntry() {
+      const name = document.getElementById('f-name').value.trim();
+      const addr = document.getElementById('f-addr').value.trim();
+      const start = document.getElementById('f-start').value;
+      const end = document.getElementById('f-end').value;
+      if (!name || !addr || !start || !end) { alert('게스트 이름, 주소, 계약 기간은 필수입니다.'); return; }
+      const bd = [];
+      if (payType === 'monthly') {
+        document.querySelectorAll('#b-body tr').forEach(tr => {
+          const ins = tr.querySelectorAll('input');
+          const sel = tr.querySelector('select');
+          if (ins[0].value || ins[1].value || ins[2].value || ins[3].value)
+            bd.push({
+              period: ins[0].value,
+              dueDate: ins[1].value,
+              actualDate: ins[2].value,
+              amount: ins[3].value ? Number(ins[3].value) : null,
+              hikFee: ins[4].value ? Number(ins[4].value) : null,
+              status: sel?.value || 'scheduled'
+            });
+        });
+      }
+      const entry = {
+        id: editId || uid(),
+        dealDate: document.getElementById('f-dealdate').value || null,
+        manager: document.getElementById('f-manager').value.trim(),
+        guestName: name, address: addr,
+        hostContact: document.getElementById('f-host').value.trim(),
+        guestContact: document.getElementById('f-guest').value.trim(),
+        deposit: document.getElementById('f-deposit').value ? Number(document.getElementById('f-deposit').value) : null,
+        monthlyRent: document.getElementById('f-rent').value ? Number(document.getElementById('f-rent').value) : null,
+        hikFee: document.getElementById('f-hik').value ? Number(document.getElementById('f-hik').value) : null,
+        startDate: start, endDate: end,
+        payType: payType,
+        payDay: document.getElementById('f-payday').value ? Number(document.getElementById('f-payday').value) : null,
+        notes: document.getElementById('f-notes').value.trim(),
+        breakdown: bd,
+        createdAt: editId ? entries.find(x=>x.id===editId)?.createdAt : new Date().toISOString()
+      };
+      if (editId) { const i = entries.findIndex(x=>x.id===editId); if (i!==-1) entries[i]=entry; }
+      else entries.unshift(entry);
+      save(); render(); closeModal();
+    }
+
+    function delEntry(id) {
+      const e = entries.find(x=>x.id===id);
+      if (!e) return;
+      if (confirm(`"${e.guestName}" 중개건을 삭제하시겠습니까?`)) {
+        entries = entries.filter(x=>x.id!==id); save(); render();
+      }
+    }
+
+    // ── BREAKDOWN VIEW ──
+    function showBD(id) {
+      const e = entries.find(x=>x.id===id);
+      if (!e) return;
+      document.getElementById('bd-title').textContent = `${e.guestName} — 납입 내역`;
+      document.getElementById('bd-sub').textContent = e.address;
+      const c = document.getElementById('bd-content');
+      if (!e.breakdown?.length) {
+        c.innerHTML = '<p style="font-size:13px;color:var(--text2);">등록된 납입 내역이 없습니다.</p>';
+      } else {
+        let sumAmt = 0, sumHik = 0;
+        const thS = `background:rgba(226,217,206,.5);color:var(--text2);font-size:11px;padding:9px 12px;text-align:left;font-weight:600;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);`;
+        const rows = e.breakdown.map(r => {
+          const dl = r.dueDate ? daysTo(r.dueDate) : null;
+          let db = '';
+          if (r.status === 'done') {
+            db = `<span class="dbadge" style="background:rgba(42,110,70,.12);color:var(--green);margin-left:5px;">완료</span>`;
+          } else if (dl !== null) {
+            if (dl <= 0) db = `<span class="dbadge" style="background:var(--red-d);color:var(--red);margin-left:5px;">${dl===0?'오늘':'D+'+Math.abs(dl)}</span>`;
+            else if (dl <= 7) db = `<span class="dbadge" style="background:var(--red-d);color:var(--red);margin-left:5px;">D-${dl}</span>`;
+            else if (dl <= 14) db = `<span class="dbadge" style="background:var(--amber-d);color:var(--amber);margin-left:5px;">D-${dl}</span>`;
+          }
+          const statusLabel = r.status === 'done'
+            ? `<span class="status-done">완료</span>`
+            : `<span class="status-sched">예정</span>`;
+          if (r.amount) sumAmt += Number(r.amount);
+          if (r.hikFee) sumHik += Number(r.hikFee);
+          return `<tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px 12px;font-size:13px;">${r.period||'—'}</td>
+            <td style="padding:10px 12px;font-size:13px;color:var(--text2);">${fmt(r.dueDate)}${db}</td>
+            <td style="padding:10px 12px;font-size:13px;color:var(--text2);">${fmt(r.actualDate)}</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;">${r.amount?krw(r.amount):'—'}</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:var(--gold);">${r.hikFee?krw(r.hikFee):'—'}</td>
+            <td style="padding:10px 12px;font-size:12px;">${statusLabel}</td>
+          </tr>`;
+        }).join('');
+        c.innerHTML = `
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead><tr>
+                <th style="${thS}">몇월분</th>
+                <th style="${thS}">납입예정일</th>
+                <th style="${thS}">실제납입일</th>
+                <th style="${thS}">금액</th>
+                <th style="${thS}">HIK 수수료</th>
+                <th style="${thS}">납입여부</th>
+              </tr></thead>
+              <tbody>${rows}</tbody>
+              <tfoot><tr>
+                <td colspan="3" style="padding:9px 12px;font-size:12px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">합계</td>
+                <td style="padding:9px 12px;font-size:13px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${sumAmt?krw(sumAmt):'—'}</td>
+                <td style="padding:9px 12px;font-size:13px;font-weight:700;color:var(--gold);background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${sumHik?krw(sumHik):'—'}</td>
+                <td style="background:rgba(226,217,206,.35);border-top:2px solid var(--border2);"></td>
+              </tr></tfoot>
+            </table>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:13px;">
+            <span style="color:var(--text2);">매월 납입일: <strong style="color:var(--gold);">${e.payDay ? e.payDay+'일' : '수동'}</strong></span>
+            <span style="color:var(--text2);">월세: <strong style="color:var(--text);">${krw(e.monthlyRent)}</strong></span>
+          </div>`;
+      }
+      document.getElementById('bd-ov').classList.add('on');
+    }
+    function closeBD() { document.getElementById('bd-ov').classList.remove('on'); }
+
+    // ── ROUTING ──
+    function showViewSwitch(listMode) {
+      document.querySelector('main').style.display = listMode ? 'block' : 'none';
+      document.getElementById('detail-view').style.display = listMode ? 'none' : 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function showDetail(id) {
+      const e = entries.find(x => x.id === id);
+      if (!e) return;
+      renderDetail(e);
+      showViewSwitch(false);
+      history.pushState({ id }, '', `#detail/${id}`);
+    }
+
+    function showList() {
+      showViewSwitch(true);
+      history.pushState(null, '', location.pathname + location.search);
+    }
+
+    function renderDetail(e) {
+      const od = daysTo(e.endDate), id2 = daysTo(e.startDate);
+      let statusBadges = '';
+      if (id2 >= 0 && id2 <= 7)       statusBadges += `<span class="badge b-urg" style="margin-right:4px;">D-${id2} 입실</span>`;
+      else if (od >= 0 && od <= 7)    statusBadges += `<span class="badge b-urg" style="margin-right:4px;">D-${od} 퇴실</span>`;
+      else if (!isNaN(od) && od < 0)  statusBadges += `<span class="badge b-exp" style="margin-right:4px;">만료</span>`;
+      const payBadge = e.payType === 'lump'
+        ? `<span class="badge b-lump">일괄납부</span>`
+        : `<span class="badge b-mo">분할납부 · 매월${e.payDay ? e.payDay+'일' : ' (수동)' }</span>`;
+
+      const thStyle = `background:rgba(226,217,206,.45);color:var(--text2);font-size:11px;padding:9px 14px;text-align:left;font-weight:600;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);`;
+      let bdHTML = '';
+      if (e.payType === 'monthly' && e.breakdown?.length) {
+        let detSumAmt = 0, detSumHik = 0;
+        const rows = e.breakdown.map(r => {
+          const dl = r.dueDate ? daysTo(r.dueDate) : null;
+          let db = '';
+          if (r.status === 'done') {
+            db = `<span class="dbadge" style="background:rgba(42,110,70,.12);color:var(--green);margin-left:5px;">완료</span>`;
+          } else if (dl !== null) {
+            if (dl <= 0) db = `<span class="dbadge" style="background:var(--red-d);color:var(--red);margin-left:5px;">${dl===0?'오늘':'D+'+Math.abs(dl)}</span>`;
+            else if (dl <= 7) db = `<span class="dbadge" style="background:var(--red-d);color:var(--red);margin-left:5px;">D-${dl}</span>`;
+            else if (dl <=14) db = `<span class="dbadge" style="background:var(--amber-d);color:var(--amber);margin-left:5px;">D-${dl}</span>`;
+          }
+          const statusLabel = r.status === 'done'
+            ? `<span class="status-done">완료</span>`
+            : `<span class="status-sched">예정</span>`;
+          if (r.amount) detSumAmt += Number(r.amount);
+          if (r.hikFee) detSumHik += Number(r.hikFee);
+          return `<tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px 14px;font-size:13px;">${r.period||'—'}</td>
+            <td style="padding:10px 14px;font-size:13px;color:var(--text2);">${fmt(r.dueDate)}${db}</td>
+            <td style="padding:10px 14px;font-size:13px;color:var(--text2);">${fmt(r.actualDate)}</td>
+            <td style="padding:10px 14px;font-size:13px;font-weight:600;">${r.amount?krw(r.amount):'—'}</td>
+            <td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--gold);">${r.hikFee?krw(r.hikFee):'—'}</td>
+            <td style="padding:10px 14px;font-size:12.5px;">${statusLabel}</td>
+          </tr>`;
+        }).join('');
+        bdHTML = `<div style="margin-top:14px;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr>
+              <th style="${thStyle}">몇월분</th><th style="${thStyle}">납입예정일</th>
+              <th style="${thStyle}">실제납입일</th><th style="${thStyle}">금액</th>
+              <th style="${thStyle}">HIK 수수료</th><th style="${thStyle}">납입여부</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot><tr>
+              <td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">합계</td>
+              <td style="padding:9px 14px;font-size:13px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${detSumAmt?krw(detSumAmt):'—'}</td>
+              <td style="padding:9px 14px;font-size:13px;font-weight:700;color:var(--gold);background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${detSumHik?krw(detSumHik):'—'}</td>
+              <td style="background:rgba(226,217,206,.35);border-top:2px solid var(--border2);"></td>
+            </tr></tfoot>
+          </table></div>`;
+      }
+
+      document.getElementById('detail-content').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px;">
+          <button id="btn-back" class="btn-s" style="display:flex;align-items:center;gap:6px;font-size:13px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            목록으로 돌아가기
+          </button>
+          <div style="display:flex;gap:8px;">
+            <button id="d-edit" class="btn-i">수정</button>
+            <button id="d-del" class="btn-i del">삭제</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:24px 28px;margin-bottom:14px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:22px;font-weight:700;margin-bottom:4px;">${e.guestName}</div>
+              <div style="font-size:14px;color:var(--text2);margin-bottom:10px;">${e.address}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">${statusBadges}${payBadge}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              ${e.dealDate ? `<div class="flabel" style="margin:0 0 3px;">성사일</div><div style="font-weight:600;">${fmt(e.dealDate)}</div>` : ''}
+              ${e.manager  ? `<div class="flabel" style="margin:10px 0 3px;">주 담당자</div><div style="font-weight:600;">${e.manager}</div>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;">
+          <div class="card" style="padding:20px;">
+            <div class="detail-section-title">계약 기간</div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">입실일</div><div style="font-weight:600;">${fmt(e.startDate)||'—'}</div></div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">퇴실일</div><div style="font-weight:600;">${e.endDate||'—'}</div></div>
+          </div>
+          <div class="card" style="padding:20px;">
+            <div class="detail-section-title">연락처</div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">호스트</div><div style="font-weight:600;">${e.hostContact||'—'}</div></div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">게스트</div><div style="font-weight:600;">${e.guestContact||'—'}</div></div>
+          </div>
+          <div class="card" style="padding:20px;">
+            <div class="detail-section-title">계약 금액</div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">보증금</div><div style="font-weight:600;">${krw(e.deposit)}</div></div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">월세</div>${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="font-weight:600;">${krw(s.amount)}</div><div style="font-size:11px;color:var(--green);margin-top:2px;">납입 완료분 합계</div>` : `<div style="font-weight:600;">${krw(e.monthlyRent)}</div>`; })()}</div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">HIK 수수료</div>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:600;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:11px;color:var(--green);margin-top:2px;">납입 완료분 합계</div>` : `<div style="font-weight:600;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px;margin-bottom:14px;">
+          <div class="detail-section-title">납부 방식</div>
+          ${payBadge}
+          ${bdHTML}
+        </div>
+
+        ${e.notes ? `<div class="card" style="padding:20px;">
+          <div class="detail-section-title">비고</div>
+          <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;">${e.notes}</div>
+        </div>` : ''}
+      `;
+
+      document.getElementById('btn-back').addEventListener('click', showList);
+      document.getElementById('d-edit').addEventListener('click', () => openModal(e.id));
+      document.getElementById('d-del').addEventListener('click', () => { delEntry(e.id); showList(); });
+    }
+
+    // ── EVENT LISTENERS ──
+    document.addEventListener('DOMContentLoaded', () => {
+      // Header
+      document.getElementById('btn-register').addEventListener('click', () => openModal());
+
+      // Urgent filters
+      document.getElementById('uf-all').addEventListener('click',      () => setUrgFilter('all'));
+      document.getElementById('uf-pay').addEventListener('click',      () => setUrgFilter('pay'));
+      document.getElementById('uf-checkin').addEventListener('click',  () => setUrgFilter('checkin'));
+      document.getElementById('uf-checkout').addEventListener('click', () => setUrgFilter('checkout'));
+
+      // Warning filters
+      document.getElementById('wf-all').addEventListener('click',      () => setWarnFilter('all'));
+      document.getElementById('wf-pay').addEventListener('click',      () => setWarnFilter('pay'));
+      document.getElementById('wf-checkin').addEventListener('click',  () => setWarnFilter('checkin'));
+      document.getElementById('wf-checkout').addEventListener('click', () => setWarnFilter('checkout'));
+
+      // Modal overlay (click-outside-to-close)
+      document.getElementById('modal-ov').addEventListener('click', e => {
+        if (e.target === document.getElementById('modal-ov')) closeModal();
+      });
+      document.getElementById('btn-modal-close').addEventListener('click', () => closeModal());
+      document.getElementById('btn-lump').addEventListener('click', () => setPay('lump'));
+      document.getElementById('btn-mo').addEventListener('click',   () => setPay('monthly'));
+      document.getElementById('btn-add-brow').addEventListener('click', () => addBrow());
+
+      // 납입일 방식 라디오
+      document.getElementById('rd-fixed').addEventListener('change', () => {
+        document.getElementById('payday-fixed-wrap').style.display = 'block';
+      });
+      document.getElementById('rd-manual').addEventListener('change', () => {
+        document.getElementById('payday-fixed-wrap').style.display = 'none';
+        document.getElementById('f-payday').value = '';
+      });
+      document.getElementById('btn-cancel').addEventListener('click', () => closeModal());
+      document.getElementById('btn-save').addEventListener('click',   () => saveEntry());
+
+      // Breakdown modal
+      document.getElementById('bd-ov').addEventListener('click', e => {
+        if (e.target === document.getElementById('bd-ov')) closeBD();
+      });
+      document.getElementById('btn-bd-close').addEventListener('click', () => closeBD());
+
+      // Event delegation: table rows (edit / delete / breakdown / row click)
+      document.getElementById('tbl-body').addEventListener('click', e => {
+        const edit = e.target.closest('[data-edit]');
+        const del  = e.target.closest('[data-del]');
+        const bd   = e.target.closest('[data-bd]');
+        if (edit) { openModal(edit.dataset.edit); return; }
+        if (del)  { delEntry(del.dataset.del);   return; }
+        if (bd)   { showBD(bd.dataset.bd);        return; }
+        const row = e.target.closest('tr[data-row]');
+        if (row) showDetail(row.dataset.row);
+      });
+
+      // Alert card clicks → detail view
+      ['urg-grid', 'warn-grid'].forEach(gridId => {
+        document.getElementById(gridId).addEventListener('click', e => {
+          const card = e.target.closest('[data-detail]');
+          if (card) showDetail(card.dataset.detail);
+        });
+      });
+
+      // Browser back/forward
+      window.addEventListener('popstate', () => {
+        if (location.hash.startsWith('#detail/')) {
+          const id = location.hash.slice(8);
+          if (entries.find(x => x.id === id)) { renderDetail(entries.find(x => x.id === id)); showViewSwitch(false); }
+        } else {
+          showViewSwitch(true);
+        }
+      });
+
+      // Event delegation: breakdown row remove buttons
+      document.getElementById('b-body').addEventListener('click', e => {
+        const rm = e.target.closest('[data-rm-row]');
+        if (rm) { rm.closest('tr').remove(); updateBrowTotals(); }
+      });
+    });
+
+    // ── INIT ──
+    (function() {
+      const now = new Date();
+      const days = ['일','월','화','수','목','금','토'];
+      document.getElementById('hdr-date').textContent =
+        `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+
+      // Demo data
+      if (!entries.length) {
+        const d = (offset) => new Date(Date.now() + offset*86400000).toISOString().slice(0,10);
+        entries = [
+          { id: uid(), dealDate:d(-182), manager:'김지수', guestName:'김민준', address:'서울시 마포구 합정동 123-4, 302호',
+            deposit:5000000, monthlyRent:850000, hikFee:850000, hostContact:'010-1234-5678', guestContact:'010-9876-5432',
+            startDate:d(-180), endDate:d(185), payType:'monthly', payDay: new Date(Date.now()+10*86400000).getDate(),
+            notes:'주차 1대 포함. 반려동물 불가.',
+            breakdown:[
+              { period:'2026년 4월분', dueDate:d(-20), actualDate:d(-18), amount:850000, hikFee:85000, status:'done' },
+              { period:'2026년 5월분', dueDate:d(10), actualDate:'', amount:850000, hikFee:85000, status:'scheduled' }
+            ], createdAt:new Date().toISOString() },
+          { id: uid(), dealDate:d(3), manager:'이현우', guestName:'이서연', address:'서울시 용산구 이태원동 456, 1층',
+            deposit:10000000, monthlyRent:null, hikFee:500000, hostContact:'010-2345-6789', guestContact:'010-8765-4321',
+            startDate:d(5), endDate:d(35), payType:'lump', payDay:null,
+            notes:'단기 임대. 일괄 선납 완료.',
+            breakdown:[], createdAt:new Date().toISOString() },
+          { id: uid(), dealDate:d(-92), manager:'김지수', guestName:'박준혁', address:'부산시 해운대구 좌동 789, 201호',
+            deposit:3000000, monthlyRent:650000, hikFee:650000, hostContact:'010-3456-7890', guestContact:'010-7654-3210',
+            startDate:d(-90), endDate:d(275), payType:'monthly', payDay:1,
+            notes:'냉장고 별도 구매 합의.',
+            breakdown:[], createdAt:new Date().toISOString() }
+        ];
+        save();
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>
