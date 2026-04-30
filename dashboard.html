@@ -113,6 +113,10 @@
     .tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-size:13px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;margin-bottom:-1px;}
     .tab-btn:hover{color:var(--text);}
     .tab-btn.tab-on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700;}
+    /* Modal tabs */
+    .modal-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 14px;font-size:12px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;white-space:nowrap;margin-bottom:-1px;}
+    .modal-tab:hover{color:var(--text);}
+    .modal-tab.on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700;}
     #detail-view{max-width:1280px;margin:0 auto;padding:32px 24px;display:none;position:relative;z-index:1;}
     .detail-section-title{font-size:10.5px;font-weight:700;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;margin-bottom:12px;}
     .detail-info-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
@@ -331,16 +335,18 @@
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div style="padding:20px 24px;max-height:72vh;overflow-y:auto;">
+      <!-- 탭 네비게이션 -->
+      <div style="display:flex;border-bottom:1px solid var(--border);padding:0 20px;overflow-x:auto;flex-shrink:0;">
+        <button class="modal-tab on" data-mt="1">① 기본 정보</button>
+        <button class="modal-tab" data-mt="2">② 연락처</button>
+        <button class="modal-tab" data-mt="3">③ 계약 기간</button>
+        <button class="modal-tab" data-mt="4">④ 납부 방식</button>
+        <button class="modal-tab" data-mt="5">⑤ 메모</button>
+      </div>
+      <div style="padding:22px 24px;max-height:60vh;overflow-y:auto;" id="modal-body">
         <input type="hidden" id="f-id">
-
-        <!-- 01 기본 정보 -->
-        <div style="margin-bottom:22px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">01</span>
-            <div class="divl"></div>
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">계약 기본 정보</span>
-          </div>
+        <!-- TAB 1: 기본 정보 -->
+        <div id="mt-1">
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:12px;">
             <div><label class="flabel">성사일</label><input type="date" id="f-dealdate" class="finput"></div>
             <div><label class="flabel">주 담당자</label><input type="text" id="f-manager" class="finput" placeholder="홍길동"></div>
@@ -348,66 +354,36 @@
             <div><label class="flabel">집 주소 *</label><input type="text" id="f-addr" class="finput" placeholder="서울시 강남구 테헤란로 123, 101호"></div>
           </div>
         </div>
-
-        <!-- 02 연락처 -->
-        <div style="margin-bottom:22px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">02</span>
-            <div class="divl"></div>
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">연락처</span>
-          </div>
+        <!-- TAB 2: 연락처 -->
+        <div id="mt-2" style="display:none;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div><label class="flabel">호스트 연락처</label><input type="text" id="f-host" class="finput" placeholder="전화번호, 카카오톡 ID, 이름 등"></div>
             <div><label class="flabel">게스트 연락처</label><input type="text" id="f-guest" class="finput" placeholder="010-0000-0000"></div>
           </div>
         </div>
-
-        <!-- 03 금액 -->
-        <div style="margin-bottom:22px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">03</span>
-            <div class="divl"></div>
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">계약 금액</span>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-            <div><label class="flabel">보증금 (원)</label><input type="number" id="f-deposit" class="finput" placeholder="10000000"></div>
-            <div><label class="flabel">월세 (원)</label><input type="number" id="f-rent" class="finput" placeholder="800000"></div>
-            <div><label class="flabel">HIK 수수료 (원)</label><input type="number" id="f-hik" class="finput" placeholder="850000"></div>
-          </div>
-        </div>
-
-        <!-- 04 기간 -->
-        <div style="margin-bottom:22px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">04</span>
-            <div class="divl"></div>
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">계약 기간</span>
-          </div>
+        <!-- TAB 3: 계약 기간 -->
+        <div id="mt-3" style="display:none;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div><label class="flabel">입실일 *</label><input type="date" id="f-start" class="finput"></div>
             <div><label class="flabel">퇴실일 *</label><input type="text" id="f-end" class="finput" placeholder="2026-12-31 또는 미정, 협의 중 등"></div>
           </div>
         </div>
-
-        <!-- 05 납부 방식 -->
-        <div style="margin-bottom:22px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">05</span>
-            <div class="divl"></div>
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">납부 방식</span>
+        <!-- TAB 4: 납부 방식 -->
+        <div id="mt-4" style="display:none;">
+          <div style="margin-bottom:16px;">
+            <label class="flabel">보증금 (원)</label>
+            <input type="number" id="f-deposit" class="finput" placeholder="10000000" style="max-width:220px;">
           </div>
           <label class="flabel">납부 유형</label>
-          <div class="tgroup">
+          <div class="tgroup" style="margin-bottom:16px;">
             <button type="button" class="tbtn on" id="btn-lump">일괄납부</button>
             <button type="button" class="tbtn" id="btn-mo">월세 분할납부</button>
           </div>
-          <!-- 일괄납부 납입 내역 -->
-          <div id="lump-opts" style="margin-top:16px;">
-            <label class="flabel">납입 내역</label>
+          <!-- 일괄납부 -->
+          <div id="lump-opts">
             <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;">
-              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
                 <div><label class="flabel" style="font-size:10px;">실제납입일</label><input type="date" id="f-lump-actual" class="finput"></div>
-                <div><label class="flabel" style="font-size:10px;">보증금 (원)</label><input type="number" id="f-lump-deposit" class="finput" placeholder="10000000"></div>
                 <div><label class="flabel" style="font-size:10px;">월세 (원)</label><input type="number" id="f-lump-rent" class="finput" placeholder="0"></div>
                 <div><label class="flabel" style="font-size:10px;">HIK 수수료 (원)</label><input type="number" id="f-lump-hik" class="finput" placeholder="0"></div>
                 <div><label class="flabel" style="font-size:10px;">납입여부</label>
@@ -416,24 +392,29 @@
               </div>
             </div>
           </div>
-          <div id="mo-opts" style="display:none;margin-top:16px;">
-            <!-- 납입일 설정 방식 -->
+          <!-- 분할납부 -->
+          <div id="mo-opts" style="display:none;">
             <div style="margin-bottom:14px;">
               <label class="flabel">납입일 설정 방식</label>
               <div style="display:flex;gap:16px;">
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text);">
-                  <input type="radio" name="payday-mode" id="rd-fixed" value="fixed" checked style="accent-color:var(--gold);">
-                  매월 고정일
+                  <input type="radio" name="payday-mode" id="rd-fixed" value="fixed" checked style="accent-color:var(--gold);">매월 고정일
                 </label>
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text);">
-                  <input type="radio" name="payday-mode" id="rd-manual" value="manual" style="accent-color:var(--gold);">
-                  수동 설정 (회차별 직접 입력)
+                  <input type="radio" name="payday-mode" id="rd-manual" value="manual" style="accent-color:var(--gold);">수동 설정
                 </label>
               </div>
             </div>
             <div id="payday-fixed-wrap" style="margin-bottom:14px;">
-              <label class="flabel">월세 납입일 (매월 며칠)</label>
-              <input type="number" id="f-payday" class="finput" placeholder="15" min="1" max="31" style="width:110px;">
+              <div style="display:flex;align-items:flex-end;gap:12px;">
+                <div>
+                  <label class="flabel">월세 납입일 (매월 며칠)</label>
+                  <input type="number" id="f-payday" class="finput" placeholder="15" min="1" max="31" style="width:110px;">
+                </div>
+                <button type="button" id="btn-auto-brow" class="btn-i" style="color:var(--gold);border-color:rgba(245,82,0,.3);display:flex;align-items:center;gap:5px;padding:9px 14px;margin-bottom:1px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/></svg>회차 자동 생성
+                </button>
+              </div>
             </div>
             <div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -450,21 +431,21 @@
             </div>
           </div>
         </div>
-
-        <!-- 06 비고 -->
-        <div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.1em;">06</span>
-            <div class="divl"></div>
-            <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;">비고</span>
-          </div>
+        <!-- TAB 5: 메모 -->
+        <div id="mt-5" style="display:none;">
           <label class="flabel">메모</label>
-          <textarea id="f-notes" class="finput" rows="3" placeholder="특이사항, 계약 조건 등..." style="resize:vertical;"></textarea>
+          <textarea id="f-notes" class="finput" rows="6" placeholder="특이사항, 계약 조건 등..." style="resize:vertical;"></textarea>
         </div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);">
-        <button id="btn-cancel" class="btn-s">취소</button>
-        <button id="btn-save" class="btn-p">저장하기</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-top:1px solid var(--border);">
+        <div style="display:flex;gap:6px;">
+          <button id="btn-mt-prev" class="btn-s" style="display:none;font-size:13px;padding:8px 14px;">← 이전</button>
+          <button id="btn-mt-next" class="btn-s" style="font-size:13px;padding:8px 14px;">다음 →</button>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button id="btn-cancel" class="btn-s">취소</button>
+          <button id="btn-save" class="btn-p">저장하기</button>
+        </div>
       </div>
     </div>
   </div>
@@ -701,12 +682,13 @@
     // ── MODAL ──
     function openModal(id = null) {
       editId = id;
-      ['f-dealdate','f-manager','f-name','f-addr','f-host','f-guest','f-deposit','f-rent','f-hik','f-start','f-end','f-payday','f-notes'].forEach(k => {
+      ['f-dealdate','f-manager','f-name','f-addr','f-host','f-guest','f-deposit','f-start','f-end','f-payday','f-notes'].forEach(k => {
         const el = document.getElementById(k);
-        if (el.tagName === 'TEXTAREA' || el.type === 'text' || el.type === 'number' || el.type === 'date') el.value = '';
+        if (el && (el.tagName === 'TEXTAREA' || el.type === 'text' || el.type === 'number' || el.type === 'date')) el.value = '';
       });
-      ['f-lump-actual','f-lump-deposit','f-lump-rent','f-lump-hik'].forEach(k => { document.getElementById(k).value = ''; });
+      ['f-lump-actual','f-lump-rent','f-lump-hik'].forEach(k => { document.getElementById(k).value = ''; });
       document.getElementById('f-lump-status').value = 'scheduled';
+      switchModalTab(1);
       document.getElementById('b-body').innerHTML = '';
       document.getElementById('rd-fixed').checked = true;
       document.getElementById('payday-fixed-wrap').style.display = 'block';
@@ -722,18 +704,16 @@
           document.getElementById('f-host').value = e.hostContact||'';
           document.getElementById('f-guest').value = e.guestContact||'';
           document.getElementById('f-deposit').value = e.deposit||'';
-          document.getElementById('f-rent').value = e.monthlyRent||'';
           document.getElementById('f-start').value = e.startDate||'';
           document.getElementById('f-end').value = e.endDate||'';
           document.getElementById('f-payday').value = e.payDay||'';
           document.getElementById('f-notes').value = e.notes||'';
           setPay(e.payType || 'lump');
           if (e.lumpDetail) {
-            document.getElementById('f-lump-actual').value   = e.lumpDetail.actualDate || '';
-            document.getElementById('f-lump-deposit').value  = e.lumpDetail.deposit ?? '';
-            document.getElementById('f-lump-rent').value     = e.lumpDetail.monthlyRent ?? '';
-            document.getElementById('f-lump-hik').value      = e.lumpDetail.hikFee ?? '';
-            document.getElementById('f-lump-status').value   = e.lumpDetail.status || 'scheduled';
+            document.getElementById('f-lump-actual').value  = e.lumpDetail.actualDate || '';
+            document.getElementById('f-lump-rent').value    = e.lumpDetail.monthlyRent ?? '';
+            document.getElementById('f-lump-hik').value     = e.lumpDetail.hikFee ?? '';
+            document.getElementById('f-lump-status').value  = e.lumpDetail.status || 'scheduled';
           }
           const isManual = e.payType === 'monthly' && !e.payDay;
           document.getElementById('rd-fixed').checked = !isManual;
@@ -746,12 +726,46 @@
     }
     function closeModal() { document.getElementById('modal-ov').classList.remove('on'); editId = null; }
 
+    let curModalTab = 1;
+    function switchModalTab(n) {
+      document.getElementById(`mt-${curModalTab}`).style.display = 'none';
+      document.querySelectorAll('.modal-tab').forEach(b => b.classList.toggle('on', Number(b.dataset.mt) === n));
+      curModalTab = n;
+      document.getElementById(`mt-${n}`).style.display = 'block';
+      document.getElementById('btn-mt-prev').style.display = n > 1 ? 'inline-flex' : 'none';
+      document.getElementById('btn-mt-next').style.display = n < 5 ? 'inline-flex' : 'none';
+    }
+
+    function autoGenerateBreakdown() {
+      const start = document.getElementById('f-start').value;
+      const end   = document.getElementById('f-end').value;
+      const pd    = parseInt(document.getElementById('f-payday').value);
+      if (!start || !end || !pd) { alert('입실일, 퇴실일, 납입일을 먼저 입력하세요.'); return; }
+      const endDate = new Date(end);
+      if (isNaN(endDate)) { alert('퇴실일이 유효한 날짜 형식이어야 합니다.'); return; }
+      document.getElementById('b-body').innerHTML = '';
+      let y = new Date(start).getFullYear();
+      let m = new Date(start).getMonth() + 1;
+      const endY = endDate.getFullYear(), endM = endDate.getMonth() + 1;
+      while (y < endY || (y === endY && m <= endM)) {
+        const dueDate = new Date(y, m - 1, pd);
+        addBrow({ period: `${y}년 ${m}월분`, dueDate: dueDate.toISOString().slice(0,10) });
+        m++; if (m > 12) { m = 1; y++; }
+      }
+      updateBrowTotals();
+    }
+
     function setPay(t) {
       payType = t;
       document.getElementById('btn-lump').classList.toggle('on', t==='lump');
       document.getElementById('btn-mo').classList.toggle('on', t==='monthly');
       document.getElementById('lump-opts').style.display = t==='lump' ? 'block' : 'none';
       document.getElementById('mo-opts').style.display = t==='monthly' ? 'block' : 'none';
+      if (t === 'lump') {
+        const dealDate = document.getElementById('f-dealdate').value;
+        const la = document.getElementById('f-lump-actual');
+        if (dealDate && !la.value) la.value = dealDate;
+      }
     }
 
     function updateBrowTotals() {
@@ -806,7 +820,7 @@
       }
       const lumpDetail = payType === 'lump' ? {
         actualDate:   document.getElementById('f-lump-actual').value || null,
-        deposit:      document.getElementById('f-lump-deposit').value ? Number(document.getElementById('f-lump-deposit').value) : null,
+        deposit:      document.getElementById('f-deposit').value ? Number(document.getElementById('f-deposit').value) : null,
         monthlyRent:  document.getElementById('f-lump-rent').value ? Number(document.getElementById('f-lump-rent').value) : null,
         hikFee:       document.getElementById('f-lump-hik').value ? Number(document.getElementById('f-lump-hik').value) : null,
         status:       document.getElementById('f-lump-status').value
@@ -819,8 +833,8 @@
         hostContact: document.getElementById('f-host').value.trim(),
         guestContact: document.getElementById('f-guest').value.trim(),
         deposit: document.getElementById('f-deposit').value ? Number(document.getElementById('f-deposit').value) : null,
-        monthlyRent: document.getElementById('f-rent').value ? Number(document.getElementById('f-rent').value) : null,
-        hikFee: document.getElementById('f-hik').value ? Number(document.getElementById('f-hik').value) : null,
+        monthlyRent: lumpDetail?.monthlyRent ?? null,
+        hikFee: lumpDetail?.hikFee ?? null,
         startDate: start, endDate: end,
         payType: payType,
         payDay: document.getElementById('f-payday').value ? Number(document.getElementById('f-payday').value) : null,
@@ -1238,9 +1252,19 @@
         });
       });
 
-      // Tabs
+      // Section tabs
       document.getElementById('tab-list').addEventListener('click', () => switchTab('list'));
       document.getElementById('tab-rev').addEventListener('click',  () => switchTab('rev'));
+
+      // Modal tabs: click on tab label
+      document.querySelectorAll('.modal-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchModalTab(Number(btn.dataset.mt)));
+      });
+      document.getElementById('btn-mt-prev').addEventListener('click', () => switchModalTab(curModalTab - 1));
+      document.getElementById('btn-mt-next').addEventListener('click', () => switchModalTab(curModalTab + 1));
+
+      // 회차 자동 생성
+      document.getElementById('btn-auto-brow').addEventListener('click', autoGenerateBreakdown);
 
       // Revenue month nav
       document.getElementById('rev-prev').addEventListener('click', () => {
