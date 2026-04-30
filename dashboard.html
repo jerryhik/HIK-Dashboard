@@ -54,7 +54,7 @@
     .tbl tr.expired td{opacity:.42;}
     .tbl tfoot td{padding:9px 10px;font-size:12px;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);}
     /* Badges */
-    .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+    .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
     .b-lump{background:var(--green-d);color:var(--green);border:1px solid rgba(76,175,138,.2);}
     .b-mo{background:var(--gold-d);color:var(--gold);border:1px solid rgba(201,168,76,.2);}
     .b-urg{background:var(--red-d);color:var(--red);border:1px solid rgba(224,82,82,.2);animation:pulse 2s infinite;}
@@ -289,19 +289,19 @@
           <table class="tbl">
             <thead>
               <tr>
-                <th>성사일</th>
-                <th>주 담당자</th>
-                <th>게스트</th>
+                <th style="min-width:88px;">성사일</th>
+                <th style="min-width:80px;">주 담당자</th>
+                <th style="min-width:100px;">게스트</th>
                 <th style="min-width:200px;">주소</th>
-                <th>보증금</th>
-                <th>월세</th>
-                <th>HIK 수수료</th>
-                <th>호스트 연락처</th>
-                <th>게스트 연락처</th>
-                <th>계약 기간</th>
+                <th style="min-width:100px;">보증금</th>
+                <th style="min-width:100px;">월세</th>
+                <th style="min-width:100px;">HIK 수수료</th>
+                <th style="min-width:140px;">호스트 연락처</th>
+                <th style="min-width:120px;">게스트 연락처</th>
+                <th style="min-width:150px;">계약 기간</th>
                 <th style="min-width:130px;">납부 방식</th>
                 <th style="min-width:200px;">비고</th>
-                <th style="text-align:center;">관리</th>
+                <th style="min-width:70px;text-align:center;">관리</th>
               </tr>
             </thead>
             <tbody id="tbl-body"></tbody>
