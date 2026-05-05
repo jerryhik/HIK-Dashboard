@@ -59,6 +59,9 @@
     .b-mo{background:var(--gold-d);color:var(--gold);border:1px solid rgba(201,168,76,.2);}
     .b-urg{background:var(--red-d);color:var(--red);border:1px solid rgba(224,82,82,.2);animation:pulse 2s infinite;}
     .b-exp{background:rgba(85,87,112,.15);color:var(--dim);border:1px solid var(--border);}
+    .b-pre{background:rgba(154,104,0,.1);color:var(--amber);border:1px solid rgba(154,104,0,.25);}
+    .b-active{background:var(--green-d);color:var(--green);border:1px solid rgba(42,110,70,.25);}
+    .b-done{background:rgba(140,140,150,.1);color:var(--dim);border:1px solid var(--border);}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.65;}}
     /* Buttons */
     .btn-p{background:var(--gold);color:#FFFFFF;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .2s;}
@@ -150,12 +153,19 @@
   <main style="max-width:1280px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;">
 
     <!-- STATS -->
-    <div class="f1" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;">
+    <div class="f1" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;">
       <div class="scard" style="border-bottom:2px solid var(--gold);">
         <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">총 중개건</div>
         <div style="display:flex;align-items:baseline;gap:8px;">
           <div style="font-size:32px;font-weight:700;color:var(--gold);" id="st-total">0</div>
           <div style="font-size:11.5px;color:var(--dim);">등록된 임대차 계약</div>
+        </div>
+      </div>
+      <div class="scard gr">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">현재 거주중</div>
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <div style="font-size:32px;font-weight:700;color:var(--green);" id="st-active">0</div>
+          <div style="font-size:11.5px;color:var(--dim);">입실 ~ 퇴실 사이</div>
         </div>
       </div>
       <div class="scard r">
@@ -290,7 +300,14 @@
             <thead>
               <tr>
                 <th style="min-width:34px;text-align:center;">No.</th>
-                <th style="min-width:78px;">성사일</th>
+                <th style="min-width:76px;">
+                  <div style="display:flex;align-items:center;gap:5px;">상태
+                    <select id="status-filter" style="font-size:10px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;background:var(--card);color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;" onclick="event.stopPropagation()">
+                      <option value="">전체</option><option value="pre">입실전</option><option value="active">거주중</option><option value="done">이용완료</option>
+                    </select>
+                  </div>
+                </th>
+                <th style="min-width:62px;">성사일</th>
                 <th style="min-width:70px;">주 담당자</th>
                 <th style="min-width:88px;">게스트</th>
                 <th style="min-width:130px;">주소</th>
@@ -494,6 +511,7 @@
     let editId = null;
     let fq = '';
     let activeManager = null;
+    let statusFilter = '';
 
     function save() { localStorage.setItem('re_entries', JSON.stringify(entries)); }
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -507,9 +525,19 @@
     }
     function fmt(ds) {
       if (!ds) return '—';
+      if (/^\d{4}-\d{2}-\d{2}/.test(ds)) return `${ds.slice(2,4)}.${ds.slice(5,7)}.${ds.slice(8,10)}`;
       const d = new Date(ds);
       if (isNaN(d.getTime())) return ds;
-      return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+      return `${String(d.getFullYear()).slice(2)}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function getStatus(e) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const s = e.startDate ? new Date(e.startDate) : null;
+      const en = e.endDate ? new Date(e.endDate) : null;
+      if (!s || !en) return null;
+      if (today < s)  return 'pre';
+      if (today > en) return 'done';
+      return 'active';
     }
     function krw(n) {
       if (n === null || n === undefined || n === '') return '—';
@@ -580,7 +608,7 @@
             </div>
           </div>
           <div style="text-align:right;flex-shrink:0;">
-            <div style="font-size:12px;font-weight:500;color:${col};">${fmt(al.date)}</div>
+            <div style="font-size:12px;font-weight:600;color:${col};">${dtext}</div>
             ${al.kind==='pay'?`<div style="font-size:11.5px;color:var(--text2);margin-top:2px;">${krw(al.e.monthlyRent)}</div>`:''}
           </div>
         </div>
@@ -636,7 +664,8 @@
       const cnt = document.getElementById('tbl-cnt');
       const filtered = entries.filter(e =>
         (!activeManager || e.manager === activeManager) &&
-        (!fq || e.guestName?.toLowerCase().includes(fq) || e.address?.toLowerCase().includes(fq))
+        (!fq || e.guestName?.toLowerCase().includes(fq) || e.address?.toLowerCase().includes(fq)) &&
+        (!statusFilter || getStatus(e) === statusFilter)
       );
       filtered.sort((a, b) => {
         if (!a.dealDate && !b.dealDate) return 0;
@@ -653,9 +682,9 @@
         totRent += s.amount !== null ? s.amount : (e.monthlyRent ? Number(e.monthlyRent) : 0);
         totHik  += s.hikFee !== null ? s.hikFee : (e.hikFee ? Number(e.hikFee) : 0);
       });
-      // tfoot 합계 행 (순번 포함 총 14열)
+      // tfoot 합계 행 (순번+상태 포함 총 15열)
       document.getElementById('tbl-foot').innerHTML =
-        `<tr><td colspan="6" style="font-weight:700;color:var(--text2);">합계</td><td style="font-weight:700;">${krw(totRent)}</td><td style="font-weight:700;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
+        `<tr><td colspan="7" style="font-weight:700;color:var(--text2);">합계</td><td style="font-weight:700;">${krw(totRent)}</td><td style="font-weight:700;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
 
       tbody.innerHTML = filtered.map((e, idx) => {
         const id = daysTo(e.startDate), od = daysTo(e.endDate);
@@ -673,8 +702,14 @@
         const bdbtn = e.payType === 'monthly' && e.breakdown?.length
           ? `<button data-bd="${e.id}" class="btn-i" style="display:block;margin-top:5px;">내역</button>` : '';
         const isExpired = !isNaN(od) && od < 0;
+        const status = getStatus(e);
+        const statusBadge = status === 'pre'    ? `<span class="badge b-pre">입실전</span>`
+                          : status === 'active' ? `<span class="badge b-active">거주중</span>`
+                          : status === 'done'   ? `<span class="badge b-done">이용완료</span>`
+                          : '';
         return `<tr data-row="${e.id}"${isExpired?' class="expired"':''}>
           <td style="text-align:center;color:var(--dim);font-size:11.5px;font-weight:600;">${idx + 1}</td>
+          <td>${statusBadge}</td>
           <td><div style="font-size:12px;color:var(--text2);white-space:nowrap;">${fmt(e.dealDate)}</div></td>
           <td><div style="font-size:13px;font-weight:500;">${e.manager||'—'}</div></td>
           <td><div style="font-weight:600;font-size:13px;">${e.guestName||'—'}</div>${sbadge}</td>
@@ -707,6 +742,7 @@
     function updateStats() {
       const base = activeManager ? entries.filter(e => e.manager === activeManager) : entries;
       document.getElementById('st-total').textContent = base.length;
+      document.getElementById('st-active').textContent = base.filter(e => getStatus(e) === 'active').length;
     }
 
     function render() { buildManagerTabs(); buildAlerts(); renderTable(); updateStats(); }
@@ -1334,6 +1370,9 @@
       // Section tabs
       document.getElementById('tab-list').addEventListener('click', () => switchTab('list'));
       document.getElementById('tab-rev').addEventListener('click',  () => switchTab('rev'));
+      document.getElementById('status-filter').addEventListener('change', function() {
+        statusFilter = this.value; renderTable();
+      });
 
       // Modal tabs: click on tab label
       document.querySelectorAll('.modal-tab').forEach(btn => {
