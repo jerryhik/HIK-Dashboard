@@ -155,28 +155,28 @@
     <!-- STATS -->
     <div class="f1" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;">
       <div class="scard" style="border-bottom:2px solid var(--gold);">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">총 중개건</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text2);letter-spacing:.04em;margin-bottom:10px;">총 중개건</div>
         <div style="display:flex;align-items:baseline;gap:8px;">
           <div style="font-size:32px;font-weight:700;color:var(--gold);" id="st-total">0</div>
           <div style="font-size:11.5px;color:var(--dim);">등록된 임대차 계약</div>
         </div>
       </div>
       <div class="scard gr">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">현재 거주중</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text2);letter-spacing:.04em;margin-bottom:10px;">현재 거주중</div>
         <div style="display:flex;align-items:baseline;gap:8px;">
           <div style="font-size:32px;font-weight:700;color:var(--green);" id="st-active">0</div>
           <div style="font-size:11.5px;color:var(--dim);">입실 ~ 퇴실 사이</div>
         </div>
       </div>
       <div class="scard r">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">긴급 알림</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text2);letter-spacing:.04em;margin-bottom:10px;">긴급 알림</div>
         <div style="display:flex;align-items:baseline;gap:8px;">
           <div style="font-size:32px;font-weight:700;color:var(--red);" id="st-urg">0</div>
           <div style="font-size:11.5px;color:var(--dim);">7일 이내 중요 일정</div>
         </div>
       </div>
       <div class="scard" style="border-bottom:2px solid #F97316;">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px;">예정 알림</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text2);letter-spacing:.04em;margin-bottom:10px;">예정 알림</div>
         <div style="display:flex;align-items:baseline;gap:8px;">
           <div style="font-size:32px;font-weight:700;color:#EA580C;" id="st-warn">0</div>
           <div style="font-size:11.5px;color:var(--dim);">8–14일 이내 중요 일정</div>
@@ -300,12 +300,10 @@
             <thead>
               <tr>
                 <th style="min-width:34px;text-align:center;">No.</th>
-                <th style="min-width:76px;">
-                  <div style="display:flex;align-items:center;gap:5px;">상태
-                    <select id="status-filter" style="font-size:10px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;background:var(--card);color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;" onclick="event.stopPropagation()">
-                      <option value="">전체</option><option value="pre">입실전</option><option value="active">거주중</option><option value="done">이용완료</option>
-                    </select>
-                  </div>
+                <th style="min-width:72px;">
+                  <select id="status-filter" style="font-size:11px;padding:3px 4px;border:1px solid var(--border2);border-radius:5px;background:var(--card);color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:600;width:100%;" onclick="event.stopPropagation()">
+                    <option value="">▼ 전체</option><option value="pre">입실전</option><option value="active">거주중</option><option value="done">이용완료</option>
+                  </select>
                 </th>
                 <th style="min-width:62px;">성사일</th>
                 <th style="min-width:70px;">주 담당자</th>
@@ -472,7 +470,14 @@
         <!-- TAB 5: 메모 -->
         <div id="mt-5" style="display:none;">
           <label class="flabel">메모</label>
-          <textarea id="f-notes" class="finput" rows="6" placeholder="특이사항, 계약 조건 등..." style="resize:vertical;"></textarea>
+          <textarea id="f-notes" class="finput" rows="4" placeholder="특이사항, 계약 조건 등..." style="resize:vertical;margin-bottom:16px;"></textarea>
+          <label class="flabel">계약서 첨부 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--dim);">(최대 5MB/파일, 다중 선택 가능)</span></label>
+          <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:8px 14px;border:1px dashed var(--border2);border-radius:8px;font-size:13px;color:var(--text2);transition:border-color .2s;margin-bottom:10px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            파일 선택
+            <input type="file" id="f-files" multiple style="display:none;">
+          </label>
+          <div id="f-attach-list"></div>
         </div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-top:1px solid var(--border);">
@@ -512,6 +517,39 @@
     let fq = '';
     let activeManager = null;
     let statusFilter = '';
+    let pendingAttachments = [];   // 새로 추가할 파일 {name,type,size,data}
+    let keepAttachments = [];      // 수정 시 유지할 기존 파일
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        if (file.size > 5 * 1024 * 1024) { reject(new Error(`${file.name}: 파일 크기가 5MB를 초과합니다.`)); return; }
+        const r = new FileReader();
+        r.onload = e => resolve({ name: file.name, type: file.type, size: file.size, data: e.target.result });
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+
+    function renderAttachList() {
+      const el = document.getElementById('f-attach-list');
+      if (!el) return;
+      const all = [...keepAttachments.map((a,i) => ({...a, _keep:true, _idx:i})),
+                   ...pendingAttachments.map((a,i) => ({...a, _keep:false, _idx:i}))];
+      if (!all.length) { el.innerHTML = '<div style="font-size:12px;color:var(--dim);padding:4px 0;">첨부 파일 없음</div>'; return; }
+      el.innerHTML = all.map((a, gi) => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;">
+          <span style="font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:320px;" title="${a.name}">📎 ${a.name}</span>
+          <button type="button" data-rm-attach="${a._keep ? 'keep' : 'pending'}:${a._idx}" class="btn-i del" style="padding:2px 6px;font-size:11px;flex-shrink:0;margin-left:8px;">삭제</button>
+        </div>`).join('');
+      el.querySelectorAll('[data-rm-attach]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const [kind, idx] = btn.dataset.rmAttach.split(':');
+          if (kind === 'keep') keepAttachments.splice(Number(idx), 1);
+          else pendingAttachments.splice(Number(idx), 1);
+          renderAttachList();
+        });
+      });
+    }
 
     function save() { localStorage.setItem('re_entries', JSON.stringify(entries)); }
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -531,10 +569,12 @@
       return `${String(d.getFullYear()).slice(2)}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
     }
     function getStatus(e) {
+      if (!e.startDate || !e.endDate) return null;
       const today = new Date(); today.setHours(0,0,0,0);
-      const s = e.startDate ? new Date(e.startDate) : null;
-      const en = e.endDate ? new Date(e.endDate) : null;
-      if (!s || !en) return null;
+      const [sy,sm,sd] = e.startDate.split('-').map(Number);
+      const [ey,em,ed] = e.endDate.split('-').map(Number);
+      const s  = new Date(sy, sm-1, sd);
+      const en = new Date(ey, em-1, ed);
       if (today < s)  return 'pre';
       if (today > en) return 'done';
       return 'active';
@@ -761,6 +801,9 @@
       document.getElementById('f4-end').value = '';
       document.getElementById('f4-rent').value = '';
       document.getElementById('f4-hik').value = '';
+      pendingAttachments = []; keepAttachments = [];
+      document.getElementById('f-files').value = '';
+      renderAttachList();
       switchModalTab(1);
       document.getElementById('b-body').innerHTML = '';
       document.getElementById('rd-fixed').checked = true;
@@ -783,6 +826,8 @@
           document.getElementById('f4-start').value = e.startDate||'';
           document.getElementById('f4-end').value = e.endDate||'';
           document.getElementById('f-notes').value = e.notes||'';
+          keepAttachments = e.attachments ? [...e.attachments] : [];
+          renderAttachList();
           setPay(e.payType || 'lump');
           if (e.lumpDetail) {
             document.getElementById('f-lump-actual').value  = e.lumpDetail.actualDate || '';
@@ -926,6 +971,7 @@
         payType: payType,
         payDay: document.getElementById('f-payday').value ? Number(document.getElementById('f-payday').value) : null,
         notes: document.getElementById('f-notes').value.trim(),
+        attachments: [...keepAttachments, ...pendingAttachments],
         breakdown: bd,
         lumpDetail,
         createdAt: editId ? entries.find(x=>x.id===editId)?.createdAt : new Date().toISOString()
@@ -1287,9 +1333,20 @@
           ${bdHTML}
         </div>
 
-        ${e.notes ? `<div class="card" style="padding:20px;">
+        ${e.notes ? `<div class="card" style="padding:20px;margin-bottom:14px;">
           <div class="detail-section-title">비고</div>
           <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;">${e.notes}</div>
+        </div>` : ''}
+        ${(e.attachments?.length) ? `<div class="card" style="padding:20px;">
+          <div class="detail-section-title">계약서 첨부 (${e.attachments.length}개)</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${e.attachments.map(a => `
+              <a href="${a.data}" download="${a.name}" style="display:inline-flex;align-items:center;gap:7px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                ${a.name}
+                <span style="font-size:11px;color:var(--dim);margin-left:auto;">${(a.size/1024).toFixed(0)}KB</span>
+              </a>`).join('')}
+          </div>
         </div>` : ''}
       `;
 
@@ -1372,6 +1429,17 @@
       document.getElementById('tab-rev').addEventListener('click',  () => switchTab('rev'));
       document.getElementById('status-filter').addEventListener('change', function() {
         statusFilter = this.value; renderTable();
+      });
+
+      // 계약서 첨부 파일 선택
+      document.getElementById('f-files').addEventListener('change', async function() {
+        const files = Array.from(this.files);
+        this.value = '';
+        for (const f of files) {
+          try { pendingAttachments.push(await fileToBase64(f)); }
+          catch(err) { alert(err.message); }
+        }
+        renderAttachList();
       });
 
       // Modal tabs: click on tab label
