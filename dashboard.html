@@ -344,7 +344,7 @@
         </div>
       </div>
       <div class="card" style="overflow:clip;">
-        <div style="overflow:auto;max-height:calc(100vh - 420px);min-height:200px;">
+        <div style="overflow:auto;max-height:calc(100vh - 420px);">
           <table class="tbl">
             <thead>
               <tr>
@@ -539,6 +539,24 @@
           <button id="btn-save" class="btn-p">저장하기</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW MODAL -->
+  <div id="preview-ov" style="position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:24px;" onclick="if(event.target===this)closePreview()">
+    <div style="background:var(--surface);border-radius:14px;max-width:900px;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;position:relative;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);flex-shrink:0;">
+        <span id="preview-name" style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+        <div style="display:flex;gap:8px;flex-shrink:0;margin-left:12px;">
+          <a id="preview-dl" href="#" download style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--text2);text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>다운로드
+          </a>
+          <button onclick="closePreview()" style="background:transparent;border:none;cursor:pointer;color:var(--text2);padding:4px;display:flex;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="preview-body" style="flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;background:#f0f0f0;min-height:400px;"></div>
     </div>
   </div>
 
@@ -806,10 +824,21 @@
         const od = daysTo(e.endDate);
         if (od >= 0 && od <= 7)  _urgAll.push({ kind:'checkout', days:od, e, date:e.endDate });
         else if (od > 7 && od <= 14) _warnAll.push({ kind:'checkout', days:od, e, date:e.endDate });
-        nextPayDates(e, 14).forEach(p => {
+        const autoPayItems = nextPayDates(e, 14);
+        autoPayItems.forEach(p => {
           const item = { kind:'pay', days:p.days, e, date:p.date };
           if (p.days <= 7) _urgAll.push(item); else _warnAll.push(item);
         });
+        // 수동납입(payDay 없음) 또는 일괄납부인 경우 breakdown dueDate로 보완
+        if (!autoPayItems.length && e.breakdown?.length) {
+          e.breakdown.forEach(r => {
+            if (r.status === 'done' || !r.dueDate) return;
+            const d = daysTo(r.dueDate);
+            if (d < 0 || d > 14) return;
+            const item = { kind:'pay', days:d, e, date:r.dueDate };
+            if (d <= 7) _urgAll.push(item); else _warnAll.push(item);
+          });
+        }
       });
       _urgAll.sort((a,b)  => a.days - b.days);
       _warnAll.sort((a,b) => a.days - b.days);
@@ -1183,6 +1212,30 @@
     }
     function closeBD() { document.getElementById('bd-ov').classList.remove('on'); }
 
+    // ── ATTACHMENT PREVIEW ──
+    function previewAttachment(a) {
+      const ov = document.getElementById('preview-ov');
+      const body = document.getElementById('preview-body');
+      document.getElementById('preview-name').textContent = a.name;
+      const dl = document.getElementById('preview-dl');
+      dl.href = a.data; dl.download = a.name;
+      const isImg = /^image\//i.test(a.type) || /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(a.name);
+      const isPdf = a.type === 'application/pdf' || /\.pdf$/i.test(a.name);
+      if (isImg) {
+        body.innerHTML = `<img src="${a.data}" style="max-width:100%;max-height:80vh;object-fit:contain;border-radius:4px;">`;
+      } else if (isPdf) {
+        body.innerHTML = `<iframe src="${a.data}" style="width:100%;height:80vh;border:none;" title="${a.name}"></iframe>`;
+      } else {
+        body.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text2);font-size:14px;">미리보기를 지원하지 않는 형식입니다.<br>다운로드 버튼을 사용해 주세요.</div>`;
+      }
+      ov.style.display = 'flex';
+    }
+    function closePreview() {
+      const ov = document.getElementById('preview-ov');
+      ov.style.display = 'none';
+      document.getElementById('preview-body').innerHTML = '';
+    }
+
     // ── MONTHLY REVENUE ──
     let revYear = new Date().getFullYear();
     let revMonth = new Date().getMonth() + 1; // 1-based
@@ -1463,12 +1516,18 @@
         ${(e.attachments?.length) ? `<div class="card" style="padding:20px;">
           <div class="detail-section-title">계약서 첨부 (${e.attachments.length}개)</div>
           <div style="display:flex;flex-direction:column;gap:6px;">
-            ${e.attachments.map(a => `
-              <a href="${a.data}" download="${a.name}" style="display:inline-flex;align-items:center;gap:7px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                ${a.name}
-                <span style="font-size:11px;color:var(--dim);margin-left:auto;">${(a.size/1024).toFixed(0)}KB</span>
-              </a>`).join('')}
+            ${e.attachments.map((a,ai) => `
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--dim)"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span style="font-size:13px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.name}</span>
+                <span style="font-size:11px;color:var(--dim);flex-shrink:0;">${(a.size/1024).toFixed(0)}KB</span>
+                <button data-preview-idx="${ai}" class="btn-i" style="flex-shrink:0;display:flex;align-items:center;gap:4px;white-space:nowrap;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>미리보기
+                </button>
+                <a href="${a.data}" download="${a.name}" class="btn-i" style="flex-shrink:0;display:inline-flex;align-items:center;gap:4px;text-decoration:none;white-space:nowrap;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>다운로드
+                </a>
+              </div>`).join('')}
           </div>
         </div>` : ''}
       `;
@@ -1476,6 +1535,15 @@
       document.getElementById('btn-back').addEventListener('click', showList);
       document.getElementById('d-edit').addEventListener('click', () => openModal(e.id));
       document.getElementById('d-del').addEventListener('click', () => { delEntry(e.id); showList(); });
+
+      // 미리보기 버튼 이벤트 위임
+      document.getElementById('detail-content').addEventListener('click', ev => {
+        const btn = ev.target.closest('[data-preview-idx]');
+        if (!btn) return;
+        const idx = Number(btn.dataset.previewIdx);
+        const att = e.attachments?.[idx];
+        if (att) previewAttachment(att);
+      });
     }
 
     // ── EVENT LISTENERS ──
