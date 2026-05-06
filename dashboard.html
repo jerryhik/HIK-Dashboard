@@ -598,78 +598,6 @@
   </div>
 
   <script>
-    // ── AUTH ──
-    const GOOGLE_CLIENT_ID = '7083643639-66tup4pake9tl96be46jtfa1tgk40r5d.apps.googleusercontent.com';
-    const ALLOWED_DOMAIN   = 'homesinkor.com';
-    const ADMIN_EMAIL      = 'admin@homesinkor.com';
-    let _deniedEmail = '';
-
-    function parseJwt(token) {
-      const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(atob(b64));
-    }
-
-    function getSession() {
-      try {
-        const s = JSON.parse(localStorage.getItem('hik_session') || 'null');
-        if (s && s.exp * 1000 > Date.now()) return s;
-      } catch(e) {}
-      return null;
-    }
-
-    function handleCredentialResponse(response) {
-      const payload = parseJwt(response.credential);
-      const email   = payload.email || '';
-      const domain  = email.split('@')[1] || '';
-      if (domain === ALLOWED_DOMAIN) {
-        const session = { email, name: payload.name || email, exp: payload.exp };
-        localStorage.setItem('hik_session', JSON.stringify(session));
-        showApp(session);
-      } else {
-        _deniedEmail = email;
-        showDenied(email);
-      }
-    }
-
-    function showApp(session) {
-      document.getElementById('login-page').style.display  = 'none';
-      document.getElementById('denied-page').style.display = 'none';
-      document.getElementById('app-header').style.display  = 'block';
-      document.getElementById('app-main').style.display    = 'block';
-      document.getElementById('hdr-email').textContent     = session.email;
-    }
-
-    function showDenied(email) {
-      document.getElementById('login-page').style.display  = 'none';
-      document.getElementById('denied-page').style.display = 'flex';
-      document.getElementById('app-header').style.display  = 'none';
-      document.getElementById('app-main').style.display    = 'none';
-      document.getElementById('denied-email-msg').textContent =
-        `${email} 계정은 접근 권한이 없습니다. @${ALLOWED_DOMAIN} 계정만 허용됩니다.`;
-    }
-
-    function requestAccess() {
-      const subject = encodeURIComponent('[HIK 대시보드] 접근 권한 신청');
-      const body    = encodeURIComponent(`안녕하세요,\n\n아래 계정으로 HIK 대시보드 접근 권한을 신청합니다.\n\n신청자 이메일: ${_deniedEmail}\n\n감사합니다.`);
-      window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
-    }
-
-    function signOutAndBack() {
-      localStorage.removeItem('hik_session');
-      if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
-      location.reload();
-    }
-
-    // Init auth on load
-    (function initAuth() {
-      const session = getSession();
-      if (session) {
-        showApp(session);
-      }
-      // If no session, login-page is already visible (default), GIS button renders itself
-    })();
-
-    
     // ── GOOGLE AUTH ──
     const ALLOWED_DOMAIN = 'homesinkor.com';
     const ADMIN_EMAIL = 'jerry@homesinkor.com';
@@ -692,7 +620,9 @@
       } else {
         const subject = encodeURIComponent('[HIK 대시보드] 접근 요청 — ' + name + ' (' + email + ')');
         const body = encodeURIComponent('안녕하세요 Jerry,\n\n아래 계정에서 HIK 대시보드 접근을 요청했습니다.\n\n이름: ' + name + '\n이메일: ' + email + '\n\n감사합니다.');
-        window.open('mailto:' + ADMIN_EMAIL + '?subject=' + subject + '&body=' + body, '_blank');
+        const mailLink = document.createElement('a');
+        mailLink.href = 'mailto:' + ADMIN_EMAIL + '?subject=' + subject + '&body=' + body;
+        mailLink.click();
         document.getElementById('pend-email').textContent = email;
         document.getElementById('login-screen').classList.add('hide');
         document.getElementById('pending-screen').classList.add('show');
@@ -716,7 +646,7 @@
     }
     function signOut() {
       sessionStorage.removeItem('hik_user');
-      if (window.google && window.google.accounts && window.google.accounts.id) google.accounts.id.disableAutoSelect();
+      try { google.accounts.id.disableAutoSelect(); } catch(e) {}
       location.reload();
     }
     function toggleUserMenu() { document.getElementById('umenu').classList.toggle('show'); }
@@ -734,7 +664,7 @@
       }
     })();
 
-    // ── DATA ──
+    DATA ──
     let entries = JSON.parse(localStorage.getItem('re_entries') || '[]');
     let payType = 'lump';
     let editId = null;
