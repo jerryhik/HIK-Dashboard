@@ -648,7 +648,7 @@
             </div>
           </div>
           <div style="text-align:right;flex-shrink:0;">
-            <div style="font-size:12px;font-weight:600;color:${col};">${fmt(al.date)}</div>
+            <div style="font-size:12px;font-weight:600;color:${col};">${al.date ? al.date.slice(2).replace(/-/g,'-') : '—'}</div>
             ${al.kind==='pay'?`<div style="font-size:11.5px;color:var(--text2);margin-top:2px;">${krw(al.e.monthlyRent)}</div>`:''}
           </div>
         </div>
