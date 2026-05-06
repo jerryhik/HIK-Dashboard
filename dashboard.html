@@ -7,63 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-  window.handleCredentialResponse = function(response) {
-    var p;
-    try { p = JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); } catch(e) { return; }
-    var email = p.email || '';
-    var name = p.name || email.split('@')[0];
-    var pic = p.picture || '';
-    if (email.toLowerCase().endsWith('@homesinkor.com')) {
-      sessionStorage.setItem('hik_user', JSON.stringify({email:email,name:name,pic:pic}));
-      document.getElementById('auth-overlay').classList.add('hidden');
-      var w = document.getElementById('user-wrap');
-      if (w) {
-        w.style.display = 'flex';
-        document.getElementById('uname-chip').textContent = name.split(' ')[0];
-        document.getElementById('uemail-menu').textContent = email;
-        if (pic) {
-          var av = document.getElementById('uav-img');
-          av.src = pic; av.style.display = 'block';
-          document.getElementById('uav-ph').style.display = 'none';
-        } else {
-          document.getElementById('uav-ph').textContent = name.charAt(0).toUpperCase();
-        }
-      }
-    } else {
-      var subj = encodeURIComponent('[HIK 대시보드] 접근 요청 — '+name+' ('+email+')');
-      var body = encodeURIComponent('안녕하세요 Jerry,\n\n아래 계정에서 HIK 대시보드 접근을 요청했습니다.\n\n이름: '+name+'\n이메일: '+email+'\n\n감사합니다.');
-      var a = document.createElement('a');
-      a.href = 'mailto:jerry@homesinkor.com?subject='+subj+'&body='+body;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      document.getElementById('pend-email').textContent = email;
-      document.getElementById('login-screen').classList.add('hide');
-      document.getElementById('pending-screen').classList.add('show');
-    }
-  };
-  // 세션 복원
-  (function(){
-    var s = sessionStorage.getItem('hik_user');
-    if (!s) return;
-    try {
-      var u = JSON.parse(s);
-      if (u.email && u.email.toLowerCase().endsWith('@homesinkor.com')) {
-        document.addEventListener('DOMContentLoaded', function() {
-          document.getElementById('auth-overlay').classList.add('hidden');
-          var w = document.getElementById('user-wrap');
-          if (w) {
-            w.style.display = 'flex';
-            document.getElementById('uname-chip').textContent = u.name.split(' ')[0];
-            document.getElementById('uemail-menu').textContent = u.email;
-            if (u.pic) { var av=document.getElementById('uav-img'); av.src=u.pic; av.style.display='block'; document.getElementById('uav-ph').style.display='none'; }
-            else { document.getElementById('uav-ph').textContent = u.name.charAt(0).toUpperCase(); }
-          }
-        });
-      }
-    } catch(e) { sessionStorage.removeItem('hik_user'); }
-  })();
-</script>
-<script src="https://accounts.google.com/gsi/client" defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --bg: #F7F7F8;
@@ -232,11 +176,12 @@
         <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-width="320"></div>
       </div>
       <div id="pending-screen">
-        <div style="font-size:38px;margin-bottom:14px;">📨</div>
-        <div class="auth-title-txt">접근 요청 완료</div>
+        <div style="font-size:38px;margin-bottom:14px;">🔒</div>
+        <div class="auth-title-txt">접근 권한 없음</div>
         <div id="pend-email" class="pend-badge"></div>
-        <div class="auth-sub-txt">jerry@homesinkor.com에게<br>접근 요청을 발송했습니다.<br>승인 후 다시 로그인해 주세요.</div>
-        <button onclick="signOut()" style="margin-top:8px;background:transparent;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text2);cursor:pointer;">다른 계정으로 로그인</button>
+        <div class="auth-sub-txt" style="margin-bottom:16px;">이 대시보드는 HomesinKorea 팀 전용입니다.<br>접근이 필요하시면 아래 버튼을 눌러주세요.</div>
+        <button onclick="sendAccessRequest()" style="background:var(--gold);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;margin-bottom:10px;width:100%;">📧 접근 권한 요청하기</button>
+        <button onclick="signOut()" style="background:transparent;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text2);cursor:pointer;width:100%;">다른 계정으로 로그인</button>
       </div>
     </div>
   </div>
