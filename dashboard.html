@@ -139,8 +139,6 @@
     .btn-logout:hover{border-color:var(--border2);color:var(--text);}
     #app-header,#app-main{display:none;}
   
-    .auth-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:40px 48px;width:100%;max-width:400px;text-align:center;box-shadow:0 4px 40px rgba(30,26,20,.08);position:relative;overflow:hidden;}
-    .auth-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
     #g-btn-wrap{display:flex;justify-content:center;}
   </style>
 </head>
@@ -156,12 +154,12 @@
   </div>
 
   <!-- ACCESS DENIED PAGE -->
-  <div id="denied-page" style="display:none;">
+  <div id="denied-page" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:var(--bg);">
     <div class="auth-card">
-      <div style="font-size:40px;margin-bottom:20px;">🔒</div>
+      <div style="font-size:40px;margin-bottom:16px;">🔒</div>
       <div class="auth-title">접근 권한이 없습니다</div>
       <div class="auth-sub" id="denied-email-msg">이 대시보드는 @homesinkor.com 계정만 접근할 수 있습니다.</div>
-      <button class="btn-p" style="margin-top:4px;width:100%;" onclick="requestAccess()">권한 요청하기</button>
+      <button class="btn-p" style="margin-top:4px;width:100%;" onclick="requestAccess()">접근 권한 신청하기</button>
       <button class="btn-s" style="margin-top:10px;width:100%;font-size:13px;" onclick="signOutAndBack()">다른 계정으로 로그인</button>
     </div>
   </div>
@@ -606,17 +604,18 @@
 
     function _showDenied(email) {
       document.getElementById('login-page').style.display  = 'none';
-      document.getElementById('denied-page').style.display = 'flex';
       document.getElementById('app-header').style.display  = 'none';
       document.getElementById('app-main').style.display    = 'none';
-      document.getElementById('denied-email-msg').textContent =
-        `${email} 계정은 접근 권한이 없습니다. @${ALLOWED_DOMAIN} 계정만 허용됩니다.`;
+      const dp = document.getElementById('denied-page');
+      dp.style.display = 'flex';
+      const msg = document.getElementById('denied-email-msg');
+      if (msg) msg.textContent = `${email} 계정은 접근 권한이 없습니다.`;
     }
 
     function requestAccess() {
       const subject = encodeURIComponent('[HIK 대시보드] 접근 권한 요청');
-      const body    = encodeURIComponent(`안녕하세요,\n\n아래 계정으로 HIK 대시보드 접근 권한을 신청합니다.\n\n신청자 이메일: ${_deniedEmail}\n\n감사합니다.`);
-      window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
+      const body    = encodeURIComponent(`${_deniedEmail} 계정으로 접근 권한을 요청합니다.`);
+      window.open(`mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`);
     }
 
     function signOutAndBack() {
@@ -628,13 +627,14 @@
     // GIS 로드 완료 후 programmatic 초기화 (data-callback 보완)
     window.onGoogleLibraryLoad = function() {
       google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback:  window.handleCredentialResponse,
+        client_id:  GOOGLE_CLIENT_ID,
+        callback:   window.handleCredentialResponse,
+        ux_mode:    'popup',
         auto_select: false,
       });
       google.accounts.id.renderButton(
         document.getElementById('g-btn-wrap'),
-        { type:'standard', shape:'pill', theme:'outline', text:'sign_in_with', size:'large', locale:'ko', logo_alignment:'left' }
+        { type:'standard', shape:'pill', theme:'outline', text:'signin_with', size:'large', locale:'ko', logo_alignment:'left' }
       );
     };
 
