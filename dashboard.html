@@ -139,50 +139,19 @@
     .btn-logout:hover{border-color:var(--border2);color:var(--text);}
     #app-header,#app-main{display:none;}
   
-    #auth-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;}
-    #auth-overlay.hidden{display:none;}
     .auth-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:40px 48px;width:100%;max-width:400px;text-align:center;box-shadow:0 4px 40px rgba(30,26,20,.08);position:relative;overflow:hidden;}
     .auth-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
-    .auth-logo-img{height:38px;width:auto;margin-bottom:22px;}
-    .auth-title-txt{font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px;}
-    .auth-sub-txt{font-size:12.5px;color:var(--text2);margin-bottom:28px;line-height:1.65;}
-    #pending-screen{display:none;}
-    #pending-screen.show{display:block;}
-    #login-screen.hide{display:none;}
-    .pend-badge{display:inline-block;background:var(--gold-d);border:1px solid rgba(245,82,0,.2);border-radius:20px;padding:4px 14px;font-size:12.5px;font-weight:600;color:var(--gold);margin:8px 0 16px;}
-    .g_id_signin{display:flex;justify-content:center;}
-    .uchip{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border:1px solid var(--border);border-radius:20px;cursor:pointer;}
-    .uchip:hover{border-color:var(--border2);}
-    .uav{width:26px;height:26px;border-radius:50%;object-fit:cover;}
-    .uav-ph{width:26px;height:26px;border-radius:50%;background:var(--gold-d);color:var(--gold);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
-    .uname{font-size:12px;color:var(--text2);font-weight:500;}
-    .umenu{position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(30,26,20,.1);padding:6px;min-width:180px;display:none;z-index:300;}
-    .umenu.show{display:block;}
-    .umenu-item{padding:8px 12px;border-radius:6px;font-size:13px;color:var(--text2);cursor:pointer;}
-    .umenu-item:hover{background:var(--bg);}
-    .uwrap{position:relative;}
+    #g-btn-wrap{display:flex;justify-content:center;}
   </style>
 </head>
 <body>
   <!-- LOGIN PAGE -->
-    <!-- AUTH OVERLAY -->
-  <div id="auth-overlay">
+  <div id="login-page" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);">
     <div class="auth-card">
-      <img src="HomesinKorea.webp" alt="HomesinKorea" class="auth-logo-img">
-      <div id="login-screen">
-        <div class="auth-title-txt">중개건 관리 대시보드</div>
-        <div class="auth-sub-txt">HomesinKorea 팀 전용 시스템입니다.<br>Google 계정으로 로그인하세요.</div>
-        <div id="g_id_onload" data-client_id="7083643639-66tup4pake9tl96be46jtfa1tgk40r5d.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left" data-width="320"></div>
-      </div>
-      <div id="pending-screen">
-        <div style="font-size:38px;margin-bottom:14px;">🔒</div>
-        <div class="auth-title-txt">접근 권한 없음</div>
-        <div id="pend-email" class="pend-badge"></div>
-        <div class="auth-sub-txt" style="margin-bottom:16px;">이 대시보드는 HomesinKorea 팀 전용입니다.<br>접근이 필요하시면 아래 버튼을 눌러주세요.</div>
-        <button onclick="sendAccessRequest()" style="background:var(--gold);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;margin-bottom:10px;width:100%;">📧 접근 권한 요청하기</button>
-        <button onclick="signOut()" style="background:transparent;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:12px;font-family:'Noto Sans KR',sans-serif;color:var(--text2);cursor:pointer;width:100%;">다른 계정으로 로그인</button>
-      </div>
+      <img src="HomesinKorea.webp" alt="HomesinKorea" class="auth-logo">
+      <div class="auth-title">중개건 관리 대시보드</div>
+      <div class="auth-sub">@homesinkor.com 계정으로 로그인하세요</div>
+      <div id="g-btn-wrap"></div>
     </div>
   </div>
 
@@ -217,17 +186,6 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           새 중개건 등록
         </button>
-        <div class="uwrap" id="user-wrap" style="display:none;">
-          <div class="uchip" onclick="toggleUserMenu()">
-            <img id="uav-img" class="uav" src="" alt="" style="display:none;">
-            <div id="uav-ph" class="uav-ph"></div>
-            <span id="uname-chip" class="uname"></span>
-          </div>
-          <div class="umenu" id="umenu">
-            <div id="uemail-menu" style="padding:8px 12px;font-size:11px;color:var(--dim);border-bottom:1px solid var(--border);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-            <div class="umenu-item" onclick="signOut()">로그아웃</div>
-          </div>
-        </div>
       </div>
     </div>
   </header>
@@ -611,54 +569,42 @@
 
   <script>
     // ── AUTH ──
+    // ── AUTH ──
     const GOOGLE_CLIENT_ID = '7083643639-66tup4pake9tl96be46jtfa1tgk40r5d.apps.googleusercontent.com';
     const ALLOWED_DOMAIN   = 'homesinkor.com';
     const ADMIN_EMAIL      = 'jerry@homesinkor.com';
     let _deniedEmail = '';
 
-    function parseJwt(token) {
+    function _parseJwt(token) {
       try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
       catch(e) { return null; }
     }
-    function handleCredentialResponse(response) {
-      const payload = parseJwt(response.credential);
+
+    // window에 직접 할당 → GIS async 타이밍과 무관하게 전역 접근 보장
+    window.handleCredentialResponse = function(response) {
+      const payload = _parseJwt(response.credential);
       if (!payload) return;
-      const email = payload.email || '';
-      const name = payload.name || email.split('@')[0];
-      const pic = payload.picture || '';
-      if (email.toLowerCase().endsWith('@' + ALLOWED_DOMAIN)) {
-        currentUser = { email, name, pic };
-        sessionStorage.setItem('hik_user', JSON.stringify(currentUser));
-        showDashboard();
+      const email = (payload.email || '').toLowerCase();
+      const domain = email.split('@')[1] || '';
+      if (domain === ALLOWED_DOMAIN) {
+        const session = { email, name: payload.name || email, exp: payload.exp };
+        sessionStorage.setItem('hik_session', JSON.stringify(session));
+        _showApp(session);
       } else {
-        const subject = encodeURIComponent('[HIK 대시보드] 접근 요청 — ' + name + ' (' + email + ')');
-        const body = encodeURIComponent('안녕하세요 Jerry,\n\n아래 계정에서 HIK 대시보드 접근을 요청했습니다.\n\n이름: ' + name + '\n이메일: ' + email + '\n\n감사합니다.');
-        const mailLink = document.createElement('a');
-        mailLink.href = 'mailto:' + ADMIN_EMAIL + '?subject=' + subject + '&body=' + body;
-        mailLink.click();
-        document.getElementById('pend-email').textContent = email;
-        document.getElementById('login-screen').classList.add('hide');
-        document.getElementById('pending-screen').classList.add('show');
+        _deniedEmail = email;
+        _showDenied(email);
       }
-    }
-    function showDashboard() {
-      document.getElementById('auth-overlay').classList.add('hidden');
-      const wrap = document.getElementById('user-wrap');
-      if (wrap) {
-        wrap.style.display = 'flex';
-        document.getElementById('uname-chip').textContent = currentUser.name.split(' ')[0];
-        document.getElementById('uemail-menu').textContent = currentUser.email;
-        if (currentUser.pic) {
-          const av = document.getElementById('uav-img');
-          av.src = currentUser.pic; av.style.display = 'block';
-          document.getElementById('uav-ph').style.display = 'none';
-        } else {
-          document.getElementById('uav-ph').textContent = currentUser.name.charAt(0).toUpperCase();
-        }
-      }
+    };
+
+    function _showApp(session) {
+      document.getElementById('login-page').style.display  = 'none';
+      document.getElementById('denied-page').style.display = 'none';
+      document.getElementById('app-header').style.display  = 'block';
+      document.getElementById('app-main').style.display    = 'block';
+      document.getElementById('hdr-email').textContent     = session.email;
     }
 
-    function showDenied(email) {
+    function _showDenied(email) {
       document.getElementById('login-page').style.display  = 'none';
       document.getElementById('denied-page').style.display = 'flex';
       document.getElementById('app-header').style.display  = 'none';
@@ -674,26 +620,38 @@
     }
 
     function signOutAndBack() {
-      localStorage.removeItem('hik_session');
-      if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
+      sessionStorage.removeItem('hik_session');
+      try { google.accounts.id.disableAutoSelect(); } catch(e) {}
       location.reload();
     }
-    function toggleUserMenu() { document.getElementById('umenu').classList.toggle('show'); }
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.uwrap')) { const m = document.getElementById('umenu'); if(m) m.classList.remove('show'); }
-    });
-    (function checkSession() {
-      const stored = sessionStorage.getItem('hik_user');
+
+    // GIS 로드 완료 후 programmatic 초기화 (data-callback 보완)
+    window.onGoogleLibraryLoad = function() {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback:  window.handleCredentialResponse,
+        auto_select: false,
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('g-btn-wrap'),
+        { type:'standard', shape:'pill', theme:'outline', text:'sign_in_with', size:'large', locale:'ko', logo_alignment:'left' }
+      );
+    };
+
+    // 기존 세션 복원
+    (function initAuth() {
+      const stored = sessionStorage.getItem('hik_session');
       if (stored) {
         try {
-          currentUser = JSON.parse(stored);
-          if (currentUser.email && currentUser.email.toLowerCase().endsWith('@' + ALLOWED_DOMAIN)) { showDashboard(); return; }
+          const s = JSON.parse(stored);
+          if (s.email && s.email.toLowerCase().endsWith('@' + ALLOWED_DOMAIN)) { _showApp(s); return; }
         } catch(e) {}
-        sessionStorage.removeItem('hik_user');
+        sessionStorage.removeItem('hik_session');
       }
+      // 세션 없음 → login-page 기본 표시
     })();
 
-    DATA ──
+    // ── DATA ──
     let entries = JSON.parse(localStorage.getItem('re_entries') || '[]');
     let payType = 'lump';
     let editId = null;
