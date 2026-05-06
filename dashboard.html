@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --bg: #F7F7F8;
@@ -127,11 +128,55 @@
     .flt-btn{background:transparent;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11.5px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .15s;color:var(--text2);white-space:nowrap;}
     .flt-btn:hover{border-color:var(--border2);color:var(--text);}
     .flt-btn.on{background:var(--gold-d);border-color:rgba(245,82,0,.4);color:var(--gold);font-weight:600;}
+    /* Auth pages */
+    #login-page,#denied-page{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+    #login-page::before,#denied-page::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(245,82,0,.06) 0%,transparent 55%),radial-gradient(ellipse at 75% 80%,rgba(42,110,70,.05) 0%,transparent 55%);pointer-events:none;}
+    .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 44px;display:flex;flex-direction:column;align-items:center;gap:0;max-width:400px;width:100%;box-shadow:0 8px 40px rgba(30,26,20,.08);position:relative;}
+    .auth-logo{height:44px;width:auto;object-fit:contain;margin-bottom:28px;}
+    .auth-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;text-align:center;}
+    .auth-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:32px;line-height:1.6;}
+    .btn-logout{background:transparent;border:1px solid var(--border);border-radius:7px;padding:6px 14px;font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;}
+    .btn-logout:hover{border-color:var(--border2);color:var(--text);}
+    #app-header,#app-main{display:none;}
   </style>
 </head>
 <body>
+  <!-- LOGIN PAGE -->
+  <div id="login-page">
+    <div class="auth-card">
+      <img src="HomesinKorea.webp" alt="HomesinKorea" class="auth-logo">
+      <div class="auth-title">중개건 관리 대시보드</div>
+      <div class="auth-sub">@homesinkor.com 계정으로 로그인하세요</div>
+      <div id="g_id_onload"
+        data-client_id="7083643639-66tup4pake9tl96be46jtfa1tgk40r5d.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+        data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+        data-type="standard"
+        data-shape="pill"
+        data-theme="outline"
+        data-text="sign_in_with"
+        data-size="large"
+        data-locale="ko"
+        data-logo_alignment="left">
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCESS DENIED PAGE -->
+  <div id="denied-page" style="display:none;">
+    <div class="auth-card">
+      <div style="font-size:40px;margin-bottom:20px;">🔒</div>
+      <div class="auth-title">접근 권한이 없습니다</div>
+      <div class="auth-sub" id="denied-email-msg">이 대시보드는 @homesinkor.com 계정만 접근할 수 있습니다.</div>
+      <button class="btn-p" style="margin-top:4px;width:100%;" onclick="requestAccess()">관리자에게 접근 신청</button>
+      <button class="btn-s" style="margin-top:10px;width:100%;font-size:13px;" onclick="signOutAndBack()">다른 계정으로 로그인</button>
+    </div>
+  </div>
+
   <!-- HEADER -->
-  <header class="hdr px-6 py-4">
+  <header class="hdr px-6 py-4" id="app-header">
     <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
       <div style="display:flex;align-items:center;gap:12px;">
         <img src="HomesinKorea.webp" alt="HomesinKorea" style="height:36px;width:auto;object-fit:contain;">
@@ -142,6 +187,10 @@
       </div>
       <div style="display:flex;align-items:center;gap:12px;">
         <span id="hdr-date" style="font-size:12px;color:var(--text2);"></span>
+        <div id="hdr-user" style="display:flex;align-items:center;gap:8px;">
+          <span id="hdr-email" style="font-size:12px;color:var(--text2);"></span>
+          <button class="btn-logout" onclick="signOutAndBack()">로그아웃</button>
+        </div>
         <button id="btn-register" class="btn-p" style="display:flex;align-items:center;gap:6px;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           새 중개건 등록
@@ -150,7 +199,7 @@
     </div>
   </header>
 
-  <main style="max-width:1280px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;">
+  <main id="app-main" style="max-width:1280px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;">
 
     <!-- STATS -->
     <div class="f1" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;">
@@ -510,6 +559,77 @@
   </div>
 
   <script>
+    // ── AUTH ──
+    const GOOGLE_CLIENT_ID = '7083643639-66tup4pake9tl96be46jtfa1tgk40r5d.apps.googleusercontent.com';
+    const ALLOWED_DOMAIN   = 'homesinkor.com';
+    const ADMIN_EMAIL      = 'admin@homesinkor.com';
+    let _deniedEmail = '';
+
+    function parseJwt(token) {
+      const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(b64));
+    }
+
+    function getSession() {
+      try {
+        const s = JSON.parse(localStorage.getItem('hik_session') || 'null');
+        if (s && s.exp * 1000 > Date.now()) return s;
+      } catch(e) {}
+      return null;
+    }
+
+    function handleCredentialResponse(response) {
+      const payload = parseJwt(response.credential);
+      const email   = payload.email || '';
+      const domain  = email.split('@')[1] || '';
+      if (domain === ALLOWED_DOMAIN) {
+        const session = { email, name: payload.name || email, exp: payload.exp };
+        localStorage.setItem('hik_session', JSON.stringify(session));
+        showApp(session);
+      } else {
+        _deniedEmail = email;
+        showDenied(email);
+      }
+    }
+
+    function showApp(session) {
+      document.getElementById('login-page').style.display  = 'none';
+      document.getElementById('denied-page').style.display = 'none';
+      document.getElementById('app-header').style.display  = 'block';
+      document.getElementById('app-main').style.display    = 'block';
+      document.getElementById('hdr-email').textContent     = session.email;
+    }
+
+    function showDenied(email) {
+      document.getElementById('login-page').style.display  = 'none';
+      document.getElementById('denied-page').style.display = 'flex';
+      document.getElementById('app-header').style.display  = 'none';
+      document.getElementById('app-main').style.display    = 'none';
+      document.getElementById('denied-email-msg').textContent =
+        `${email} 계정은 접근 권한이 없습니다. @${ALLOWED_DOMAIN} 계정만 허용됩니다.`;
+    }
+
+    function requestAccess() {
+      const subject = encodeURIComponent('[HIK 대시보드] 접근 권한 신청');
+      const body    = encodeURIComponent(`안녕하세요,\n\n아래 계정으로 HIK 대시보드 접근 권한을 신청합니다.\n\n신청자 이메일: ${_deniedEmail}\n\n감사합니다.`);
+      window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
+    }
+
+    function signOutAndBack() {
+      localStorage.removeItem('hik_session');
+      if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
+      location.reload();
+    }
+
+    // Init auth on load
+    (function initAuth() {
+      const session = getSession();
+      if (session) {
+        showApp(session);
+      }
+      // If no session, login-page is already visible (default), GIS button renders itself
+    })();
+
     // ── DATA ──
     let entries = JSON.parse(localStorage.getItem('re_entries') || '[]');
     let payType = 'lump';
