@@ -692,7 +692,14 @@
       });
     }
 
-    function save() { localStorage.setItem('re_entries', JSON.stringify(entries)); }
+    function save() {
+      localStorage.setItem('re_entries', JSON.stringify(entries));
+      fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entries)
+      }).catch(() => {});
+    }
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
     // ── DATE HELPERS ──
@@ -1674,11 +1681,30 @@
     });
 
     // ── INIT ──
-    (function() {
+    (async function() {
       const now = new Date();
       const days = ['일','월','화','수','목','금','토'];
       document.getElementById('hdr-date').textContent =
         `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
+
+      // Vercel Blob에서 공유 데이터 로드 (실패 시 localStorage 유지)
+      try {
+        const r = await fetch('/api/data');
+        if (r.ok) {
+          const remote = await r.json();
+          if (remote && remote.length > 0) {
+            entries = remote;
+            localStorage.setItem('re_entries', JSON.stringify(entries));
+          } else if (entries.length > 0) {
+            // 로컬 데이터가 있으면 Blob으로 마이그레이션
+            await fetch('/api/data', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(entries)
+            });
+          }
+        }
+      } catch(e) {}
 
       // Demo data
       if (!entries.length) {
