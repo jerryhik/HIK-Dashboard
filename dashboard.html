@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     :root {
       --bg: #F7F7F8;
@@ -651,6 +652,11 @@
       // 세션 없음 → login-page 기본 표시
     })();
 
+    // ── SUPABASE ──
+    const _SB_URL  = 'https://pxtoavbramozuvzqfhwl.supabase.co';
+    const _SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4dG9hdmJyYW1venV2enFmaHdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMjAwMjEsImV4cCI6MjA5MzY5NjAyMX0.bBOxnyHEE1U_8r_ng1DsxOR4jPBd71A7ZmXsrez4z0Q';
+    let _sb = null;
+
     // ── DATA ──
     let entries = JSON.parse(localStorage.getItem('re_entries') || '[]');
     let payType = 'lump';
@@ -694,11 +700,11 @@
 
     function save() {
       localStorage.setItem('re_entries', JSON.stringify(entries));
-      fetch('/api/data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entries)
-      }).catch(() => {});
+      if (_sb) {
+        _sb.from('app_data')
+          .upsert({ key: 'entries', value: entries, updated_at: new Date().toISOString() })
+          .catch(() => {});
+      }
     }
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
@@ -1687,21 +1693,18 @@
       document.getElementById('hdr-date').textContent =
         `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
 
-      // Vercel Blob에서 공유 데이터 로드 (실패 시 localStorage 유지)
+      // Supabase에서 공유 데이터 로드 (실패 시 localStorage 유지)
       try {
-        const r = await fetch('/api/data');
-        if (r.ok) {
-          const remote = await r.json();
-          if (remote && remote.length > 0) {
-            entries = remote;
+        if (window.supabase) {
+          _sb = window.supabase.createClient(_SB_URL, _SB_KEY);
+          const { data, error } = await _sb.from('app_data').select('value').eq('key', 'entries').single();
+          if (!error && data && Array.isArray(data.value) && data.value.length > 0) {
+            // Supabase에 데이터 있음 → 우선 사용
+            entries = data.value;
             localStorage.setItem('re_entries', JSON.stringify(entries));
           } else if (entries.length > 0) {
-            // 로컬 데이터가 있으면 Blob으로 마이그레이션
-            await fetch('/api/data', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(entries)
-            });
+            // Supabase 비어 있고 localStorage에 데이터 있음 → 마이그레이션
+            await _sb.from('app_data').upsert({ key: 'entries', value: entries, updated_at: new Date().toISOString() });
           }
         }
       } catch(e) {}
