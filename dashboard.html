@@ -687,37 +687,45 @@
     }
 
     async function checkPendingRequests() {
-      if (!_sb) return;
-      const { data } = await _sb.from('access_requests').select('id,requester_email,requested_at').eq('status','pending').order('requested_at',{ascending:false});
+      const sb = _sb || window.supabase.createClient(_SB_URL, _SB_KEY);
+      const { data } = await sb.from('access_requests').select('id,requester_email,requested_at').eq('status','pending').order('requested_at',{ascending:false});
       if (!data || !data.length) return;
+      // 이메일 중복 제거 — 같은 이메일의 최신 요청 하나만 표시
+      const unique = [...new Map(data.map(r => [r.requester_email, r])).values()];
       const list = document.getElementById('access-banner-list');
-      list.innerHTML = data.map(r => `
-        <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.6);border-radius:8px;padding:8px 12px;">
+      list.innerHTML = unique.map(r => `
+        <div data-email="${r.requester_email}" style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.6);border-radius:8px;padding:8px 12px;">
           <span style="font-size:13px;color:#92400E;">${r.requester_email}
             <span style="font-size:11px;color:#B45309;margin-left:6px;">${new Date(r.requested_at).toLocaleDateString('ko-KR')}</span>
           </span>
           <div style="display:flex;gap:6px;">
-            <button onclick="approveRequest('${r.id}','${r.requester_email}',this)" style="background:#2A6E46;color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit;">승인</button>
-            <button onclick="denyRequest('${r.id}',this)" style="background:transparent;color:#B83232;border:1px solid #B83232;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit;">거절</button>
+            <button onclick="approveRequest('${r.requester_email}',this)" style="background:#2A6E46;color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit;">승인</button>
+            <button onclick="denyRequest('${r.requester_email}',this)" style="background:transparent;color:#B83232;border:1px solid #B83232;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit;">거절</button>
           </div>
         </div>`).join('');
       document.getElementById('access-banner').style.display = 'block';
     }
 
-    async function approveRequest(id, email, btn) {
+    async function approveRequest(email, btn) {
+      const sb = _sb || window.supabase.createClient(_SB_URL, _SB_KEY);
       btn.disabled = true; btn.textContent = '처리 중...';
-      const { error } = await _sb.from('access_requests').update({ status: 'approved' }).eq('id', id);
+      // 해당 이메일의 모든 pending 요청을 approved로 일괄 처리
+      const { error } = await sb.from('access_requests').update({ status: 'approved' }).eq('requester_email', email).eq('status', 'pending');
       if (error) { btn.disabled = false; btn.textContent = '승인'; alert('오류: ' + error.message); return; }
-      btn.closest('div[style]').innerHTML = `<span style="font-size:13px;color:#2A6E46;font-weight:500;">✓ ${email} 승인됨</span>`;
-      setTimeout(() => btn.closest('div[style]')?.remove(), 2000);
+      const row = btn.closest('[data-email]');
+      row.innerHTML = `<span style="font-size:13px;color:#2A6E46;font-weight:500;">✓ ${email} 승인됨</span>`;
+      setTimeout(() => { row.remove(); if (!list.children.length) dismissBanner(); }, 2000);
     }
 
-    async function denyRequest(id, btn) {
+    async function denyRequest(email, btn) {
+      const sb = _sb || window.supabase.createClient(_SB_URL, _SB_KEY);
       btn.disabled = true; btn.textContent = '처리 중...';
-      const { error } = await _sb.from('access_requests').update({ status: 'denied' }).eq('id', id);
+      // 해당 이메일의 모든 pending 요청을 denied로 일괄 처리
+      const { error } = await sb.from('access_requests').update({ status: 'denied' }).eq('requester_email', email).eq('status', 'pending');
       if (error) { btn.disabled = false; btn.textContent = '거절'; alert('오류: ' + error.message); return; }
-      btn.closest('div[style]')?.remove();
+      const row = btn.closest('[data-email]');
       const list = document.getElementById('access-banner-list');
+      row.remove();
       if (!list.children.length) dismissBanner();
     }
 
