@@ -1510,16 +1510,21 @@
       });
     }
 
-    function switchTab(tab) {
+    function switchTab(tab, updateUrl = true) {
       const isRev = tab === 'rev';
       const isMgr = tab.startsWith('mgr:');
       activeManager = isMgr ? tab.slice(4) : null;
-      document.getElementById('tab-list').classList.toggle('tab-on', tab === 'list');
+      document.getElementById('tab-list').classList.toggle('tab-on', tab === 'list' || isMgr);
       document.getElementById('tab-rev').classList.toggle('tab-on', isRev);
       document.querySelectorAll('.tab-mgr').forEach(b => b.classList.toggle('tab-on', b.textContent === activeManager));
       document.getElementById('list-section').style.display = isRev ? 'none' : 'block';
       document.getElementById('rev-section').style.display  = isRev ? 'block' : 'none';
       if (isRev) renderRevenue(); else render();
+      if (updateUrl) {
+        if (isRev) history.pushState({ view: 'revenue' }, '', '/revenue');
+        else if (isMgr) history.pushState({ view: 'manager', manager: activeManager }, '', `/?manager=${encodeURIComponent(activeManager)}`);
+        else history.pushState({ view: 'list' }, '', '/');
+      }
     }
 
     // ── ROUTING ──
@@ -1534,12 +1539,31 @@
       if (!e) return;
       renderDetail(e);
       showViewSwitch(false);
-      history.pushState({ id }, '', `#detail/${id}`);
+      history.pushState({ view: 'entry', id }, '', `/entry/${id}`);
     }
 
     function showList() {
       showViewSwitch(true);
-      history.pushState(null, '', location.pathname + location.search);
+      history.pushState({ view: 'list' }, '', '/');
+    }
+
+    function navigateToPath(path, search) {
+      const params = new URLSearchParams(search || '');
+      if (path.startsWith('/entry/')) {
+        const id = path.slice(7);
+        const e = entries.find(x => x.id === id);
+        if (e) { renderDetail(e); showViewSwitch(false); return; }
+      }
+      showViewSwitch(true);
+      if (path === '/revenue') {
+        const y = params.get('y'), m = params.get('m');
+        if (y) revYear = parseInt(y);
+        if (m) revMonth = parseInt(m);
+        switchTab('rev', false);
+        return;
+      }
+      const manager = params.get('manager');
+      switchTab(manager ? `mgr:${manager}` : 'list', false);
     }
 
     function renderDetail(e) {
@@ -1809,20 +1833,17 @@
       document.getElementById('rev-prev').addEventListener('click', () => {
         revMonth--; if (revMonth < 1) { revMonth = 12; revYear--; }
         renderRevenue();
+        history.replaceState({ view: 'revenue' }, '', `/revenue?y=${revYear}&m=${revMonth}`);
       });
       document.getElementById('rev-next').addEventListener('click', () => {
         revMonth++; if (revMonth > 12) { revMonth = 1; revYear++; }
         renderRevenue();
+        history.replaceState({ view: 'revenue' }, '', `/revenue?y=${revYear}&m=${revMonth}`);
       });
 
       // Browser back/forward
       window.addEventListener('popstate', () => {
-        if (location.hash.startsWith('#detail/')) {
-          const id = location.hash.slice(8);
-          if (entries.find(x => x.id === id)) { renderDetail(entries.find(x => x.id === id)); showViewSwitch(false); }
-        } else {
-          showViewSwitch(true);
-        }
+        navigateToPath(location.pathname, location.search);
       });
 
       // Event delegation: breakdown row remove buttons
@@ -1890,6 +1911,11 @@
         save();
       }
       render();
+
+      // 초기 URL에 따라 올바른 뷰로 이동
+      if (location.pathname !== '/') {
+        navigateToPath(location.pathname, location.search);
+      }
 
       // 세션 복원으로 로그인된 관리자에게 배너 표시 (initAuth 시점엔 _sb 미초기화라 여기서 실행)
       try {
