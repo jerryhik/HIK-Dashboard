@@ -55,6 +55,8 @@
     .tbl tr:last-child td{border-bottom:none;}
     .tbl tr.expired td{opacity:.42;}
     .tbl tfoot td{padding:9px 10px;font-size:12px;background:#E6DFDA;border-top:2px solid var(--border2);position:sticky;bottom:0;z-index:2;}
+    #rev-tbl thead tr:first-child td{position:sticky;top:0;z-index:3;background:#E6DFDA;}
+    #rev-tbl th{top:46px;}
     /* Badges */
     .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
     .b-lump{background:var(--green-d);color:var(--green);border:1px solid rgba(76,175,138,.2);}
@@ -324,7 +326,7 @@
         </div>
         <!-- 상세 내역 -->
         <div class="card" style="overflow:hidden;">
-          <div style="overflow-x:auto;">
+          <div style="overflow:auto;max-height:520px;">
             <table class="tbl" id="rev-tbl">
               <thead>
                 <tr style="background:#E6DFDA;">
