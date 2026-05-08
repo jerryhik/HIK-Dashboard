@@ -1870,6 +1870,15 @@
         save();
       }
       render();
+
+      // 세션 복원으로 로그인된 관리자에게 배너 표시 (initAuth 시점엔 _sb 미초기화라 여기서 실행)
+      try {
+        const stored = sessionStorage.getItem('hik_session');
+        if (stored) {
+          const s = JSON.parse(stored);
+          if (s.email === ADMIN_EMAIL) checkPendingRequests();
+        }
+      } catch(e) {}
     })();
   </script>
 </body>
