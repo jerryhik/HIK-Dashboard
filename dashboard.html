@@ -49,7 +49,7 @@
     .alert.a{background:var(--amber-d);border-color:rgba(224,154,43,.25);}
     /* Table */
     .tbl{width:100%;border-collapse:separate;border-spacing:0;}
-    .tbl th{background:#E6DFDA;color:var(--text2);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2;}
+    .tbl th{background:#E6DFDA;color:var(--text2);font-size:16.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2;}
     .tbl td{padding:11px 10px;border-bottom:1px solid rgba(226,217,206,.7);font-size:13px;vertical-align:middle;}
     .tbl tr:hover td{background:rgba(226,217,206,.3);}
     .tbl tr:last-child td{border-bottom:none;}
@@ -1057,7 +1057,7 @@
       });
       // tfoot 합계 행 (순번+상태 포함 총 15열)
       document.getElementById('tbl-foot').innerHTML =
-        `<tr><td colspan="7" style="font-weight:700;color:var(--text2);">합계</td><td style="font-weight:700;font-size:18px;">${krw(totRent)}</td><td style="font-weight:700;font-size:18px;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
+        `<tr><td colspan="7" style="font-weight:700;font-size:18px;color:var(--text2);">합계</td><td style="font-weight:700;font-size:18px;">${krw(totRent)}</td><td style="font-weight:700;font-size:18px;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
 
       tbody.innerHTML = filtered.map((e, idx) => {
         const id = daysTo(e.startDate), od = daysTo(e.endDate);
@@ -1533,7 +1533,7 @@
       ).join('');
 
       foot.innerHTML = `<tr>
-        <td colspan="5" style="font-weight:700;color:var(--text2);">합계</td>
+        <td colspan="5" style="font-weight:700;font-size:18px;color:var(--text2);">합계</td>
         <td style="font-weight:700;font-size:18px;">${krw(allRent)} <span style="font-size:16px;color:var(--green);font-weight:500;">완료 ${krw(doneRent)}</span></td>
         <td style="font-weight:700;font-size:18px;color:var(--gold);">${krw(allHik)} <span style="font-size:16px;color:var(--green);font-weight:500;">완료 ${krw(doneHik)}</span></td>
         <td colspan="2"></td>
