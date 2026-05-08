@@ -9,6 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     :root {
       --bg: #F7F7F8;
@@ -160,7 +161,8 @@
       <div style="font-size:40px;margin-bottom:16px;">🔒</div>
       <div class="auth-title">접근 권한이 없습니다</div>
       <div class="auth-sub" id="denied-email-msg">이 대시보드는 @homesinkor.com 계정만 접근할 수 있습니다.</div>
-      <button class="btn-p" style="margin-top:4px;width:100%;" onclick="requestAccess()">접근 권한 신청하기</button>
+      <button id="btn-request-access" class="btn-p" style="margin-top:4px;width:100%;" onclick="requestAccess()">접근 권한 요청</button>
+      <div id="request-result" style="display:none;margin-top:12px;font-size:13px;text-align:center;"></div>
       <button class="btn-s" style="margin-top:10px;width:100%;font-size:13px;" onclick="signOutAndBack()">다른 계정으로 로그인</button>
     </div>
   </div>
@@ -526,7 +528,7 @@
         </div>
         <div style="display:flex;gap:10px;">
           <button id="btn-cancel" class="btn-s">취소</button>
-          <button id="btn-save" class="btn-p">저장하기</button>
+          <button id="btn-save" class="btn-p" style="display:none;">저장하기</button>
         </div>
       </div>
     </div>
@@ -569,9 +571,14 @@
   <script>
     // ── AUTH ──
     // ── AUTH ──
-    const GOOGLE_CLIENT_ID = '7083643639-66tup4pake9tl96be46jtfa1tgk40r5d.apps.googleusercontent.com';
-    const ALLOWED_DOMAIN   = 'homesinkor.com';
-    const ADMIN_EMAIL      = 'jerry@homesinkor.com';
+    const GOOGLE_CLIENT_ID  = '7083643639-66tup4pake9tl96be46jtfa1tgk40r5d.apps.googleusercontent.com';
+    const ALLOWED_DOMAIN    = 'homesinkor.com';
+    const ADMIN_EMAIL       = 'jerry@homesinkor.com';
+
+    // EmailJS 설정 — emailjs.com에서 발급받은 값으로 교체하세요
+    const EJS_PUBLIC_KEY    = 'YOUR_PUBLIC_KEY';
+    const EJS_SERVICE_ID    = 'YOUR_SERVICE_ID';
+    const EJS_TEMPLATE_ID   = 'YOUR_TEMPLATE_ID';
     let _deniedEmail = '';
 
     function _parseJwt(token) {
@@ -613,10 +620,30 @@
       if (msg) msg.textContent = `${email} 계정은 접근 권한이 없습니다.`;
     }
 
-    function requestAccess() {
-      const subject = encodeURIComponent('[HIK 대시보드] 접근 권한 요청');
-      const body    = encodeURIComponent(`${_deniedEmail} 계정으로 접근 권한을 요청합니다.`);
-      window.open(`mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`);
+    async function requestAccess() {
+      const btn = document.getElementById('btn-request-access');
+      const result = document.getElementById('request-result');
+      btn.disabled = true;
+      btn.textContent = '전송 중...';
+      result.style.display = 'none';
+      try {
+        emailjs.init(EJS_PUBLIC_KEY);
+        await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+          requester_email: _deniedEmail,
+          admin_email:     ADMIN_EMAIL,
+          dashboard_url:   location.origin,
+        });
+        result.style.display = 'block';
+        result.style.color   = 'var(--green)';
+        result.textContent   = '요청이 전송됐습니다. 승인 후 접근 가능합니다.';
+        btn.textContent      = '요청 완료';
+      } catch(e) {
+        result.style.display = 'block';
+        result.style.color   = 'var(--red)';
+        result.textContent   = '전송 실패. 잠시 후 다시 시도해주세요.';
+        btn.disabled  = false;
+        btn.textContent = '접근 권한 요청';
+      }
     }
 
     function signOutAndBack() {
@@ -703,7 +730,8 @@
       if (_sb) {
         _sb.from('app_data')
           .upsert({ key: 'entries', value: entries, updated_at: new Date().toISOString() })
-          .catch(() => {});
+          .then(({ error }) => { if (error) console.error('[Supabase] 저장 오류:', error.message); })
+          .catch(e => console.error('[Supabase] 저장 실패:', e));
       }
     }
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -1024,6 +1052,7 @@
       document.getElementById(`mt-${n}`).style.display = 'block';
       document.getElementById('btn-mt-prev').style.display = n > 1 ? 'inline-flex' : 'none';
       document.getElementById('btn-mt-next').style.display = n < 5 ? 'inline-flex' : 'none';
+      document.getElementById('btn-save').style.display    = n === 5 ? 'inline-flex' : 'none';
     }
 
     function autoGenerateBreakdown() {
@@ -1693,21 +1722,30 @@
       document.getElementById('hdr-date').textContent =
         `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${days[now.getDay()]})`;
 
-      // Supabase에서 공유 데이터 로드 (실패 시 localStorage 유지)
-      try {
-        if (window.supabase) {
-          _sb = window.supabase.createClient(_SB_URL, _SB_KEY);
+      // Supabase에서 공유 데이터 로드
+      if (window.supabase) {
+        _sb = window.supabase.createClient(_SB_URL, _SB_KEY);
+        try {
           const { data, error } = await _sb.from('app_data').select('value').eq('key', 'entries').single();
-          if (!error && data && Array.isArray(data.value) && data.value.length > 0) {
-            // Supabase에 데이터 있음 → 우선 사용
+          if (error) {
+            console.error('[Supabase] 읽기 오류:', error.message, error.details);
+          } else if (data && Array.isArray(data.value) && data.value.length > 0) {
+            // Supabase에 데이터 있음 → 우선 사용 (공유 데이터)
             entries = data.value;
             localStorage.setItem('re_entries', JSON.stringify(entries));
+            console.log('[Supabase] 데이터 로드 성공:', entries.length, '건');
           } else if (entries.length > 0) {
-            // Supabase 비어 있고 localStorage에 데이터 있음 → 마이그레이션
-            await _sb.from('app_data').upsert({ key: 'entries', value: entries, updated_at: new Date().toISOString() });
+            // Supabase가 비어 있고 localStorage에 데이터 있음 → Supabase로 마이그레이션
+            console.log('[Supabase] 로컬 데이터를 Supabase로 마이그레이션 중...');
+            const { error: upErr } = await _sb.from('app_data')
+              .upsert({ key: 'entries', value: entries, updated_at: new Date().toISOString() });
+            if (upErr) console.error('[Supabase] 마이그레이션 오류:', upErr.message);
+            else console.log('[Supabase] 마이그레이션 완료!');
           }
+        } catch(e) {
+          console.error('[Supabase] 연결 오류:', e);
         }
-      } catch(e) {}
+      }
 
       // Demo data
       if (!entries.length) {
