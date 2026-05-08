@@ -286,22 +286,21 @@
     <div class="f3">
       <div id="tab-bar" style="display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;flex-wrap:wrap;">
         <button id="tab-list" class="tab-btn tab-on">전체 중개건 목록</button>
-        <button id="tab-rev" class="tab-btn">월별 매출 집계</button>
+        <button id="tab-rev" class="tab-btn">매출 집계</button>
       </div>
 
-      <!-- 월별 매출 집계 -->
+      <!-- 매출 집계 -->
       <div id="rev-section" style="display:none;">
         <!-- 날짜 범위 필터 -->
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
           <input type="date" id="rev-start" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
           <span style="font-size:15px;font-weight:700;color:var(--text2);">~</span>
           <input type="date" id="rev-end" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
-          <div id="rev-range-label" style="font-size:12px;color:var(--dim);margin-left:4px;"></div>
         </div>
         <!-- 요약 카드 -->
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;" id="rev-cards">
           <div class="card" style="padding:18px 22px;">
-            <div style="font-size:21px;font-weight:700;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">✓ 완료 합계</div>
+            <div style="font-size:21px;font-weight:700;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">✓ 실제 완료 합계</div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span style="font-size:12px;color:var(--text2);">월세</span>
               <span id="rev-done-rent" style="font-size:17px;font-weight:700;">—</span>
@@ -1058,7 +1057,7 @@
       });
       // tfoot 합계 행 (순번+상태 포함 총 15열)
       document.getElementById('tbl-foot').innerHTML =
-        `<tr><td colspan="7" style="font-weight:700;color:var(--text2);">합계</td><td style="font-weight:700;">${krw(totRent)}</td><td style="font-weight:700;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
+        `<tr><td colspan="7" style="font-weight:700;color:var(--text2);">합계</td><td style="font-weight:700;font-size:18px;">${krw(totRent)}</td><td style="font-weight:700;font-size:18px;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
 
       tbody.innerHTML = filtered.map((e, idx) => {
         const id = daysTo(e.startDate), od = daysTo(e.endDate);
@@ -1473,8 +1472,6 @@
       if (!startEl.value) startEl.value = window._revStartDefault;
       if (!endEl.value)   endEl.value   = window._revEndDefault;
       const startDate = startEl.value, endDate = endEl.value;
-      document.getElementById('rev-range-label').textContent =
-        startDate && endDate ? `${fmtRangeLabel(startDate)} ~ ${fmtRangeLabel(endDate)}` : '';
 
       const allItems = revItems(startDate, endDate);
 
@@ -1537,8 +1534,8 @@
 
       foot.innerHTML = `<tr>
         <td colspan="5" style="font-weight:700;color:var(--text2);">합계</td>
-        <td style="font-weight:700;">${krw(allRent)} <span style="font-size:10.5px;color:var(--green);font-weight:500;">완료 ${krw(doneRent)}</span></td>
-        <td style="font-weight:700;color:var(--gold);">${krw(allHik)} <span style="font-size:10.5px;color:var(--green);font-weight:500;">완료 ${krw(doneHik)}</span></td>
+        <td style="font-weight:700;font-size:18px;">${krw(allRent)} <span style="font-size:16px;color:var(--green);font-weight:500;">완료 ${krw(doneRent)}</span></td>
+        <td style="font-weight:700;font-size:18px;color:var(--gold);">${krw(allHik)} <span style="font-size:16px;color:var(--green);font-weight:500;">완료 ${krw(doneHik)}</span></td>
         <td colspan="2"></td>
       </tr>`;
     }
