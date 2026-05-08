@@ -45,8 +45,8 @@
     .scard.gr::after{background:var(--green);}
     /* Alerts */
     .alert{border-radius:10px;padding:14px 16px;border:1px solid;}
-    .alert.r{background:var(--red-d);border-color:rgba(224,82,82,.25);}
-    .alert.a{background:var(--amber-d);border-color:rgba(224,154,43,.25);}
+    .alert.r{background:#FFF2F2;border-color:rgba(184,50,50,.22);}
+    .alert.a{background:#FFFBF0;border-color:rgba(154,104,0,.22);}
     /* Table */
     .tbl{width:100%;border-collapse:separate;border-spacing:0;}
     .tbl th{background:#E6DFDA;color:var(--text2);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2;}
@@ -124,7 +124,7 @@
     .modal-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 14px;font-size:12px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;white-space:nowrap;margin-bottom:-1px;}
     .modal-tab:hover{color:var(--text);}
     .modal-tab.on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700;}
-    #detail-view{max-width:1280px;margin:0 auto;padding:32px 24px;display:none;position:relative;z-index:1;}
+    #detail-view{max-width:1280px;margin:0 auto;padding:32px 12px;display:none;position:relative;z-index:1;}
     .detail-section-title{font-size:10.5px;font-weight:700;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;margin-bottom:12px;}
     .detail-info-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
     .detail-info-row:last-child{margin-bottom:0;}
@@ -180,7 +180,7 @@
   </div>
 
   <!-- HEADER -->
-  <header class="hdr px-6 py-4" id="app-header">
+  <header class="hdr px-3 py-4" id="app-header">
     <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
       <div style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="location.href='/'">
         <img src="/HomesinKorea.webp" alt="HomesinKorea" style="height:36px;width:auto;object-fit:contain;">
@@ -214,39 +214,8 @@
     </div>
   </div>
 
-  <main id="app-main" style="max-width:1280px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;">
+  <main id="app-main" style="max-width:1280px;margin:0 auto;padding:32px 12px;position:relative;z-index:1;">
 
-    <!-- STATS -->
-    <div class="f1" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;">
-      <div class="scard g">
-        <div style="font-size:14px;font-weight:700;color:var(--text2);letter-spacing:.04em;margin-bottom:8px;">총 중개건</div>
-        <div style="display:flex;align-items:baseline;gap:8px;">
-          <div style="font-size:32px;font-weight:700;color:var(--gold);" id="st-total">0</div>
-          <div style="font-size:11.5px;color:var(--dim);">등록된 임대차 계약</div>
-        </div>
-      </div>
-      <div class="scard gr">
-        <div style="font-size:14px;font-weight:700;color:var(--text2);letter-spacing:.04em;margin-bottom:8px;">현재 거주중</div>
-        <div style="display:flex;align-items:baseline;gap:8px;">
-          <div style="font-size:32px;font-weight:700;color:var(--green);" id="st-active">0</div>
-          <div style="font-size:11.5px;color:var(--dim);">입실 ~ 퇴실 사이</div>
-        </div>
-      </div>
-      <div class="scard r">
-        <div style="font-size:14px;font-weight:700;color:var(--text2);letter-spacing:.04em;margin-bottom:8px;">긴급 알림</div>
-        <div style="display:flex;align-items:baseline;gap:8px;">
-          <div style="font-size:32px;font-weight:700;color:var(--red);" id="st-urg">0</div>
-          <div style="font-size:11.5px;color:var(--dim);">7일 이내 중요 일정</div>
-        </div>
-      </div>
-      <div class="scard a">
-        <div style="font-size:14px;font-weight:700;color:var(--text2);letter-spacing:.04em;margin-bottom:8px;">예정 알림</div>
-        <div style="display:flex;align-items:baseline;gap:8px;">
-          <div style="font-size:32px;font-weight:700;color:var(--amber);" id="st-warn">0</div>
-          <div style="font-size:11.5px;color:var(--dim);">8–14일 이내 중요 일정</div>
-        </div>
-      </div>
-    </div>
 
     <!-- ALERTS -->
     <div class="f2" style="margin-bottom:32px;">
