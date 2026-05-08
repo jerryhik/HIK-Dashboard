@@ -49,12 +49,15 @@
     .alert.a{background:var(--amber-d);border-color:rgba(224,154,43,.25);}
     /* Table */
     .tbl{width:100%;border-collapse:separate;border-spacing:0;}
-    .tbl th{background:#E6DFDA;color:var(--text2);font-size:16.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2;}
-    .tbl td{padding:11px 10px;border-bottom:1px solid rgba(226,217,206,.7);font-size:13px;vertical-align:middle;}
+    .tbl th{background:#E6DFDA;color:var(--text2);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);border-right:1px solid rgba(226,217,206,.7);white-space:nowrap;position:sticky;top:0;z-index:2;}
+    .tbl th:last-child{border-right:none;}
+    .tbl td{padding:11px 10px;border-bottom:1px solid rgba(185,170,155,.85);border-right:1px solid rgba(226,217,206,.7);font-size:13px;vertical-align:middle;}
+    .tbl td:last-child{border-right:none;}
     .tbl tr:hover td{background:rgba(226,217,206,.3);}
     .tbl tr:last-child td{border-bottom:none;}
     .tbl tr.expired td{opacity:.42;}
-    .tbl tfoot td{padding:9px 10px;font-size:12px;background:#E6DFDA;border-top:2px solid var(--border2);position:sticky;bottom:0;z-index:2;}
+    .tbl tfoot td{padding:9px 10px;font-size:12px;background:#E6DFDA;border-top:2px solid var(--border2);border-right:1px solid rgba(226,217,206,.7);position:sticky;bottom:0;z-index:2;}
+    .tbl tfoot td:last-child{border-right:none;}
     /* Badges */
     .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
     .b-lump{background:var(--green-d);color:var(--green);border:1px solid rgba(76,175,138,.2);}
