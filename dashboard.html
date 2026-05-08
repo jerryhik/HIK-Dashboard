@@ -1001,8 +1001,8 @@
       });
       _urgAll.sort((a,b)  => a.days - b.days);
       _warnAll.sort((a,b) => a.days - b.days);
-      document.getElementById('st-urg').textContent  = _urgAll.length;
-      document.getElementById('st-warn').textContent = _warnAll.length;
+      const stUrg = document.getElementById('st-urg'); if (stUrg) stUrg.textContent = _urgAll.length;
+      const stWarn = document.getElementById('st-warn'); if (stWarn) stWarn.textContent = _warnAll.length;
       renderSection('urg',  _urgAll,  urgFilter);
       renderSection('warn', _warnAll, warnFilter);
     }
@@ -1092,8 +1092,8 @@
 
     function updateStats() {
       const base = activeManager ? entries.filter(e => e.manager === activeManager) : entries;
-      document.getElementById('st-total').textContent = base.length;
-      document.getElementById('st-active').textContent = base.filter(e => getStatus(e) === 'active').length;
+      const stTotal = document.getElementById('st-total'); if (stTotal) stTotal.textContent = base.length;
+      const stActive = document.getElementById('st-active'); if (stActive) stActive.textContent = base.filter(e => getStatus(e) === 'active').length;
     }
 
     function render() { buildManagerTabs(); buildAlerts(); renderTable(); updateStats(); }
