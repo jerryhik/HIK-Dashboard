@@ -180,7 +180,7 @@
   <!-- HEADER -->
   <header class="hdr px-6 py-4" id="app-header">
     <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;align-items:center;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="switchTab('list')">
         <img src="HomesinKorea.webp" alt="HomesinKorea" style="height:36px;width:auto;object-fit:contain;">
         <div>
           <div style="font-size:15px;font-weight:700;color:var(--text);line-height:1.2;">중개건 관리 대시보드</div>
@@ -611,7 +611,7 @@
       const domain = email.split('@')[1] || '';
       if (domain === ALLOWED_DOMAIN) {
         const session = { email, name: payload.name || email, exp: payload.exp };
-        sessionStorage.setItem('hik_session', JSON.stringify(session));
+        localStorage.setItem('hik_session', JSON.stringify(session));
         _showApp(session);
       } else {
         // 승인된 외부 이메일인지 확인
@@ -620,7 +620,7 @@
           const { data } = await sb.from('access_requests').select('id').eq('requester_email', email).eq('status', 'approved').limit(1);
           if (data && data.length > 0) {
             const session = { email, name: payload.name || email, exp: payload.exp };
-            sessionStorage.setItem('hik_session', JSON.stringify(session));
+            localStorage.setItem('hik_session', JSON.stringify(session));
             _showApp(session);
             return;
           }
@@ -672,7 +672,7 @@
             clearInterval(_approvalPollTimer);
             _approvalPollTimer = null;
             const session = { email, name: email, exp: Math.floor(Date.now()/1000) + 86400*30 };
-            sessionStorage.setItem('hik_session', JSON.stringify(session));
+            localStorage.setItem('hik_session', JSON.stringify(session));
             _showApp(session);
           }
         } catch(e) {}
@@ -694,7 +694,7 @@
         const { data: approved } = await sb.from('access_requests').select('id').eq('requester_email', email).eq('status', 'approved').limit(1);
         if (approved && approved.length > 0) {
           const session = { email, name: email, exp: Math.floor(Date.now()/1000) + 86400*30 };
-          sessionStorage.setItem('hik_session', JSON.stringify(session));
+          localStorage.setItem('hik_session', JSON.stringify(session));
           _showApp(session);
           return;
         }
@@ -763,7 +763,7 @@
     }
 
     function signOutAndBack() {
-      sessionStorage.removeItem('hik_session');
+      localStorage.removeItem('hik_session');
       try { google.accounts.id.disableAutoSelect(); } catch(e) {}
       location.reload();
     }
@@ -784,14 +784,14 @@
 
     // 기존 세션 복원
     (function initAuth() {
-      const stored = sessionStorage.getItem('hik_session');
+      const stored = localStorage.getItem('hik_session');
       if (stored) {
         try {
           const s = JSON.parse(stored);
           // homesinkor.com 계정 또는 승인된 외부 계정 세션 모두 허용
           if (s.email) { _showApp(s); return; }
         } catch(e) {}
-        sessionStorage.removeItem('hik_session');
+        localStorage.removeItem('hik_session');
       }
       // 세션 없음 → login-page 기본 표시
     })();
@@ -1919,7 +1919,7 @@
 
       // 세션 복원으로 로그인된 관리자에게 배너 표시 (initAuth 시점엔 _sb 미초기화라 여기서 실행)
       try {
-        const stored = sessionStorage.getItem('hik_session');
+        const stored = localStorage.getItem('hik_session');
         if (stored) {
           const s = JSON.parse(stored);
           if (s.email === ADMIN_EMAIL) checkPendingRequests();
