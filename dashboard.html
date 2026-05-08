@@ -177,17 +177,6 @@
     </div>
   </div>
 
-  <!-- ACCESS REQUEST BANNER -->
-  <div id="access-banner" style="display:none;background:#FFF3CD;border-bottom:1px solid #FBBF24;padding:12px 24px;position:sticky;top:0;z-index:99;">
-    <div style="max-width:1280px;margin:0 auto;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <span style="font-size:13px;font-weight:600;color:#92400E;">📬 접근 권한 요청</span>
-        <button onclick="dismissBanner()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#92400E;line-height:1;">×</button>
-      </div>
-      <div id="access-banner-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-    </div>
-  </div>
-
   <!-- HEADER -->
   <header class="hdr px-6 py-4" id="app-header">
     <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
@@ -211,6 +200,17 @@
       </div>
     </div>
   </header>
+
+  <!-- ACCESS REQUEST BANNER -->
+  <div id="access-banner" style="display:none;background:#FFF3CD;border-bottom:1px solid #FBBF24;padding:12px 24px;">
+    <div style="max-width:1280px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:600;color:#92400E;">📬 접근 권한 요청</span>
+        <button onclick="dismissBanner()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#92400E;line-height:1;">×</button>
+      </div>
+      <div id="access-banner-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+  </div>
 
   <main id="app-main" style="max-width:1280px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;">
 
@@ -617,8 +617,8 @@
         // 승인된 외부 이메일인지 확인
         try {
           const sb = window.supabase.createClient(_SB_URL, _SB_KEY);
-          const { data } = await sb.from('access_requests').select('status').eq('requester_email', email).eq('status', 'approved').maybeSingle();
-          if (data) {
+          const { data } = await sb.from('access_requests').select('id').eq('requester_email', email).eq('status', 'approved').limit(1);
+          if (data && data.length > 0) {
             const session = { email, name: payload.name || email, exp: payload.exp };
             sessionStorage.setItem('hik_session', JSON.stringify(session));
             _showApp(session);
@@ -672,8 +672,8 @@
       try {
         const sb = window.supabase.createClient(_SB_URL, _SB_KEY);
         // 이미 승인된 계정이면 바로 로그인
-        const { data: approved } = await sb.from('access_requests').select('status').eq('requester_email', email).eq('status', 'approved').maybeSingle();
-        if (approved) {
+        const { data: approved } = await sb.from('access_requests').select('id').eq('requester_email', email).eq('status', 'approved').limit(1);
+        if (approved && approved.length > 0) {
           const session = { email, name: email, exp: Math.floor(Date.now()/1000) + 86400*30 };
           sessionStorage.setItem('hik_session', JSON.stringify(session));
           _showApp(session);
