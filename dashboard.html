@@ -597,6 +597,11 @@
     const ADMIN_EMAIL       = 'jerry@homesinkor.com';
 
     let _deniedEmail = '';
+    let _initDone = false;
+    let _loggedIn = false;
+    let _loginRedirect = (location.pathname !== '/' || location.search)
+      ? { path: location.pathname, search: location.search }
+      : null;
 
     function _parseJwt(token) {
       try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
@@ -631,12 +636,20 @@
     };
 
     function _showApp(session) {
+      _loggedIn = true;
       document.getElementById('login-page').style.display  = 'none';
       document.getElementById('denied-page').style.display = 'none';
       document.getElementById('app-header').style.display  = 'block';
       document.getElementById('app-main').style.display    = 'block';
+      document.getElementById('detail-view').style.display = 'none';
       document.getElementById('hdr-email').textContent     = session.email;
       if (session.email === ADMIN_EMAIL) checkPendingRequests();
+      // 로그인 전 접근한 URL로 이동 (INIT 완료 후에만 entries 존재)
+      if (_initDone && _loginRedirect) {
+        const { path, search } = _loginRedirect;
+        _loginRedirect = null;
+        navigateToPath(path, search);
+      }
     }
 
     function _showDenied(email) {
@@ -1911,9 +1924,11 @@
         save();
       }
       render();
+      _initDone = true;
 
-      // 초기 URL에 따라 올바른 뷰로 이동
-      if (location.pathname !== '/') {
+      // 이미 로그인된 상태(세션 복원)라면 초기 URL로 이동
+      // 미로그인 상태라면 _loginRedirect에 저장해뒀다가 _showApp에서 처리
+      if (_loggedIn && location.pathname !== '/') {
         navigateToPath(location.pathname, location.search);
       }
 
