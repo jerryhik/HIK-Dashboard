@@ -662,20 +662,29 @@
 
     async function requestAccess() {
       const emailInput = document.getElementById('req-email-input');
-      const email = (emailInput?.value || _deniedEmail || '').trim();
+      const email = (emailInput?.value || _deniedEmail || '').trim().toLowerCase();
       if (!email) { alert('이메일을 입력해주세요.'); return; }
       const btn = document.getElementById('btn-request-access');
       const result = document.getElementById('request-result');
       btn.disabled = true;
-      btn.textContent = '전송 중...';
+      btn.textContent = '확인 중...';
       result.style.display = 'none';
       try {
         const sb = window.supabase.createClient(_SB_URL, _SB_KEY);
+        // 이미 승인된 계정이면 바로 로그인
+        const { data: approved } = await sb.from('access_requests').select('status').eq('requester_email', email).eq('status', 'approved').maybeSingle();
+        if (approved) {
+          const session = { email, name: email, exp: Math.floor(Date.now()/1000) + 86400*30 };
+          sessionStorage.setItem('hik_session', JSON.stringify(session));
+          _showApp(session);
+          return;
+        }
+        // 미승인 → 요청 저장
         const { error } = await sb.from('access_requests').insert({ requester_email: email });
         if (error) throw error;
         result.style.display = 'block';
         result.style.color   = 'var(--green)';
-        result.textContent   = '요청이 접수됐습니다. 승인 후 접근 가능합니다.';
+        result.textContent   = '요청이 접수됐습니다. 담당자 승인 후 이 화면에서 동일 이메일로 다시 시도해주세요.';
         btn.textContent      = '요청 완료';
       } catch(e) {
         result.style.display = 'block';
@@ -759,7 +768,8 @@
       if (stored) {
         try {
           const s = JSON.parse(stored);
-          if (s.email && s.email.toLowerCase().endsWith('@' + ALLOWED_DOMAIN)) { _showApp(s); return; }
+          // homesinkor.com 계정 또는 승인된 외부 계정 세션 모두 허용
+          if (s.email) { _showApp(s); return; }
         } catch(e) {}
         sessionStorage.removeItem('hik_session');
       }
