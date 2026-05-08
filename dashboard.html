@@ -324,27 +324,34 @@
         </div>
         <!-- 상세 내역 -->
         <div class="card" style="overflow:hidden;">
-          <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 0;">
-            <span style="font-size:11.5px;font-weight:600;color:var(--text2);">담당자</span>
-            <select id="rev-mgr-filter" style="font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;padding:5px 10px;border:1px solid var(--border2);border-radius:7px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
-              <option value="all">전체</option>
-            </select>
-          </div>
           <div style="overflow-x:auto;">
             <table class="tbl" id="rev-tbl">
-              <thead><tr>
-                <th>게스트</th>
-                <th>담당자</th>
-                <th style="min-width:160px;">주소</th>
-                <th>납입예정일</th>
-                <th>실제납입일</th>
-                <th>금액</th>
-                <th>HIK 수수료</th>
-                <th>납입여부</th>
-                <th>출처</th>
-              </tr></thead>
+              <thead>
+                <tr style="background:#E6DFDA;">
+                  <td style="font-weight:700;font-size:18px;padding:9px 10px;border-bottom:2px solid var(--border2);color:var(--text2);white-space:nowrap;">합계</td>
+                  <td style="padding:6px 10px;border-bottom:2px solid var(--border2);">
+                    <select id="rev-mgr-filter" style="font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;padding:5px 10px;border:1px solid var(--border2);border-radius:7px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
+                      <option value="all">전체</option>
+                    </select>
+                  </td>
+                  <td colspan="3" style="border-bottom:2px solid var(--border2);"></td>
+                  <td id="rev-foot-rent" style="font-weight:700;font-size:18px;padding:9px 10px;border-bottom:2px solid var(--border2);white-space:nowrap;"></td>
+                  <td id="rev-foot-hik" style="font-weight:700;font-size:18px;color:var(--gold);padding:9px 10px;border-bottom:2px solid var(--border2);white-space:nowrap;"></td>
+                  <td colspan="2" style="border-bottom:2px solid var(--border2);"></td>
+                </tr>
+                <tr>
+                  <th>게스트</th>
+                  <th>담당자</th>
+                  <th style="min-width:160px;">주소</th>
+                  <th>납입예정일</th>
+                  <th>실제납입일</th>
+                  <th>금액</th>
+                  <th>HIK 수수료</th>
+                  <th>납입여부</th>
+                  <th>출처</th>
+                </tr>
+              </thead>
               <tbody id="rev-body"></tbody>
-              <tfoot id="rev-foot"></tfoot>
             </table>
           </div>
           <div id="rev-empty" style="text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;display:none;">해당 기간 납입내역이 없습니다</div>
@@ -1502,17 +1509,22 @@
       document.getElementById('rev-all-hik').textContent   = items.length ? krw(allHik)   : '—';
 
       const body = document.getElementById('rev-body');
-      const foot = document.getElementById('rev-foot');
       const empty = document.getElementById('rev-empty');
+      const footRent = document.getElementById('rev-foot-rent');
+      const footHik  = document.getElementById('rev-foot-hik');
 
       if (!items.length) {
-        body.innerHTML = ''; foot.innerHTML = '';
+        body.innerHTML = '';
+        footRent.innerHTML = '—'; footHik.innerHTML = '—';
         empty.style.display = 'block';
         document.getElementById('rev-tbl').style.display = 'none';
         return;
       }
       empty.style.display = 'none';
       document.getElementById('rev-tbl').style.display = '';
+
+      footRent.innerHTML = `${krw(allRent)} <span style="font-size:16px;color:var(--green);font-weight:500;">완료 ${krw(doneRent)}</span>`;
+      footHik.innerHTML  = `${krw(allHik)} <span style="font-size:16px;color:var(--green);font-weight:500;">완료 ${krw(doneHik)}</span>`;
 
       const statusTag = s => s === 'done'
         ? `<span class="badge" style="background:rgba(42,110,70,.12);color:var(--green);border:1px solid rgba(42,110,70,.2);">완료</span>`
@@ -1531,13 +1543,6 @@
           <td><span style="font-size:11px;color:var(--dim);">${source}</span></td>
         </tr>`
       ).join('');
-
-      foot.innerHTML = `<tr>
-        <td colspan="5" style="font-weight:700;font-size:18px;color:var(--text2);">합계</td>
-        <td style="font-weight:700;font-size:18px;">${krw(allRent)} <span style="font-size:16px;color:var(--green);font-weight:500;">완료 ${krw(doneRent)}</span></td>
-        <td style="font-weight:700;font-size:18px;color:var(--gold);">${krw(allHik)} <span style="font-size:16px;color:var(--green);font-weight:500;">완료 ${krw(doneHik)}</span></td>
-        <td colspan="2"></td>
-      </tr>`;
     }
 
     function getManagerList() {
