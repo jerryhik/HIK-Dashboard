@@ -291,16 +291,17 @@
 
       <!-- 월별 매출 집계 -->
       <div id="rev-section" style="display:none;">
-        <!-- 월 네비게이터 -->
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-          <button id="rev-prev" class="btn-s" style="padding:6px 14px;font-size:13px;">‹</button>
-          <div id="rev-month-label" style="font-size:16px;font-weight:700;min-width:110px;text-align:center;"></div>
-          <button id="rev-next" class="btn-s" style="padding:6px 14px;font-size:13px;">›</button>
+        <!-- 날짜 범위 필터 -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+          <input type="date" id="rev-start" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
+          <span style="font-size:15px;font-weight:700;color:var(--text2);">~</span>
+          <input type="date" id="rev-end" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
+          <div id="rev-range-label" style="font-size:12px;color:var(--dim);margin-left:4px;"></div>
         </div>
         <!-- 요약 카드 -->
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;" id="rev-cards">
           <div class="card" style="padding:18px 22px;">
-            <div style="font-size:10.5px;font-weight:700;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">✓ 완료 합계</div>
+            <div style="font-size:21px;font-weight:700;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">✓ 완료 합계</div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span style="font-size:12px;color:var(--text2);">월세</span>
               <span id="rev-done-rent" style="font-size:17px;font-weight:700;">—</span>
@@ -311,7 +312,7 @@
             </div>
           </div>
           <div class="card" style="padding:18px 22px;">
-            <div style="font-size:10.5px;font-weight:700;color:var(--amber);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">◎ 예정 포함 합계</div>
+            <div style="font-size:21px;font-weight:700;color:var(--amber);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">◎ 예정 포함 합계</div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span style="font-size:12px;color:var(--text2);">월세</span>
               <span id="rev-all-rent" style="font-size:17px;font-weight:700;">—</span>
@@ -324,10 +325,17 @@
         </div>
         <!-- 상세 내역 -->
         <div class="card" style="overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 16px 0;">
+            <span style="font-size:11.5px;font-weight:600;color:var(--text2);">담당자</span>
+            <select id="rev-mgr-filter" style="font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;padding:5px 10px;border:1px solid var(--border2);border-radius:7px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
+              <option value="all">전체</option>
+            </select>
+          </div>
           <div style="overflow-x:auto;">
             <table class="tbl" id="rev-tbl">
               <thead><tr>
                 <th>게스트</th>
+                <th>담당자</th>
                 <th style="min-width:160px;">주소</th>
                 <th>납입예정일</th>
                 <th>실제납입일</th>
@@ -340,7 +348,7 @@
               <tfoot id="rev-foot"></tfoot>
             </table>
           </div>
-          <div id="rev-empty" style="text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;display:none;">해당 월 납입내역이 없습니다</div>
+          <div id="rev-empty" style="text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;display:none;">해당 기간 납입내역이 없습니다</div>
         </div>
       </div>
 
@@ -1412,29 +1420,33 @@
     }
 
     // ── MONTHLY REVENUE ──
-    let revYear = new Date().getFullYear();
-    let revMonth = new Date().getMonth() + 1; // 1-based
+    (function() {
+      const _n = new Date(), _y = _n.getFullYear(), _m = _n.getMonth();
+      const pad2 = n => String(n).padStart(2,'0');
+      window._revStartDefault = `${_y}-${pad2(_m+1)}-01`;
+      window._revEndDefault   = `${_y}-${pad2(_m+2 > 12 ? 1 : _m+2)}-${pad2(new Date(_y, _m+1, 0).getDate())}`;
+    })();
 
-    function revItems(year, month) {
+    function revItems(startDate, endDate) {
+      const s = new Date(startDate); s.setHours(0,0,0,0);
+      const e2 = new Date(endDate);  e2.setHours(23,59,59,999);
       const items = [];
       entries.forEach(e => {
-        // breakdown 항목
         if (e.breakdown?.length) {
           e.breakdown.forEach(r => {
             if (!r.dueDate) return;
             const d = new Date(r.dueDate);
             if (isNaN(d)) return;
-            if (d.getFullYear() === year && d.getMonth() + 1 === month) {
+            if (d >= s && d <= e2) {
               items.push({ e, r, source: e.payType === 'lump' ? '일괄' : (e.payDay ? `분할·${e.payDay}일` : '분할·수동') });
             }
           });
         } else if (e.payType === 'lump') {
-          // 일괄납부 — lumpDetail 기준, 없으면 startDate 폴백
           const ld = e.lumpDetail;
           const refDate = (ld?.actualDate) || e.startDate;
           if (!refDate) return;
           const d = new Date(refDate);
-          if (!isNaN(d) && d.getFullYear() === year && d.getMonth() + 1 === month) {
+          if (!isNaN(d) && d >= s && d <= e2) {
             items.push({ e, r: {
               dueDate: e.startDate,
               actualDate: ld?.actualDate || '',
@@ -1448,11 +1460,37 @@
       return items;
     }
 
-    function renderRevenue() {
-      const label = `${revYear}년 ${String(revMonth).padStart(2,'0')}월`;
-      document.getElementById('rev-month-label').textContent = label;
-      const items = revItems(revYear, revMonth);
+    function fmtRangeLabel(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr);
+      if (isNaN(d)) return '—';
+      return `${String(d.getFullYear()).slice(2)}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    }
 
+    function renderRevenue() {
+      const startEl = document.getElementById('rev-start');
+      const endEl   = document.getElementById('rev-end');
+      if (!startEl.value) startEl.value = window._revStartDefault;
+      if (!endEl.value)   endEl.value   = window._revEndDefault;
+      const startDate = startEl.value, endDate = endEl.value;
+      document.getElementById('rev-range-label').textContent =
+        startDate && endDate ? `${fmtRangeLabel(startDate)} ~ ${fmtRangeLabel(endDate)}` : '';
+
+      const allItems = revItems(startDate, endDate);
+
+      // 담당자 드롭다운 갱신 (선택값 유지)
+      const mgrSel = document.getElementById('rev-mgr-filter');
+      const prevMgr = mgrSel.value;
+      const managers = [...new Set(allItems.map(({e}) => e.manager).filter(Boolean))].sort();
+      mgrSel.innerHTML = `<option value="all">전체</option>` +
+        managers.map(m => `<option value="${m}"${m===prevMgr?' selected':''}>${m}</option>`).join('');
+      if (prevMgr && prevMgr !== 'all' && managers.includes(prevMgr)) mgrSel.value = prevMgr;
+
+      // 담당자 필터 적용
+      const selMgr = mgrSel.value;
+      const items = selMgr === 'all' ? allItems : allItems.filter(({e}) => e.manager === selMgr);
+
+      // 요약 카드: 필터 적용된 항목 기준
       let doneRent = 0, doneHik = 0, allRent = 0, allHik = 0;
       items.forEach(({ r }) => {
         const amt = r.amount ? Number(r.amount) : 0;
@@ -1486,6 +1524,7 @@
       body.innerHTML = items.map(({ e, r, source }) =>
         `<tr>
           <td><div style="font-weight:600;font-size:13px;">${e.guestName||'—'}</div></td>
+          <td><div style="font-size:12px;color:var(--text2);">${e.manager||'—'}</div></td>
           <td><div style="font-size:12px;color:var(--text2);">${e.address||'—'}</div></td>
           <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.dueDate)}</div></td>
           <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.actualDate)}</div></td>
@@ -1497,7 +1536,7 @@
       ).join('');
 
       foot.innerHTML = `<tr>
-        <td colspan="4" style="font-weight:700;color:var(--text2);">합계</td>
+        <td colspan="5" style="font-weight:700;color:var(--text2);">합계</td>
         <td style="font-weight:700;">${krw(allRent)} <span style="font-size:10.5px;color:var(--green);font-weight:500;">완료 ${krw(doneRent)}</span></td>
         <td style="font-weight:700;color:var(--gold);">${krw(allHik)} <span style="font-size:10.5px;color:var(--green);font-weight:500;">완료 ${krw(doneHik)}</span></td>
         <td colspan="2"></td>
@@ -1534,8 +1573,11 @@
       document.getElementById('rev-section').style.display  = isRev ? 'block' : 'none';
       if (isRev) renderRevenue(); else render();
       if (updateUrl) {
-        if (isRev) history.pushState({ view: 'revenue' }, '', '/revenue');
-        else if (isMgr) history.pushState({ view: 'manager', manager: activeManager }, '', `/?manager=${encodeURIComponent(activeManager)}`);
+        if (isRev) {
+          const s = document.getElementById('rev-start').value || window._revStartDefault;
+          const en = document.getElementById('rev-end').value   || window._revEndDefault;
+          history.pushState({ view: 'revenue' }, '', `/revenue?start=${s}&end=${en}`);
+        } else if (isMgr) history.pushState({ view: 'manager', manager: activeManager }, '', `/?manager=${encodeURIComponent(activeManager)}`);
         else history.pushState({ view: 'list' }, '', '/');
       }
     }
@@ -1569,9 +1611,9 @@
       }
       showViewSwitch(true);
       if (path === '/revenue') {
-        const y = params.get('y'), m = params.get('m');
-        if (y) revYear = parseInt(y);
-        if (m) revMonth = parseInt(m);
+        const start = params.get('start'), end = params.get('end');
+        if (start) document.getElementById('rev-start').value = start;
+        if (end)   document.getElementById('rev-end').value   = end;
         switchTab('rev', false);
         return;
       }
@@ -1842,17 +1884,17 @@
       // 회차 자동 생성
       document.getElementById('btn-auto-brow').addEventListener('click', autoGenerateBreakdown);
 
-      // Revenue month nav
-      document.getElementById('rev-prev').addEventListener('click', () => {
-        revMonth--; if (revMonth < 1) { revMonth = 12; revYear--; }
-        renderRevenue();
-        history.replaceState({ view: 'revenue' }, '', `/revenue?y=${revYear}&m=${revMonth}`);
+      // Revenue date range inputs
+      ['rev-start', 'rev-end'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+          renderRevenue();
+          const s  = document.getElementById('rev-start').value || window._revStartDefault;
+          const en = document.getElementById('rev-end').value   || window._revEndDefault;
+          history.replaceState({ view: 'revenue' }, '', `/revenue?start=${s}&end=${en}`);
+        });
       });
-      document.getElementById('rev-next').addEventListener('click', () => {
-        revMonth++; if (revMonth > 12) { revMonth = 1; revYear++; }
-        renderRevenue();
-        history.replaceState({ view: 'revenue' }, '', `/revenue?y=${revYear}&m=${revMonth}`);
-      });
+      // Revenue manager filter
+      document.getElementById('rev-mgr-filter').addEventListener('change', () => renderRevenue());
 
       // Browser back/forward
       window.addEventListener('popstate', () => {
