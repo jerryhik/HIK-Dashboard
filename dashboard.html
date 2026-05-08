@@ -178,10 +178,13 @@
   </div>
 
   <!-- ACCESS REQUEST BANNER -->
-  <div id="access-banner" style="display:none;background:#FFF3CD;border-bottom:1px solid #FBBF24;padding:10px 24px;position:sticky;top:0;z-index:99;">
-    <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span id="access-banner-msg" style="font-size:13px;color:#92400E;font-weight:500;"></span>
-      <button onclick="dismissBanner()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#92400E;line-height:1;">×</button>
+  <div id="access-banner" style="display:none;background:#FFF3CD;border-bottom:1px solid #FBBF24;padding:12px 24px;position:sticky;top:0;z-index:99;">
+    <div style="max-width:1280px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:600;color:#92400E;">📬 접근 권한 요청</span>
+        <button onclick="dismissBanner()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#92400E;line-height:1;">×</button>
+      </div>
+      <div id="access-banner-list" style="display:flex;flex-direction:column;gap:6px;"></div>
     </div>
   </div>
 
@@ -601,7 +604,7 @@
     }
 
     // window에 직접 할당 → GIS async 타이밍과 무관하게 전역 접근 보장
-    window.handleCredentialResponse = function(response) {
+    window.handleCredentialResponse = async function(response) {
       const payload = _parseJwt(response.credential);
       if (!payload) return;
       const email = (payload.email || '').toLowerCase();
@@ -611,6 +614,17 @@
         sessionStorage.setItem('hik_session', JSON.stringify(session));
         _showApp(session);
       } else {
+        // 승인된 외부 이메일인지 확인
+        try {
+          const sb = window.supabase.createClient(_SB_URL, _SB_KEY);
+          const { data } = await sb.from('access_requests').select('status').eq('requester_email', email).eq('status', 'approved').maybeSingle();
+          if (data) {
+            const session = { email, name: payload.name || email, exp: payload.exp };
+            sessionStorage.setItem('hik_session', JSON.stringify(session));
+            _showApp(session);
+            return;
+          }
+        } catch(e) {}
         _deniedEmail = email;
         _showDenied(email);
       }
@@ -674,13 +688,37 @@
 
     async function checkPendingRequests() {
       if (!_sb) return;
-      const { data } = await _sb.from('access_requests').select('requester_email,requested_at').eq('status','pending').order('requested_at',{ascending:false});
+      const { data } = await _sb.from('access_requests').select('id,requester_email,requested_at').eq('status','pending').order('requested_at',{ascending:false});
       if (!data || !data.length) return;
-      const banner = document.getElementById('access-banner');
-      const msg    = document.getElementById('access-banner-msg');
-      const emails = data.map(r => r.requester_email).join(', ');
-      msg.textContent = `📬 접근 권한 요청 ${data.length}건: ${emails}`;
-      banner.style.display = 'block';
+      const list = document.getElementById('access-banner-list');
+      list.innerHTML = data.map(r => `
+        <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.6);border-radius:8px;padding:8px 12px;">
+          <span style="font-size:13px;color:#92400E;">${r.requester_email}
+            <span style="font-size:11px;color:#B45309;margin-left:6px;">${new Date(r.requested_at).toLocaleDateString('ko-KR')}</span>
+          </span>
+          <div style="display:flex;gap:6px;">
+            <button onclick="approveRequest('${r.id}','${r.requester_email}',this)" style="background:#2A6E46;color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit;">승인</button>
+            <button onclick="denyRequest('${r.id}',this)" style="background:transparent;color:#B83232;border:1px solid #B83232;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit;">거절</button>
+          </div>
+        </div>`).join('');
+      document.getElementById('access-banner').style.display = 'block';
+    }
+
+    async function approveRequest(id, email, btn) {
+      btn.disabled = true; btn.textContent = '처리 중...';
+      const { error } = await _sb.from('access_requests').update({ status: 'approved' }).eq('id', id);
+      if (error) { btn.disabled = false; btn.textContent = '승인'; alert('오류: ' + error.message); return; }
+      btn.closest('div[style]').innerHTML = `<span style="font-size:13px;color:#2A6E46;font-weight:500;">✓ ${email} 승인됨</span>`;
+      setTimeout(() => btn.closest('div[style]')?.remove(), 2000);
+    }
+
+    async function denyRequest(id, btn) {
+      btn.disabled = true; btn.textContent = '처리 중...';
+      const { error } = await _sb.from('access_requests').update({ status: 'denied' }).eq('id', id);
+      if (error) { btn.disabled = false; btn.textContent = '거절'; alert('오류: ' + error.message); return; }
+      btn.closest('div[style]')?.remove();
+      const list = document.getElementById('access-banner-list');
+      if (!list.children.length) dismissBanner();
     }
 
     function dismissBanner() {
