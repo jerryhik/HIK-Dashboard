@@ -148,9 +148,22 @@
   <div id="login-page" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);">
     <div class="auth-card">
       <img src="HomesinKorea.webp" alt="HomesinKorea" class="auth-logo">
-      <div class="auth-title">중개건 관리 대시보드</div>
-      <div class="auth-sub">@homesinkor.com 계정으로 로그인하세요</div>
-      <div id="g-btn-wrap"></div>
+      <div id="login-view">
+        <div class="auth-title">중개건 관리 대시보드</div>
+        <div class="auth-sub">@homesinkor.com 계정으로 로그인하세요</div>
+        <div id="g-btn-wrap"></div>
+        <div style="margin-top:20px;text-align:center;">
+          <button onclick="showRequestView()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--text2);text-decoration:underline;">외부 계정으로 접근 요청하기</button>
+        </div>
+      </div>
+      <div id="request-view" style="display:none;width:100%;">
+        <div class="auth-title" style="margin-bottom:6px;">접근 권한 요청</div>
+        <div class="auth-sub" style="margin-bottom:20px;">이메일을 입력하면 담당자에게 요청이 전달됩니다.</div>
+        <input id="req-email-input" type="email" class="finput" placeholder="your@email.com" style="margin-bottom:12px;">
+        <button id="btn-request-access" class="btn-p" style="width:100%;" onclick="requestAccess()">접근 권한 요청</button>
+        <div id="request-result" style="display:none;margin-top:12px;font-size:13px;text-align:center;"></div>
+        <button onclick="showLoginView()" class="btn-s" style="margin-top:10px;width:100%;font-size:13px;">← 로그인으로 돌아가기</button>
+      </div>
     </div>
   </div>
 
@@ -160,8 +173,6 @@
       <div style="font-size:40px;margin-bottom:16px;">🔒</div>
       <div class="auth-title">접근 권한이 없습니다</div>
       <div class="auth-sub" id="denied-email-msg">이 대시보드는 @homesinkor.com 계정만 접근할 수 있습니다.</div>
-      <button id="btn-request-access" class="btn-p" style="margin-top:4px;width:100%;" onclick="requestAccess()">접근 권한 요청</button>
-      <div id="request-result" style="display:none;margin-top:12px;font-size:13px;text-align:center;"></div>
       <button class="btn-s" style="margin-top:10px;width:100%;font-size:13px;" onclick="signOutAndBack()">다른 계정으로 로그인</button>
     </div>
   </div>
@@ -624,7 +635,21 @@
       if (msg) msg.textContent = `${email} 계정은 접근 권한이 없습니다.`;
     }
 
+    function showRequestView() {
+      document.getElementById('login-view').style.display   = 'none';
+      document.getElementById('request-view').style.display = 'block';
+    }
+    function showLoginView() {
+      document.getElementById('request-view').style.display = 'none';
+      document.getElementById('login-view').style.display   = 'block';
+      document.getElementById('request-result').style.display = 'none';
+      document.getElementById('req-email-input').value = '';
+    }
+
     async function requestAccess() {
+      const emailInput = document.getElementById('req-email-input');
+      const email = (emailInput?.value || _deniedEmail || '').trim();
+      if (!email) { alert('이메일을 입력해주세요.'); return; }
       const btn = document.getElementById('btn-request-access');
       const result = document.getElementById('request-result');
       btn.disabled = true;
@@ -632,7 +657,7 @@
       result.style.display = 'none';
       try {
         const sb = window.supabase.createClient(_SB_URL, _SB_KEY);
-        const { error } = await sb.from('access_requests').insert({ requester_email: _deniedEmail });
+        const { error } = await sb.from('access_requests').insert({ requester_email: email });
         if (error) throw error;
         result.style.display = 'block';
         result.style.color   = 'var(--green)';
