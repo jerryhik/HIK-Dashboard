@@ -1913,7 +1913,7 @@
         }
       }
 
-      // Demo data
+      // Demo data (표시만 하고 저장하지 않음 — 실수로 실데이터 덮어쓰기 방지)
       if (!entries.length) {
         const d = (offset) => new Date(Date.now() + offset*86400000).toISOString().slice(0,10);
         entries = [
@@ -1936,7 +1936,6 @@
             notes:'냉장고 별도 구매 합의.',
             breakdown:[], createdAt:new Date().toISOString() }
         ];
-        save();
       }
       render();
       _initDone = true;
