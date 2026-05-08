@@ -660,6 +660,25 @@
       document.getElementById('req-email-input').value = '';
     }
 
+    let _approvalPollTimer = null;
+
+    function _startApprovalPolling(email) {
+      if (_approvalPollTimer) return;
+      _approvalPollTimer = setInterval(async () => {
+        try {
+          const sb = window.supabase.createClient(_SB_URL, _SB_KEY);
+          const { data } = await sb.from('access_requests').select('id').eq('requester_email', email).eq('status', 'approved').limit(1);
+          if (data && data.length > 0) {
+            clearInterval(_approvalPollTimer);
+            _approvalPollTimer = null;
+            const session = { email, name: email, exp: Math.floor(Date.now()/1000) + 86400*30 };
+            sessionStorage.setItem('hik_session', JSON.stringify(session));
+            _showApp(session);
+          }
+        } catch(e) {}
+      }, 3000);
+    }
+
     async function requestAccess() {
       const emailInput = document.getElementById('req-email-input');
       const email = (emailInput?.value || _deniedEmail || '').trim().toLowerCase();
@@ -684,8 +703,9 @@
         if (error) throw error;
         result.style.display = 'block';
         result.style.color   = 'var(--green)';
-        result.textContent   = '요청이 접수됐습니다. 담당자 승인 후 이 화면에서 동일 이메일로 다시 시도해주세요.';
-        btn.textContent      = '요청 완료';
+        result.textContent   = '요청이 접수됐습니다. 승인되면 자동으로 로그인됩니다...';
+        btn.textContent      = '대기 중...';
+        _startApprovalPolling(email);
       } catch(e) {
         result.style.display = 'block';
         result.style.color   = 'var(--red)';
