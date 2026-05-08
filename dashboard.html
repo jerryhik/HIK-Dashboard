@@ -9,7 +9,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     :root {
       --bg: #F7F7F8;
@@ -164,6 +163,14 @@
       <button id="btn-request-access" class="btn-p" style="margin-top:4px;width:100%;" onclick="requestAccess()">접근 권한 요청</button>
       <div id="request-result" style="display:none;margin-top:12px;font-size:13px;text-align:center;"></div>
       <button class="btn-s" style="margin-top:10px;width:100%;font-size:13px;" onclick="signOutAndBack()">다른 계정으로 로그인</button>
+    </div>
+  </div>
+
+  <!-- ACCESS REQUEST BANNER -->
+  <div id="access-banner" style="display:none;background:#FFF3CD;border-bottom:1px solid #FBBF24;padding:10px 24px;position:sticky;top:0;z-index:99;">
+    <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <span id="access-banner-msg" style="font-size:13px;color:#92400E;font-weight:500;"></span>
+      <button onclick="dismissBanner()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#92400E;line-height:1;">×</button>
     </div>
   </div>
 
@@ -575,10 +582,6 @@
     const ALLOWED_DOMAIN    = 'homesinkor.com';
     const ADMIN_EMAIL       = 'jerry@homesinkor.com';
 
-    // EmailJS 설정 — emailjs.com에서 발급받은 값으로 교체하세요
-    const EJS_PUBLIC_KEY    = 'YOUR_PUBLIC_KEY';
-    const EJS_SERVICE_ID    = 'YOUR_SERVICE_ID';
-    const EJS_TEMPLATE_ID   = 'YOUR_TEMPLATE_ID';
     let _deniedEmail = '';
 
     function _parseJwt(token) {
@@ -608,6 +611,7 @@
       document.getElementById('app-header').style.display  = 'block';
       document.getElementById('app-main').style.display    = 'block';
       document.getElementById('hdr-email').textContent     = session.email;
+      if (session.email === ADMIN_EMAIL) checkPendingRequests();
     }
 
     function _showDenied(email) {
@@ -627,15 +631,12 @@
       btn.textContent = '전송 중...';
       result.style.display = 'none';
       try {
-        emailjs.init(EJS_PUBLIC_KEY);
-        await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
-          requester_email: _deniedEmail,
-          admin_email:     ADMIN_EMAIL,
-          dashboard_url:   location.origin,
-        });
+        const sb = window.supabase.createClient(_SB_URL, _SB_KEY);
+        const { error } = await sb.from('access_requests').insert({ requester_email: _deniedEmail });
+        if (error) throw error;
         result.style.display = 'block';
         result.style.color   = 'var(--green)';
-        result.textContent   = '요청이 전송됐습니다. 승인 후 접근 가능합니다.';
+        result.textContent   = '요청이 접수됐습니다. 승인 후 접근 가능합니다.';
         btn.textContent      = '요청 완료';
       } catch(e) {
         result.style.display = 'block';
@@ -644,6 +645,21 @@
         btn.disabled  = false;
         btn.textContent = '접근 권한 요청';
       }
+    }
+
+    async function checkPendingRequests() {
+      if (!_sb) return;
+      const { data } = await _sb.from('access_requests').select('requester_email,requested_at').eq('status','pending').order('requested_at',{ascending:false});
+      if (!data || !data.length) return;
+      const banner = document.getElementById('access-banner');
+      const msg    = document.getElementById('access-banner-msg');
+      const emails = data.map(r => r.requester_email).join(', ');
+      msg.textContent = `📬 접근 권한 요청 ${data.length}건: ${emails}`;
+      banner.style.display = 'block';
+    }
+
+    function dismissBanner() {
+      document.getElementById('access-banner').style.display = 'none';
     }
 
     function signOutAndBack() {
