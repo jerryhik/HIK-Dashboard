@@ -11,7 +11,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     :root {
-      --bg: #F7F7F8;
+      --bg: #FAFAF8;
       --surface: #FFFFFF;
       --card: #FFFFFF;
       --border: #E4E4E7;
@@ -125,7 +125,7 @@
     .modal-tab:hover{color:var(--text);}
     .modal-tab.on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700;}
     #detail-view{max-width:1280px;margin:0 auto;padding:32px 12px;display:none;position:relative;z-index:1;}
-    .detail-section-title{font-size:10.5px;font-weight:700;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;margin-bottom:12px;}
+    .detail-section-title{font-size:15.75px;font-weight:700;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:12px;}
     .detail-info-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
     .detail-info-row:last-child{margin-bottom:0;}
     .flt-btn{background:transparent;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11.5px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .15s;color:var(--text2);white-space:nowrap;}
@@ -316,8 +316,8 @@
                   <th style="min-width:160px;">주소</th>
                   <th>납입예정일</th>
                   <th>실제납입일</th>
-                  <th>금액</th>
-                  <th>HIK 수수료</th>
+                  <th style="font-size:16.5px;border-left:1px solid var(--border2);border-right:1px solid var(--border2);">금액</th>
+                  <th style="font-size:16.5px;border-left:1px solid var(--border2);border-right:1px solid var(--border2);">HIK 수수료</th>
                   <th>납입여부</th>
                   <th>출처</th>
                 </tr>
@@ -357,8 +357,8 @@
                 <th style="min-width:88px;">게스트</th>
                 <th style="min-width:130px;">주소</th>
                 <th style="min-width:84px;">보증금</th>
-                <th style="min-width:84px;">월세</th>
-                <th style="min-width:86px;">HIK 수수료</th>
+                <th style="min-width:84px;font-size:16.5px;border-left:1px solid var(--border2);border-right:1px solid var(--border2);">월세</th>
+                <th style="min-width:86px;font-size:16.5px;border-left:1px solid var(--border2);border-right:1px solid var(--border2);">HIK 수수료</th>
                 <th style="min-width:122px;">호스트 연락처</th>
                 <th style="min-width:108px;">게스트 연락처</th>
                 <th style="min-width:132px;">계약 기간</th>
@@ -1066,8 +1066,8 @@
           <td><div style="font-weight:600;font-size:13px;">${e.guestName||'—'}</div>${sbadge}</td>
           <td><div style="font-size:12px;color:var(--text2);max-width:170px;">${e.address||'—'}</div></td>
           <td><div style="font-weight:500;">${krw(e.deposit)}</div></td>
-          <td>${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="font-weight:500;">${krw(s.amount)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;">${krw(e.monthlyRent)}</div>`; })()}</td>
-          <td>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:500;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</td>
+          <td style="border-left:1px solid var(--border2);border-right:1px solid var(--border2);font-size:19.5px;">${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="font-weight:500;">${krw(s.amount)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;">${krw(e.monthlyRent)}</div>`; })()}</td>
+          <td style="border-left:1px solid var(--border2);border-right:1px solid var(--border2);font-size:19.5px;">${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:500;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</td>
           <td><div style="font-size:12px;color:var(--text2);">${e.hostContact||'—'}</div></td>
           <td><div style="font-size:12px;color:var(--text2);">${e.guestContact||'—'}</div></td>
           <td>
@@ -1508,8 +1508,8 @@
           <td><div style="font-size:12px;color:var(--text2);">${e.address||'—'}</div></td>
           <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.dueDate)}</div></td>
           <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.actualDate)}</div></td>
-          <td><div style="font-weight:500;">${r.amount ? krw(r.amount) : '—'}${r.status==='scheduled'?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
-          <td><div style="font-weight:500;color:var(--gold);">${r.hikFee ? krw(r.hikFee) : '—'}${r.status==='scheduled'&&r.hikFee?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
+          <td style="border-left:1px solid var(--border2);border-right:1px solid var(--border2);font-size:19.5px;"><div style="font-weight:500;">${r.amount ? krw(r.amount) : '—'}${r.status==='scheduled'?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
+          <td style="border-left:1px solid var(--border2);border-right:1px solid var(--border2);font-size:19.5px;"><div style="font-weight:500;color:var(--gold);">${r.hikFee ? krw(r.hikFee) : '—'}${r.status==='scheduled'&&r.hikFee?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
           <td>${statusTag(r.status)}</td>
           <td><span style="font-size:11px;color:var(--dim);">${source}</span></td>
         </tr>`
@@ -1689,8 +1689,8 @@
           <div class="card" style="padding:20px;">
             <div class="detail-section-title">계약 금액</div>
             <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">보증금</div><div style="font-weight:600;">${krw(e.deposit)}</div></div>
-            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">월세</div>${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="font-weight:600;">${krw(s.amount)}</div><div style="font-size:11px;color:var(--green);margin-top:2px;">납입 완료분 합계</div>` : `<div style="font-weight:600;">${krw(e.monthlyRent)}</div>`; })()}</div>
-            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">HIK 수수료</div>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:600;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:11px;color:var(--green);margin-top:2px;">납입 완료분 합계</div>` : `<div style="font-weight:600;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;font-size:16.5px;">월세</div>${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;"><div style="font-weight:600;">${krw(s.amount)}</div><div style="font-size:11px;color:var(--green);">납입 완료분 합계</div></div>` : `<div style="font-weight:600;">${krw(e.monthlyRent)}</div>`; })()}</div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;font-size:16.5px;">HIK 수수료</div>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;"><div style="font-weight:600;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:11px;color:var(--green);">납입 완료분 합계</div></div>` : `<div style="font-weight:600;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</div>
           </div>
         </div>
 
