@@ -67,7 +67,7 @@
     /* Badges */
     .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
     .b-lump{background:var(--green-d);color:var(--green);border:1px solid rgba(76,175,138,.2);}
-    .b-mo{background:var(--gold-d);color:var(--gold);border:1px solid rgba(201,168,76,.2);}
+    .b-mo{background:var(--gold-d);color:#D9730E;border:1px solid rgba(201,168,76,.2);}
     .b-urg{background:var(--red-d);color:var(--red);border:1px solid rgba(224,82,82,.2);animation:pulse 2s infinite;}
     .b-exp{background:rgba(85,87,112,.15);color:var(--dim);border:1px solid var(--border);}
     .b-pre{background:rgba(154,104,0,.1);color:var(--amber);border:1px solid rgba(154,104,0,.25);}
@@ -314,7 +314,7 @@
                   </td>
                   <td colspan="3" style="border-bottom:2px solid var(--border2);"></td>
                   <td id="rev-foot-rent" style="font-weight:700;font-size:18px;padding:9px 10px;border-bottom:2px solid var(--border2);white-space:nowrap;"></td>
-                  <td id="rev-foot-hik" style="font-weight:700;font-size:18px;color:var(--gold);padding:9px 10px;border-bottom:2px solid var(--border2);white-space:nowrap;"></td>
+                  <td id="rev-foot-hik" style="font-weight:700;font-size:18px;color:#D9730E;padding:9px 10px;border-bottom:2px solid var(--border2);white-space:nowrap;"></td>
                   <td colspan="2" style="border-bottom:2px solid var(--border2);"></td>
                 </tr>
                 <tr>
@@ -1042,7 +1042,7 @@
       });
       // tfoot 합계 행 (순번+상태 포함 총 15열)
       document.getElementById('tbl-foot').innerHTML =
-        `<tr><td colspan="7" style="font-weight:700;font-size:18px;color:var(--text2);">합계</td><td style="font-weight:700;font-size:18px;">${krw(totRent)}</td><td style="font-weight:700;font-size:18px;color:var(--gold);">${krw(totHik)}</td><td colspan="6"></td></tr>`;
+        `<tr><td colspan="7" style="font-weight:700;font-size:18px;color:var(--text2);">합계</td><td style="font-weight:700;font-size:18px;">${krw(totRent)}</td><td style="font-weight:700;font-size:18px;color:#D9730E;">${krw(totHik)}</td><td colspan="6"></td></tr>`;
 
       tbody.innerHTML = filtered.map((e, idx) => {
         const id = daysTo(e.startDate), od = daysTo(e.endDate);
@@ -1074,7 +1074,7 @@
           <td><div style="font-size:12px;color:var(--text2);max-width:170px;">${e.address||'—'}</div></td>
           <td><div style="font-weight:500;">${krw(e.deposit)}</div></td>
           <td>${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="font-weight:500;">${krw(s.amount)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;">${krw(e.monthlyRent)}</div>`; })()}</td>
-          <td>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:500;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</td>
+          <td>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:500;color:#D9730E;">${krw(s.hikFee)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;color:#D9730E;">${krw(e.hikFee)}</div>`; })()}</td>
           <td><div style="font-size:12px;color:var(--text2);">${e.hostContact||'—'}</div></td>
           <td><div style="font-size:12px;color:var(--text2);">${e.guestContact||'—'}</div></td>
           <td>
@@ -1346,7 +1346,7 @@
             <td style="padding:10px 12px;font-size:13px;color:var(--text2);white-space:nowrap;">${fmt(r.dueDate)}${db}</td>
             <td style="padding:10px 12px;font-size:13px;color:var(--text2);">${fmt(r.actualDate)}</td>
             <td style="padding:10px 12px;font-size:13px;font-weight:600;">${r.amount?krw(r.amount):'—'}</td>
-            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:var(--gold);">${r.hikFee?krw(r.hikFee):'—'}</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;color:#D9730E;">${r.hikFee?krw(r.hikFee):'—'}</td>
             <td style="padding:10px 12px;font-size:12px;">${statusLabel}</td>
           </tr>`;
         }).join('');
@@ -1365,7 +1365,7 @@
               <tfoot><tr>
                 <td colspan="3" style="padding:9px 12px;font-size:12px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">합계</td>
                 <td style="padding:9px 12px;font-size:13px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${sumAmt?krw(sumAmt):'—'}</td>
-                <td style="padding:9px 12px;font-size:13px;font-weight:700;color:var(--gold);background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${sumHik?krw(sumHik):'—'}</td>
+                <td style="padding:9px 12px;font-size:13px;font-weight:700;color:#D9730E;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${sumHik?krw(sumHik):'—'}</td>
                 <td style="background:rgba(226,217,206,.35);border-top:2px solid var(--border2);"></td>
               </tr></tfoot>
             </table>
@@ -1516,7 +1516,7 @@
           <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.dueDate)}</div></td>
           <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.actualDate)}</div></td>
           <td><div style="font-weight:500;">${r.amount ? krw(r.amount) : '—'}${r.status==='scheduled'?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
-          <td><div style="font-weight:500;color:var(--gold);">${r.hikFee ? krw(r.hikFee) : '—'}${r.status==='scheduled'&&r.hikFee?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
+          <td><div style="font-weight:500;color:#D9730E;">${r.hikFee ? krw(r.hikFee) : '—'}${r.status==='scheduled'&&r.hikFee?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
           <td>${statusTag(r.status)}</td>
           <td><span style="font-size:11px;color:var(--dim);">${source}</span></td>
         </tr>`
@@ -1635,7 +1635,7 @@
             <td style="padding:10px 14px;font-size:13px;color:var(--text2);">${fmt(r.dueDate)}${db}</td>
             <td style="padding:10px 14px;font-size:13px;color:var(--text2);">${fmt(r.actualDate)}</td>
             <td style="padding:10px 14px;font-size:13px;font-weight:600;">${r.amount?krw(r.amount):'—'}</td>
-            <td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--gold);">${r.hikFee?krw(r.hikFee):'—'}</td>
+            <td style="padding:10px 14px;font-size:13px;font-weight:600;color:#D9730E;">${r.hikFee?krw(r.hikFee):'—'}</td>
             <td style="padding:10px 14px;font-size:12.5px;">${statusLabel}</td>
           </tr>`;
         }).join('');
@@ -1650,7 +1650,7 @@
             <tfoot><tr>
               <td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">합계</td>
               <td style="padding:9px 14px;font-size:13px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${detSumAmt?krw(detSumAmt):'—'}</td>
-              <td style="padding:9px 14px;font-size:13px;font-weight:700;color:var(--gold);background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${detSumHik?krw(detSumHik):'—'}</td>
+              <td style="padding:9px 14px;font-size:13px;font-weight:700;color:#D9730E;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${detSumHik?krw(detSumHik):'—'}</td>
               <td style="background:rgba(226,217,206,.35);border-top:2px solid var(--border2);"></td>
             </tr></tfoot>
           </table></div>`;
@@ -1722,7 +1722,7 @@
                   <td style="padding:10px 14px;font-size:13px;">${fmt(ld.actualDate)}</td>
                   <td style="padding:10px 14px;font-size:13px;font-weight:600;">${ld.deposit ? krw(ld.deposit) : '—'}</td>
                   <td style="padding:10px 14px;font-size:13px;font-weight:600;">${ld.monthlyRent ? krw(ld.monthlyRent) : '—'}</td>
-                  <td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--gold);">${ld.hikFee ? krw(ld.hikFee) : '—'}</td>
+                  <td style="padding:10px 14px;font-size:13px;font-weight:600;color:#D9730E;">${ld.hikFee ? krw(ld.hikFee) : '—'}</td>
                   <td style="padding:10px 14px;font-size:13px;">${statusLabel}</td>
                 </tr></tbody>
               </table></div>`;
