@@ -49,13 +49,13 @@
     .alert.a{background:#FFFBF0;border-color:rgba(154,104,0,.22);}
     /* Table */
     .tbl{width:100%;border-collapse:separate;border-spacing:0;}
-    .tbl th{background:#E6DFDA;color:var(--text2);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2;}
+    .tbl th{background:#F0F9FF;color:#333333;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2;}
     .tbl td{padding:11px 10px;border-bottom:1px solid rgba(185,170,155,.85);font-size:13px;vertical-align:middle;}
     .tbl tr:hover td{background:rgba(226,217,206,.3);}
     .tbl tr:last-child td{border-bottom:none;}
     .tbl tr.expired td{opacity:.42;}
-    .tbl tfoot td{padding:9px 10px;font-size:12px;background:#E6DFDA;border-top:2px solid var(--border2);position:sticky;bottom:0;z-index:2;}
-    #rev-tbl thead tr:first-child td{position:sticky;top:0;z-index:3;background:#E6DFDA;}
+    .tbl tfoot td{padding:9px 10px;font-size:12px;background:#F0F9FF;color:#333333;border-top:2px solid var(--border2);position:sticky;bottom:0;z-index:2;}
+    #rev-tbl thead tr:first-child td{position:sticky;top:0;z-index:3;background:#F0F9FF;}
     #rev-tbl th{top:46px;}
     /* Badges */
     .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
@@ -298,8 +298,8 @@
           <div style="overflow:auto;max-height:520px;">
             <table class="tbl" id="rev-tbl">
               <thead>
-                <tr style="background:#E6DFDA;">
-                  <td style="font-weight:700;font-size:18px;padding:9px 10px;border-bottom:2px solid var(--border2);color:var(--text2);white-space:nowrap;">합계</td>
+                <tr style="background:#F0F9FF;">
+                  <td style="font-weight:700;font-size:18px;padding:9px 10px;border-bottom:2px solid var(--border2);color:#333333;white-space:nowrap;">합계</td>
                   <td style="padding:6px 10px;border-bottom:2px solid var(--border2);">
                     <select id="rev-mgr-filter" style="font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;padding:5px 10px;border:1px solid var(--border2);border-radius:7px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
                       <option value="all">전체</option>
@@ -316,8 +316,8 @@
                   <th style="min-width:160px;">주소</th>
                   <th>납입예정일</th>
                   <th>실제납입일</th>
-                  <th style="font-size:16.5px;border-left:1px solid var(--border2);border-right:1px solid var(--border2);">금액</th>
-                  <th style="font-size:16.5px;border-left:1px solid var(--border2);border-right:1px solid var(--border2);">HIK 수수료</th>
+                  <th>금액</th>
+                  <th>HIK 수수료</th>
                   <th>납입여부</th>
                   <th>출처</th>
                 </tr>
@@ -357,8 +357,8 @@
                 <th style="min-width:88px;">게스트</th>
                 <th style="min-width:130px;">주소</th>
                 <th style="min-width:84px;">보증금</th>
-                <th style="min-width:84px;font-size:16.5px;border-left:1px solid var(--border2);border-right:1px solid var(--border2);">월세</th>
-                <th style="min-width:86px;font-size:16.5px;border-left:1px solid var(--border2);border-right:1px solid var(--border2);">HIK 수수료</th>
+                <th style="min-width:84px;">월세</th>
+                <th style="min-width:86px;">HIK 수수료</th>
                 <th style="min-width:122px;">호스트 연락처</th>
                 <th style="min-width:108px;">게스트 연락처</th>
                 <th style="min-width:132px;">계약 기간</th>
@@ -1066,8 +1066,8 @@
           <td><div style="font-weight:600;font-size:13px;">${e.guestName||'—'}</div>${sbadge}</td>
           <td><div style="font-size:12px;color:var(--text2);max-width:170px;">${e.address||'—'}</div></td>
           <td><div style="font-weight:500;">${krw(e.deposit)}</div></td>
-          <td style="border-left:1px solid var(--border2);border-right:1px solid var(--border2);font-size:19.5px;">${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="font-weight:500;">${krw(s.amount)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;">${krw(e.monthlyRent)}</div>`; })()}</td>
-          <td style="border-left:1px solid var(--border2);border-right:1px solid var(--border2);font-size:19.5px;">${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:500;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</td>
+          <td>${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="font-weight:500;">${krw(s.amount)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;">${krw(e.monthlyRent)}</div>`; })()}</td>
+          <td>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:500;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</td>
           <td><div style="font-size:12px;color:var(--text2);">${e.hostContact||'—'}</div></td>
           <td><div style="font-size:12px;color:var(--text2);">${e.guestContact||'—'}</div></td>
           <td>
@@ -1508,8 +1508,8 @@
           <td><div style="font-size:12px;color:var(--text2);">${e.address||'—'}</div></td>
           <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.dueDate)}</div></td>
           <td><div style="font-size:12.5px;color:var(--text2);">${fmt(r.actualDate)}</div></td>
-          <td style="border-left:1px solid var(--border2);border-right:1px solid var(--border2);font-size:19.5px;"><div style="font-weight:500;">${r.amount ? krw(r.amount) : '—'}${r.status==='scheduled'?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
-          <td style="border-left:1px solid var(--border2);border-right:1px solid var(--border2);font-size:19.5px;"><div style="font-weight:500;color:var(--gold);">${r.hikFee ? krw(r.hikFee) : '—'}${r.status==='scheduled'&&r.hikFee?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
+          <td><div style="font-weight:500;">${r.amount ? krw(r.amount) : '—'}${r.status==='scheduled'?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
+          <td><div style="font-weight:500;color:var(--gold);">${r.hikFee ? krw(r.hikFee) : '—'}${r.status==='scheduled'&&r.hikFee?'<span style="font-size:10.5px;color:var(--amber);margin-left:4px;">(예정)</span>':''}</div></td>
           <td>${statusTag(r.status)}</td>
           <td><span style="font-size:11px;color:var(--dim);">${source}</span></td>
         </tr>`
