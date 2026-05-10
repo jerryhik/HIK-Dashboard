@@ -4,14 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>중개건 관리 대시보드</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
+    @font-face{font-family:'Apple SD Gothic Neo';src:url('/fonts/AppleSDGothicNeoUL.ttf') format('truetype');font-weight:100;font-style:normal;}
+    @font-face{font-family:'Apple SD Gothic Neo';src:url('/fonts/AppleSDGothicNeoT.ttf') format('truetype');font-weight:200;font-style:normal;}
+    @font-face{font-family:'Apple SD Gothic Neo';src:url('/fonts/AppleSDGothicNeoL.ttf') format('truetype');font-weight:300;font-style:normal;}
+    @font-face{font-family:'Apple SD Gothic Neo';src:url('/fonts/AppleSDGothicNeoR.ttf') format('truetype');font-weight:400;font-style:normal;}
+    @font-face{font-family:'Apple SD Gothic Neo';src:url('/fonts/AppleSDGothicNeoM.ttf') format('truetype');font-weight:500;font-style:normal;}
+    @font-face{font-family:'Apple SD Gothic Neo';src:url('/fonts/AppleSDGothicNeoSB.ttf') format('truetype');font-weight:600;font-style:normal;}
+    @font-face{font-family:'Apple SD Gothic Neo';src:url('/fonts/AppleSDGothicNeoB.ttf') format('truetype');font-weight:700;font-style:normal;}
+    @font-face{font-family:'Apple SD Gothic Neo';src:url('/fonts/AppleSDGothicNeoEB.ttf') format('truetype');font-weight:800;font-style:normal;}
+    @font-face{font-family:'Apple SD Gothic Neo';src:url('/fonts/AppleSDGothicNeoH.ttf') format('truetype');font-weight:900;font-style:normal;}
     :root {
-      --bg: #F5F5F7;
+      --bg: #FAFAFA;
       --surface: #FFFFFF;
       --card: #FFFFFF;
       --border: #E4E4E7;
@@ -29,11 +36,11 @@
       --green: #2A6E46;
       --green-d: rgba(42,110,70,0.08);
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Apple SD Gothic Neo',sans-serif;}
+    body{background:var(--bg);color:var(--text);font-family:'Apple SD Gothic Neo',sans-serif;min-height:100vh;}
     body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 10%,rgba(139,101,16,.03) 0%,transparent 50%),radial-gradient(ellipse at 85% 85%,rgba(42,110,70,.03) 0%,transparent 50%);pointer-events:none;z-index:0;}
     /* Header */
-    .hdr{background:rgba(255,255,255,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;}
+    .hdr{background:#FAFAFA;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
     /* Cards */
     .card{background:var(--card);border:1px solid var(--border);border-radius:12px;}
     /* Stat cards */
@@ -51,7 +58,7 @@
     .tbl{width:100%;border-collapse:separate;border-spacing:0;}
     .tbl th{background:#F0F9FF;color:#333333;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2;}
     .tbl td{padding:11px 10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
-    .tbl tr:hover td{background:#F5F5F7;}
+    .tbl tr:hover td{background:#F2F2F2;}
     .tbl tr:last-child td{border-bottom:none;}
     .tbl tr.expired td{opacity:.42;}
     .tbl tfoot td{padding:9px 10px;font-size:12px;background:#F0F9FF;color:#333333;border-top:2px solid var(--border2);position:sticky;bottom:0;z-index:2;}
@@ -68,11 +75,11 @@
     .b-done{background:rgba(140,140,150,.1);color:var(--dim);border:1px solid var(--border);}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.65;}}
     /* Buttons */
-    .btn-p{background:var(--gold);color:#FFFFFF;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .2s;}
+    .btn-p{background:var(--gold);color:#FFFFFF;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;transition:all .2s;}
     .btn-p:hover{background:var(--gold-l);transform:translateY(-1px);box-shadow:0 4px 20px rgba(201,168,76,.3);}
-    .btn-s{background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:14px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .2s;}
+    .btn-s{background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:14px;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;transition:all .2s;}
     .btn-s:hover{border-color:var(--border2);color:var(--text);}
-    .btn-i{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 9px;cursor:pointer;transition:all .2s;color:var(--text2);font-size:12px;font-family:'Noto Sans KR',sans-serif;}
+    .btn-i{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 9px;cursor:pointer;transition:all .2s;color:var(--text2);font-size:12px;font-family:'Apple SD Gothic Neo',sans-serif;}
     .btn-i:hover{border-color:var(--border2);color:var(--text);}
     .btn-i.del:hover{border-color:rgba(224,82,82,.4);color:var(--red);background:var(--red-d);}
     /* Modal */
@@ -82,19 +89,19 @@
     .overlay.on .modal{transform:translateY(0);}
     /* Form */
     .flabel{display:block;font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px;}
-    .finput{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'Noto Sans KR',sans-serif;outline:none;transition:border-color .2s;}
+    .finput{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'Apple SD Gothic Neo',sans-serif;outline:none;transition:border-color .2s;}
     .finput:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,82,0,.1);}
     .finput::placeholder{color:var(--dim);}
     select.finput{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B8D9F' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
     /* Toggle */
     .tgroup{display:flex;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px;}
-    .tbtn{flex:1;padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;font-weight:500;transition:all .2s;background:transparent;color:var(--text2);}
+    .tbtn{flex:1;padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Apple SD Gothic Neo',sans-serif;font-weight:500;transition:all .2s;background:transparent;color:var(--text2);}
     .tbtn.on{background:var(--gold);color:#FFFFFF;}
     /* Breakdown table */
     .btbl{width:100%;border-collapse:collapse;font-size:13px;}
     .btbl th{background:rgba(226,217,206,.5);color:var(--text2);font-size:11px;padding:8px 10px;text-align:left;font-weight:500;border-bottom:1px solid var(--border);}
     .btbl td{padding:6px 5px;border-bottom:1px solid rgba(226,217,206,.7);}
-    .btbl td input,.btbl td select{width:100%;background:#FDFAF6;border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--text);font-size:12.5px;font-family:'Noto Sans KR',sans-serif;outline:none;}
+    .btbl td input,.btbl td select{width:100%;background:#FDFAF6;border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--text);font-size:12.5px;font-family:'Apple SD Gothic Neo',sans-serif;outline:none;}
     .btbl td input:focus,.btbl td select:focus{border-color:var(--gold);}
     .btbl td select{cursor:pointer;min-width:70px;}
     .btbl tfoot td{padding:8px 10px;font-size:12px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);}
@@ -103,7 +110,7 @@
     /* Search */
     .srch-wrap{position:relative;}
     .srch-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;}
-    .srch{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 14px 9px 36px;color:var(--text);font-size:13.5px;font-family:'Noto Sans KR',sans-serif;outline:none;transition:all .2s;width:200px;}
+    .srch{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 14px 9px 36px;color:var(--text);font-size:13.5px;font-family:'Apple SD Gothic Neo',sans-serif;outline:none;transition:all .2s;width:200px;}
     .srch:focus{border-color:var(--gold);width:260px;}
     /* Misc */
     ::-webkit-scrollbar{width:5px;height:5px;}
@@ -117,18 +124,18 @@
     .dbadge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;}
     .tbl tbody tr[data-row]{cursor:pointer;}
     /* Tabs */
-    .tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-size:13px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;margin-bottom:-1px;}
+    .tab-btn{background:transparent;border:none;border-bottom:2px solid transparent;padding:8px 16px;font-size:13px;font-weight:500;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;margin-bottom:-1px;}
     .tab-btn:hover{color:var(--text);}
     .tab-btn.tab-on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700;}
     /* Modal tabs */
-    .modal-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 14px;font-size:12px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;white-space:nowrap;margin-bottom:-1px;}
+    .modal-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 14px;font-size:12px;font-weight:500;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;white-space:nowrap;margin-bottom:-1px;}
     .modal-tab:hover{color:var(--text);}
     .modal-tab.on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700;}
     #detail-view{max-width:1280px;margin:0 auto;padding:32px 12px;display:none;position:relative;z-index:1;}
     .detail-section-title{font-size:15.75px;font-weight:700;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:12px;}
     .detail-info-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
     .detail-info-row:last-child{margin-bottom:0;}
-    .flt-btn{background:transparent;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11.5px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .15s;color:var(--text2);white-space:nowrap;}
+    .flt-btn{background:transparent;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11.5px;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;transition:all .15s;color:var(--text2);white-space:nowrap;}
     .flt-btn:hover{border-color:var(--border2);color:var(--text);}
     .flt-btn.on{background:var(--gold-d);border-color:rgba(245,82,0,.4);color:var(--gold);font-weight:600;}
     /* Auth pages */
@@ -138,7 +145,7 @@
     .auth-logo{height:44px;width:auto;object-fit:contain;margin-bottom:28px;}
     .auth-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;text-align:center;}
     .auth-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:32px;line-height:1.6;}
-    .btn-logout{background:transparent;border:1px solid var(--border);border-radius:7px;padding:6px 14px;font-size:12px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;}
+    .btn-logout{background:transparent;border:1px solid var(--border);border-radius:7px;padding:6px 14px;font-size:12px;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;}
     .btn-logout:hover{border-color:var(--border2);color:var(--text);}
     #app-header,#app-main{display:none;}
   
@@ -264,9 +271,9 @@
       <div id="rev-section" style="display:none;">
         <!-- 날짜 범위 필터 -->
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-          <input type="date" id="rev-start" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
+          <input type="date" id="rev-start" style="font-family:'Apple SD Gothic Neo',sans-serif;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
           <span style="font-size:15px;font-weight:700;color:var(--text2);">~</span>
-          <input type="date" id="rev-end" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
+          <input type="date" id="rev-end" style="font-family:'Apple SD Gothic Neo',sans-serif;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
         </div>
         <!-- 요약 카드 -->
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px;" id="rev-cards">
@@ -301,7 +308,7 @@
                 <tr style="background:#F0F9FF;">
                   <td style="font-weight:700;font-size:18px;padding:9px 10px;border-bottom:2px solid var(--border2);color:#333333;white-space:nowrap;">합계</td>
                   <td style="padding:6px 10px;border-bottom:2px solid var(--border2);">
-                    <select id="rev-mgr-filter" style="font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;padding:5px 10px;border:1px solid var(--border2);border-radius:7px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
+                    <select id="rev-mgr-filter" style="font-family:'Apple SD Gothic Neo',sans-serif;font-size:12px;font-weight:600;padding:5px 10px;border:1px solid var(--border2);border-radius:7px;background:var(--card);color:var(--text);cursor:pointer;outline:none;">
                       <option value="all">전체</option>
                     </select>
                   </td>
@@ -348,7 +355,7 @@
               <tr>
                 <th style="min-width:34px;text-align:center;">No.</th>
                 <th style="min-width:72px;">
-                  <select id="status-filter" style="font-size:11px;padding:3px 4px;border:1px solid var(--border2);border-radius:5px;background:var(--card);color:var(--text2);cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:600;width:100%;" onclick="event.stopPropagation()">
+                  <select id="status-filter" style="font-size:11px;padding:3px 4px;border:1px solid var(--border2);border-radius:5px;background:var(--card);color:var(--text2);cursor:pointer;font-family:'Apple SD Gothic Neo',sans-serif;font-weight:600;width:100%;" onclick="event.stopPropagation()">
                     <option value="">▼ 전체</option><option value="pre">입실전</option><option value="active">거주중</option><option value="done">이용완료</option>
                   </select>
                 </th>
