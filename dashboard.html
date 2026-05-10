@@ -23,7 +23,7 @@
       --card: #FFFFFF;
       --border: #E4E4E7;
       --border2: #C4C4CC;
-      --gold: #F55200;
+      --gold: #D9730E;
       --gold-l: #FF6B1A;
       --gold-d: rgba(245,82,0,0.10);
       --text: #1E1A14;
@@ -75,7 +75,7 @@
     .b-done{background:rgba(140,140,150,.1);color:var(--dim);border:1px solid var(--border);}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.65;}}
     /* Buttons */
-    .btn-p{background:var(--gold);color:#FFFFFF;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;transition:all .2s;}
+    .btn-p{background:#F55200;color:#FFFFFF;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;transition:all .2s;}
     .btn-p:hover{background:var(--gold-l);transform:translateY(-1px);box-shadow:0 4px 20px rgba(201,168,76,.3);}
     .btn-s{background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:10px 20px;font-size:14px;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;transition:all .2s;}
     .btn-s:hover{border-color:var(--border2);color:var(--text);}
@@ -90,19 +90,19 @@
     /* Form */
     .flabel{display:block;font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px;}
     .finput{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'Apple SD Gothic Neo',sans-serif;outline:none;transition:border-color .2s;}
-    .finput:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,82,0,.1);}
+    .finput:focus{border-color:#F55200;box-shadow:0 0 0 3px rgba(245,82,0,.1);}
     .finput::placeholder{color:var(--dim);}
     select.finput{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B8D9F' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
     /* Toggle */
     .tgroup{display:flex;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px;}
     .tbtn{flex:1;padding:8px 14px;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-family:'Apple SD Gothic Neo',sans-serif;font-weight:500;transition:all .2s;background:transparent;color:var(--text2);}
-    .tbtn.on{background:var(--gold);color:#FFFFFF;}
+    .tbtn.on{background:#F55200;color:#FFFFFF;}
     /* Breakdown table */
     .btbl{width:100%;border-collapse:collapse;font-size:13px;}
     .btbl th{background:rgba(226,217,206,.5);color:var(--text2);font-size:11px;padding:8px 10px;text-align:left;font-weight:500;border-bottom:1px solid var(--border);}
     .btbl td{padding:6px 5px;border-bottom:1px solid rgba(226,217,206,.7);}
     .btbl td input,.btbl td select{width:100%;background:#FDFAF6;border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--text);font-size:12.5px;font-family:'Apple SD Gothic Neo',sans-serif;outline:none;}
-    .btbl td input:focus,.btbl td select:focus{border-color:var(--gold);}
+    .btbl td input:focus,.btbl td select:focus{border-color:#F55200;}
     .btbl td select{cursor:pointer;min-width:70px;}
     .btbl tfoot td{padding:8px 10px;font-size:12px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);}
     .status-done{color:var(--green);font-weight:600;}
@@ -130,7 +130,7 @@
     /* Modal tabs */
     .modal-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 14px;font-size:12px;font-weight:500;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;white-space:nowrap;margin-bottom:-1px;}
     .modal-tab:hover{color:var(--text);}
-    .modal-tab.on{color:var(--gold);border-bottom-color:var(--gold);font-weight:700;}
+    .modal-tab.on{color:#F55200;border-bottom-color:#F55200;font-weight:700;}
     #detail-view{max-width:1280px;margin:0 auto;padding:32px 12px;display:none;position:relative;z-index:1;}
     .detail-section-title{font-size:15.75px;font-weight:700;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:12px;}
     .detail-info-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
@@ -468,10 +468,10 @@
               <label class="flabel">납입일 설정 방식</label>
               <div style="display:flex;gap:16px;">
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text);">
-                  <input type="radio" name="payday-mode" id="rd-fixed" value="fixed" checked style="accent-color:var(--gold);">매월 고정일
+                  <input type="radio" name="payday-mode" id="rd-fixed" value="fixed" checked style="accent-color:#F55200;">매월 고정일
                 </label>
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text);">
-                  <input type="radio" name="payday-mode" id="rd-manual" value="manual" style="accent-color:var(--gold);">수동 설정
+                  <input type="radio" name="payday-mode" id="rd-manual" value="manual" style="accent-color:#F55200;">수동 설정
                 </label>
               </div>
             </div>
@@ -500,7 +500,7 @@
                   <input type="number" id="f4-hik" class="finput" placeholder="0">
                 </div>
                 <div style="display:flex;align-items:flex-end;">
-                  <button type="button" id="btn-auto-brow" class="btn-i" style="color:var(--gold);border-color:rgba(245,82,0,.3);display:flex;align-items:center;gap:5px;padding:9px 14px;margin-bottom:1px;">
+                  <button type="button" id="btn-auto-brow" class="btn-i" style="color:#F55200;border-color:rgba(245,82,0,.3);display:flex;align-items:center;gap:5px;padding:9px 14px;margin-bottom:1px;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.58"/></svg>회차 자동 생성
                   </button>
                 </div>
@@ -509,7 +509,7 @@
             <div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
                 <label class="flabel" style="margin:0;">납입 내역 Breakdown</label>
-                <button type="button" id="btn-add-brow" class="btn-i" style="color:var(--gold);border-color:rgba(201,168,76,.3);display:flex;align-items:center;gap:4px;">
+                <button type="button" id="btn-add-brow" class="btn-i" style="color:#F55200;border-color:rgba(201,168,76,.3);display:flex;align-items:center;gap:4px;">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>행 추가
                 </button>
               </div>
