@@ -1,6 +1,3 @@
-const { list } = require('@vercel/blob');
-
-const BLOB_KEY = 'hik-dashboard/entries.json';
 const SLACK_CHANNEL = 'C0B2RR5796F';
 
 // yy.mm.dd / yyyy.mm.dd / yyyy-mm-dd / yy-mm-dd 모두 처리
@@ -112,6 +109,33 @@ function buildMessages(entries, testMode = false) {
   return msgs;
 }
 
+async function loadEntries() {
+  const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    console.log('[loadEntries] Supabase env vars not set');
+    return { entries: [], debug: { hasUrl: !!url, hasKey: !!key, error: 'env vars missing' } };
+  }
+  try {
+    const r = await fetch(`${url}/rest/v1/app_data?key=eq.entries&select=value`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+    });
+    if (!r.ok) {
+      const text = await r.text();
+      console.error('[loadEntries] Supabase error:', r.status, text);
+      return { entries: [], debug: { hasUrl: true, hasKey: true, status: r.status, error: text } };
+    }
+    const data = await r.json();
+    if (!data.length || !Array.isArray(data[0].value)) {
+      return { entries: [], debug: { hasUrl: true, hasKey: true, rows: data.length, error: 'no entries row' } };
+    }
+    return { entries: data[0].value, debug: { hasUrl: true, hasKey: true, count: data[0].value.length } };
+  } catch (e) {
+    console.error('[loadEntries] fetch error:', e.message);
+    return { entries: [], debug: { hasUrl: true, hasKey: true, error: e.message } };
+  }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).end();
@@ -121,22 +145,19 @@ module.exports = async function handler(req, res) {
   if (!token) {
     return res.status(500).json({ error: 'SLACK_BOT_TOKEN 환경변수가 없습니다.' });
   }
+  if (!/^[\x00-\x7F]+$/.test(token)) {
+    return res.status(500).json({ error: 'SLACK_BOT_TOKEN에 비ASCII 문자가 포함되어 있습니다. Vercel 환경변수를 확인해주세요.' });
+  }
 
   const testMode = req.query?.test === 'true';
 
   try {
-    // Vercel Blob에서 중개건 데이터 로드
-    const { blobs } = await list({ prefix: BLOB_KEY });
-    let entries = [];
-    if (blobs.length) {
-      const r = await fetch(blobs[0].url);
-      if (r.ok) entries = await r.json();
-    }
+    const { entries, debug } = await loadEntries();
 
     const msgs = buildMessages(entries, testMode);
 
     if (!msgs.length) {
-      return res.status(200).json({ ok: true, sent: 0, message: testMode ? '활성 중개건 없음' : '해당 날짜 조건 없음' });
+      return res.status(200).json({ ok: true, sent: 0, message: testMode ? '활성 중개건 없음' : '해당 날짜 조건 없음', ...(testMode && { debug }) });
     }
 
     const headerLine = testMode
@@ -160,7 +181,7 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: slackData.error });
     }
 
-    return res.status(200).json({ ok: true, sent: msgs.length, testMode, messages: msgs });
+    return res.status(200).json({ ok: true, sent: msgs.length, testMode, messages: msgs, ...(testMode && { debug }) });
   } catch (err) {
     console.error('slack-notify error:', err);
     return res.status(500).json({ error: err.message });
