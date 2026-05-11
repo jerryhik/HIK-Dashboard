@@ -1,0 +1,143 @@
+const { list } = require('@vercel/blob');
+
+const BLOB_KEY = 'hik-dashboard/entries.json';
+const SLACK_CHANNEL = 'C0B2RR5796F';
+
+// yy.mm.dd / yyyy.mm.dd / yyyy-mm-dd / yy-mm-dd 모두 처리
+function parseDateStr(ds) {
+  if (!ds) return null;
+  const m = ds.match(/^(\d{2,4})[.\-](\d{1,2})[.\-](\d{1,2})/);
+  if (m) {
+    let y = parseInt(m[1], 10), mo = parseInt(m[2], 10), d = parseInt(m[3], 10);
+    if (y < 100) y += 2000;
+    const dt = new Date(y, mo - 1, d);
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+  const dt = new Date(ds);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+// KST 기준 오늘 자정 Date 객체
+function kstToday() {
+  const now = new Date();
+  const kst = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+  return new Date(kst.getFullYear(), kst.getMonth(), kst.getDate());
+}
+
+// 오늘(KST)로부터 dateStr까지 며칠인지 (0 = D-day, 3 = D-3)
+function daysFrom(dateStr) {
+  const d = parseDateStr(dateStr);
+  if (!d) return null;
+  const today = kstToday();
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return Math.round((target - today) / 86400000);
+}
+
+function label(days) {
+  return days === 0 ? '🔴 *오늘 D-day*' : `🔔 *D-${days} 알림*`;
+}
+
+function buildMessages(entries) {
+  const msgs = [];
+
+  for (const e of entries) {
+    const name = e.guestName || '(이름 없음)';
+    const addr = e.address || '(주소 없음)';
+
+    // 1. 입실일
+    if (e.startDate) {
+      const d = daysFrom(e.startDate);
+      if (d === 0 || d === 3) {
+        msgs.push(`${label(d)} - ${name} / ${addr} / 입실`);
+      }
+    }
+
+    // 2. 퇴실일 (날짜 파싱 가능한 경우만)
+    if (e.endDate) {
+      const d = daysFrom(e.endDate);
+      if (d === 0 || d === 3) {
+        msgs.push(`${label(d)} - ${name} / ${addr} / 퇴실`);
+      }
+    }
+
+    // 3. 월세 납입예정일
+    if (e.payType === 'monthly') {
+      if (e.breakdown && e.breakdown.length) {
+        // breakdown에 납입예정일이 있는 경우
+        for (const r of e.breakdown) {
+          if (r.status === 'done' || !r.dueDate) continue;
+          const d = daysFrom(r.dueDate);
+          if (d === 0 || d === 3) {
+            msgs.push(`${label(d)} - ${name} / ${addr} / 월세납입`);
+            break; // 같은 건에서 중복 알림 방지
+          }
+        }
+      } else if (e.payDay) {
+        // 고정 납입일 기준으로 이번 달/다음 달 체크
+        const today = kstToday();
+        for (let offset = 0; offset <= 1; offset++) {
+          const payDate = new Date(today.getFullYear(), today.getMonth() + offset, e.payDay);
+          const d = Math.round((payDate - today) / 86400000);
+          if (d === 0 || d === 3) {
+            msgs.push(`${label(d)} - ${name} / ${addr} / 월세납입`);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return msgs;
+}
+
+module.exports = async function handler(req, res) {
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).end();
+  }
+
+  const token = process.env.SLACK_BOT_TOKEN;
+  if (!token) {
+    return res.status(500).json({ error: 'SLACK_BOT_TOKEN 환경변수가 없습니다.' });
+  }
+
+  try {
+    // Vercel Blob에서 중개건 데이터 로드
+    const { blobs } = await list({ prefix: BLOB_KEY });
+    let entries = [];
+    if (blobs.length) {
+      const r = await fetch(blobs[0].url);
+      if (r.ok) entries = await r.json();
+    }
+
+    const msgs = buildMessages(entries);
+
+    if (!msgs.length) {
+      return res.status(200).json({ ok: true, sent: 0, message: '해당 날짜 조건 없음' });
+    }
+
+    // Slack chat.postMessage 전송
+    const slackRes = await fetch('https://slack.com/api/chat.postMessage', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: JSON.stringify({
+        channel: SLACK_CHANNEL,
+        text: msgs.join('\n'),
+        mrkdwn: true,
+      }),
+    });
+
+    const slackData = await slackRes.json();
+    if (!slackData.ok) {
+      console.error('Slack API error:', slackData.error);
+      return res.status(500).json({ error: slackData.error });
+    }
+
+    return res.status(200).json({ ok: true, sent: msgs.length, messages: msgs });
+  } catch (err) {
+    console.error('slack-notify error:', err);
+    return res.status(500).json({ error: err.message });
+  }
+};
