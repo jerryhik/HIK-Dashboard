@@ -1014,7 +1014,7 @@
         none.textContent = '해당 카테고리의 알림이 없습니다.'; none.style.display = 'block';
         return;
       }
-      none.style.display = 'none'; grid.style.display = 'grid';
+      none.style.display = 'none'; grid.style.display = 'flex';
       grid.innerHTML = filtered.map(al => alertCard(al)).join('');
     }
 
