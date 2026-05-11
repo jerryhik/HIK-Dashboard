@@ -131,7 +131,9 @@
     .modal-tab{background:transparent;border:none;border-bottom:2px solid transparent;padding:10px 14px;font-size:12px;font-weight:500;font-family:'Apple SD Gothic Neo',sans-serif;cursor:pointer;color:var(--text2);transition:all .15s;white-space:nowrap;margin-bottom:-1px;}
     .modal-tab:hover{color:var(--text);}
     .modal-tab.on{color:#F55200;border-bottom-color:#F55200;font-weight:700;}
-    #detail-view{max-width:1280px;margin:0 auto;padding:32px 12px;display:none;position:relative;z-index:1;}
+    #detail-view{max-width:1800px;margin:0 auto;padding:32px 24px;display:none;position:relative;z-index:1;}
+    .tbl-scroll-wrap{overflow-x:auto;}
+    @media (min-width:1400px){.tbl-scroll-wrap{overflow-x:auto;}.tbl{table-layout:auto;}}
     .detail-section-title{font-size:15.75px;font-weight:700;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:12px;}
     .detail-info-row{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
     .detail-info-row:last-child{margin-bottom:0;}
@@ -188,7 +190,7 @@
 
   <!-- HEADER -->
   <header class="hdr px-3 py-4" id="app-header">
-    <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
+    <div style="max-width:1800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;">
       <div style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="location.href='/'">
         <img src="/HomesinKorea.webp" alt="HomesinKorea" style="height:36px;width:auto;object-fit:contain;">
         <div>
@@ -212,7 +214,7 @@
 
   <!-- ACCESS REQUEST BANNER -->
   <div id="access-banner" style="display:none;background:#FFF3CD;border-bottom:1px solid #FBBF24;padding:12px 24px;">
-    <div style="max-width:1280px;margin:0 auto;">
+    <div style="max-width:1800px;margin:0 auto;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
         <span style="font-size:13px;font-weight:600;color:#92400E;">📬 접근 권한 요청</span>
         <button onclick="dismissBanner()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#92400E;line-height:1;">×</button>
@@ -221,7 +223,7 @@
     </div>
   </div>
 
-  <main id="app-main" style="max-width:1280px;margin:0 auto;padding:32px 12px;position:relative;z-index:1;">
+  <main id="app-main" style="max-width:1800px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;">
 
 
     <!-- ALERTS -->
@@ -359,7 +361,7 @@
         </div>
       </div>
       <div class="card" style="overflow:clip;">
-        <div style="overflow:auto;max-height:calc(150vh - 630px);">
+        <div class="tbl-scroll-wrap" style="max-height:calc(150vh - 630px);">
           <table class="tbl">
             <thead>
               <tr>
