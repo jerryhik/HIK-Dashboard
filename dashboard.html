@@ -61,7 +61,7 @@
     .tbl tr:hover td{background:#F2F2F2;}
     .tbl tr:last-child td{border-bottom:none;}
     .tbl tr.expired td{opacity:.7;}
-    .tbl tfoot td{padding:9px 10px;font-size:12px;background:#F0F9FF;color:#333333;border-top:2px solid var(--border2);position:sticky;bottom:0;z-index:2;}
+    .tbl-sum td{background:#F0F9FF;color:#333333;padding:9px 10px;border-top:2px solid var(--border2);}
     #rev-tbl thead tr:first-child td{position:sticky;top:0;z-index:3;background:#F0F9FF;}
     #rev-tbl th{top:46px;}
     /* Badges */
@@ -350,16 +350,6 @@
 
       <!-- 전체 중개건 목록 -->
       <div id="list-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div class=""style="font-size:11.5px;font-weight:600;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;">전체 중개건 목록</div>
-          <span id="tbl-cnt" style="font-size:11px;padding:2px 9px;border-radius:20px;background:var(--card);color:var(--text2);border:1px solid var(--border);">0건</span>
-        </div>
-        <div class="srch-wrap">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" class="srch" placeholder="이름, 주소 검색..." oninput="filterTable(this.value)">
-        </div>
-      </div>
       <div class="card" style="overflow:clip;">
         <div class="tbl-scroll-wrap" style="max-height:calc(150vh - 630px);">
           <table class="tbl">
@@ -386,8 +376,24 @@
                 <th style="min-width:64px;text-align:center;">관리</th>
               </tr>
             </thead>
+            <tbody id="tbl-foot">
+              <tr class="tbl-sum">
+                <td colspan="7">
+                  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span style="font-weight:700;font-size:18px;color:var(--text2);">합계</span>
+                    <span id="tbl-cnt" style="font-size:11px;padding:2px 9px;border-radius:20px;background:var(--card);color:var(--text2);border:1px solid var(--border);">0건</span>
+                    <div class="srch-wrap">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                      <input type="text" class="srch" placeholder="이름, 주소 검색..." oninput="filterTable(this.value)">
+                    </div>
+                  </div>
+                </td>
+                <td id="tbl-foot-rent" style="font-weight:700;font-size:18px;white-space:nowrap;"></td>
+                <td id="tbl-foot-hik" style="font-weight:700;font-size:18px;color:#D9730E;white-space:nowrap;"></td>
+                <td colspan="6"></td>
+              </tr>
+            </tbody>
             <tbody id="tbl-body"></tbody>
-            <tfoot id="tbl-foot"></tfoot>
           </table>
         </div>
         <div id="empty-st" style="text-align:center;padding:56px 20px;color:var(--dim);">
@@ -1061,7 +1067,14 @@
         return a.dealDate.localeCompare(b.dealDate);
       });
       cnt.textContent = `${filtered.length}건`;
-      if (!filtered.length) { tbody.innerHTML=''; document.getElementById('tbl-foot').innerHTML=''; empty.style.display='block'; return; }
+      const footRent = document.getElementById('tbl-foot-rent');
+      const footHik  = document.getElementById('tbl-foot-hik');
+      if (!filtered.length) {
+        tbody.innerHTML='';
+        if (footRent) footRent.textContent = '—';
+        if (footHik)  footHik.textContent  = '—';
+        empty.style.display='block'; return;
+      }
       empty.style.display = 'none';
       let totRent = 0, totHik = 0;
       filtered.forEach(e => {
@@ -1069,9 +1082,8 @@
         totRent += s.amount !== null ? s.amount : (e.monthlyRent ? Number(e.monthlyRent) : 0);
         totHik  += s.hikFee !== null ? s.hikFee : (e.hikFee ? Number(e.hikFee) : 0);
       });
-      // tfoot 합계 행 (순번+상태 포함 총 15열)
-      document.getElementById('tbl-foot').innerHTML =
-        `<tr><td colspan="7" style="font-weight:700;font-size:18px;color:var(--text2);">합계</td><td style="font-weight:700;font-size:18px;">${krw(totRent)}</td><td style="font-weight:700;font-size:18px;color:#D9730E;">${krw(totHik)}</td><td colspan="6"></td></tr>`;
+      if (footRent) footRent.textContent = krw(totRent);
+      if (footHik)  footHik.textContent  = krw(totHik);
 
       tbody.innerHTML = filtered.map((e, idx) => {
         const id = daysTo(e.startDate), od = daysTo(e.endDate);
