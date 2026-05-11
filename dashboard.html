@@ -51,7 +51,11 @@
     .scard.a::after{background:var(--amber);}
     .scard.gr::after{background:var(--green);}
     /* Alerts */
-    .alert{border-radius:10px;padding:14px 16px;border:1px solid;width:fit-content;max-width:300px;min-width:220px;}
+    .alert{border-radius:10px;padding:14px 16px;border:1px solid;width:260px;min-width:260px;max-width:260px;flex-shrink:0;box-sizing:border-box;}
+    .alert-grid{display:flex;flex-direction:row;flex-wrap:nowrap;gap:10px;overflow-x:auto;padding-bottom:6px;}
+    .alert-grid::-webkit-scrollbar{height:4px;}
+    .alert-grid::-webkit-scrollbar-track{background:transparent;}
+    .alert-grid::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
     .alert.r{background:#FFF2F2;border-color:rgba(184,50,50,.22);}
     .alert.a{background:#FFFBF0;border-color:rgba(154,104,0,.22);}
     /* Table */
@@ -241,7 +245,7 @@
             <button class="flt-btn"    id="uf-checkout">퇴실</button>
           </div>
         </div>
-        <div id="urg-grid" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+        <div id="urg-grid" class="alert-grid"></div>
         <div id="urg-none" style="font-size:13px;color:var(--dim);padding:6px 0;display:none;"></div>
       </div>
       <!-- 예정: 8–14일 -->
@@ -257,7 +261,7 @@
             <button class="flt-btn"    id="wf-checkout">퇴실</button>
           </div>
         </div>
-        <div id="warn-grid" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+        <div id="warn-grid" class="alert-grid"></div>
         <div id="warn-none" style="font-size:13px;color:var(--dim);padding:6px 0;display:none;"></div>
       </div>
     </div>
