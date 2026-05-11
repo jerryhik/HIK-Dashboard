@@ -60,7 +60,7 @@
     .tbl td{padding:11px 10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
     .tbl tr:hover td{background:#F2F2F2;}
     .tbl tr:last-child td{border-bottom:none;}
-    .tbl tr.expired td{opacity:.42;}
+    .tbl tr.expired td{opacity:.7;}
     .tbl tfoot td{padding:9px 10px;font-size:12px;background:#F0F9FF;color:#333333;border-top:2px solid var(--border2);position:sticky;bottom:0;z-index:2;}
     #rev-tbl thead tr:first-child td{position:sticky;top:0;z-index:3;background:#F0F9FF;}
     #rev-tbl th{top:46px;}
@@ -897,14 +897,17 @@
       return `${String(d.getFullYear()).slice(2)}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
     }
     function getStatus(e) {
-      if (!e.startDate || !e.endDate) return null;
+      if (!e.startDate) return null;
       const today = new Date(); today.setHours(0,0,0,0);
-      const s  = parseDateStr(e.startDate);
-      const en = parseDateStr(e.endDate);
-      if (!s || !en) return null;
-      s.setHours(0,0,0,0); en.setHours(0,0,0,0);
-      if (today < s)  return 'pre';
-      if (today > en) return 'done';
+      const s = parseDateStr(e.startDate);
+      if (!s) return null;
+      s.setHours(0,0,0,0);
+      if (today < s) return 'pre';
+      // 퇴실일이 파싱 가능한 경우에만 이용완료 판단
+      if (e.endDate) {
+        const en = parseDateStr(e.endDate);
+        if (en) { en.setHours(0,0,0,0); if (today > en) return 'done'; }
+      }
       return 'active';
     }
     function krw(n) {
@@ -1074,7 +1077,6 @@
         if (!isNaN(id) && id >= 0 && id <= 7) sbadgeParts.push(`<span class="badge b-urg">입실 D-${id}</span>`);
         if (!isNaN(od) && od >= 0 && od <= 7) sbadgeParts.push(`<span class="badge b-urg">퇴실 D-${od}</span>`);
         nextPayDates(e, 7).forEach(p => sbadgeParts.push(`<span class="badge b-urg">월세 D-${p.days}</span>`));
-        if (!isNaN(od) && od < 0) sbadgeParts.push(`<span class="badge b-exp">만료</span>`);
         const sbadge = sbadgeParts.length ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">${sbadgeParts.join('')}</div>` : '';
         const pb = e.payType === 'lump'
           ? `<span class="badge b-lump">일괄납부</span>`
@@ -1632,7 +1634,6 @@
       let statusBadges = '';
       if (id2 >= 0 && id2 <= 7)       statusBadges += `<span class="badge b-urg" style="margin-right:4px;">D-${id2} 입실</span>`;
       else if (od >= 0 && od <= 7)    statusBadges += `<span class="badge b-urg" style="margin-right:4px;">D-${od} 퇴실</span>`;
-      else if (!isNaN(od) && od < 0)  statusBadges += `<span class="badge b-exp" style="margin-right:4px;">만료</span>`;
       const st = getStatus(e);
       const statusMainBadge = st === 'pre'    ? `<span class="badge b-pre">입실전</span>`
                             : st === 'active' ? `<span class="badge b-active">거주중</span>`
