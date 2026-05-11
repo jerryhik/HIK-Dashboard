@@ -1,4 +1,5 @@
 const SLACK_CHANNEL = 'C0B2RR5796F';
+const BASE_URL = 'https://dev-hik.vercel.app';
 
 // yy.mm.dd / yyyy.mm.dd / yyyy-mm-dd / yy-mm-dd 모두 처리
 function parseDateStr(ds) {
@@ -59,26 +60,28 @@ function buildMessages(entries, testMode = false) {
     const name = e.guestName || '(이름 없음)';
     const addr = e.address || '(주소 없음)';
 
+    const link = `${BASE_URL}/entry/${e.id}`;
+
     if (testMode) {
       // 테스트 모드: 날짜 조건 무시, 모든 활성 건 나열
       const parts = [];
       if (e.startDate) parts.push(`입실 ${e.startDate}`);
       if (e.endDate)   parts.push(`퇴실 ${e.endDate}`);
       if (e.payType === 'monthly' && e.payDay) parts.push(`매월 ${e.payDay}일 납입`);
-      msgs.push(`${prefix}- ${name} / ${addr}${parts.length ? ' (' + parts.join(', ') + ')' : ''}`);
+      msgs.push(`${prefix}- ${name} / ${addr}${parts.length ? ' (' + parts.join(', ') + ')' : ''}\n${link}`);
       continue;
     }
 
     // 1. 입실일
     if (e.startDate) {
       const d = daysFrom(e.startDate);
-      if (d === 0 || d === 3) msgs.push(`${label(d)} - ${name} / ${addr} / 입실`);
+      if (d === 0 || d === 3) msgs.push(`${label(d)} - ${name} / ${addr} / 입실\n${link}`);
     }
 
     // 2. 퇴실일 (날짜 파싱 가능한 경우만)
     if (e.endDate) {
       const d = daysFrom(e.endDate);
-      if (d === 0 || d === 3) msgs.push(`${label(d)} - ${name} / ${addr} / 퇴실`);
+      if (d === 0 || d === 3) msgs.push(`${label(d)} - ${name} / ${addr} / 퇴실\n${link}`);
     }
 
     // 3. 월세 납입예정일
@@ -88,7 +91,7 @@ function buildMessages(entries, testMode = false) {
           if (r.status === 'done' || !r.dueDate) continue;
           const d = daysFrom(r.dueDate);
           if (d === 0 || d === 3) {
-            msgs.push(`${label(d)} - ${name} / ${addr} / 월세납입`);
+            msgs.push(`${label(d)} - ${name} / ${addr} / 월세납입\n${link}`);
             break;
           }
         }
@@ -98,7 +101,7 @@ function buildMessages(entries, testMode = false) {
           const payDate = new Date(today.getFullYear(), today.getMonth() + offset, e.payDay);
           const d = Math.round((payDate - today) / 86400000);
           if (d === 0 || d === 3) {
-            msgs.push(`${label(d)} - ${name} / ${addr} / 월세납입`);
+            msgs.push(`${label(d)} - ${name} / ${addr} / 월세납입\n${link}`);
             break;
           }
         }
