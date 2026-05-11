@@ -51,7 +51,7 @@
     .scard.a::after{background:var(--amber);}
     .scard.gr::after{background:var(--green);}
     /* Alerts */
-    .alert{border-radius:10px;padding:14px 16px;border:1px solid;width:300px;}
+    .alert{border-radius:10px;padding:14px 16px;border:1px solid;width:fit-content;max-width:300px;min-width:220px;}
     .alert.r{background:#FFF2F2;border-color:rgba(184,50,50,.22);}
     .alert.a{background:#FFFBF0;border-color:rgba(154,104,0,.22);}
     /* Table */
@@ -356,20 +356,19 @@
             <thead>
               <tr class="tbl-sum">
                 <td colspan="7">
-                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                      <span style="font-weight:700;font-size:18px;color:var(--text2);">합계</span>
-                      <span id="tbl-cnt" style="font-size:11px;padding:2px 9px;border-radius:20px;background:var(--card);color:var(--text2);border:1px solid var(--border);">0건</span>
-                    </div>
-                    <div class="srch-wrap">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                      <input type="text" class="srch" placeholder="이름, 주소 검색..." oninput="filterTable(this.value)">
-                    </div>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-weight:700;font-size:18px;color:var(--text2);">합계</span>
+                    <span id="tbl-cnt" style="font-size:11px;padding:2px 9px;border-radius:20px;background:var(--card);color:var(--text2);border:1px solid var(--border);">0건</span>
                   </div>
                 </td>
                 <td id="tbl-foot-rent" style="font-weight:700;font-size:18px;white-space:nowrap;"></td>
                 <td id="tbl-foot-hik" style="font-weight:700;font-size:18px;color:#D9730E;white-space:nowrap;"></td>
-                <td colspan="6"></td>
+                <td colspan="6" style="text-align:right;">
+                  <div class="srch-wrap" style="display:inline-block;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" class="srch" placeholder="이름, 주소 검색..." oninput="filterTable(this.value)">
+                  </div>
+                </td>
               </tr>
               <tr>
                 <th style="min-width:34px;text-align:center;">No.</th>
@@ -977,10 +976,10 @@
       const icons = { checkin:'🏠', checkout:'🚪', pay:'💳' };
       const labels = { checkin:'입실일', checkout:'퇴실일', pay:'월세 납입일' };
       return `<div class="alert ${cls}" data-detail="${al.e.id}" style="cursor:pointer;">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
-          <div style="display:flex;align-items:flex-start;gap:10px;min-width:0;">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;min-width:0;flex:1;">
             <span style="font-size:18px;line-height:1;margin-top:2px;flex-shrink:0;">${icons[al.kind]}</span>
-            <div style="min-width:0;">
+            <div style="min-width:0;flex:1;">
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                 <span style="font-weight:600;font-size:13px;color:${col};">${labels[al.kind]}</span>
                 <span class="dbadge" style="background:${urg?'rgba(224,82,82,.15)':'rgba(224,154,43,.15)'};color:${col};">${dtext}</span>
@@ -989,7 +988,7 @@
               <div style="font-size:11.5px;color:var(--text2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${al.e.address}</div>
             </div>
           </div>
-          <div style="text-align:right;flex-shrink:0;">
+          <div style="text-align:right;flex-shrink:0;padding-left:4px;">
             <div style="font-size:12px;font-weight:600;color:${col};">${fmt(al.date)}</div>
             ${al.kind==='pay'?`<div style="font-size:11.5px;color:var(--text2);margin-top:2px;">${krw(al.e.monthlyRent)}</div>`:''}
           </div>
