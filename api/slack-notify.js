@@ -117,7 +117,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).end();
   }
 
-  const token = process.env.SLACK_BOT_TOKEN;
+  const token = process.env.SLACK_BOT_TOKEN || process.env.Slack_bot_token;
   if (!token) {
     return res.status(500).json({ error: 'SLACK_BOT_TOKEN 환경변수가 없습니다.' });
   }
