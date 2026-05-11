@@ -56,12 +56,12 @@
     .alert.a{background:#FFFBF0;border-color:rgba(154,104,0,.22);}
     /* Table */
     .tbl{width:100%;border-collapse:separate;border-spacing:0;}
-    .tbl th{background:#F0F9FF;color:#333333;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2;}
+    .tbl th{background:#F0F9FF;color:#333333;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 10px;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:42px;z-index:2;}
     .tbl td{padding:11px 10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
     .tbl tr:hover td{background:#F2F2F2;}
     .tbl tr:last-child td{border-bottom:none;}
     .tbl tr.expired td{opacity:.7;}
-    .tbl-sum td{background:#F0F9FF;color:#333333;padding:9px 10px;border-top:2px solid var(--border2);}
+    .tbl-sum td{background:#F0F9FF;color:#333333;padding:9px 10px;border-bottom:2px solid var(--border2);position:sticky;top:0;z-index:3;}
     #rev-tbl thead tr:first-child td{position:sticky;top:0;z-index:3;background:#F0F9FF;}
     #rev-tbl th{top:46px;}
     /* Badges */
@@ -354,6 +354,23 @@
         <div class="tbl-scroll-wrap" style="max-height:calc(150vh - 630px);">
           <table class="tbl">
             <thead>
+              <tr class="tbl-sum">
+                <td colspan="7">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <span style="font-weight:700;font-size:18px;color:var(--text2);">합계</span>
+                      <span id="tbl-cnt" style="font-size:11px;padding:2px 9px;border-radius:20px;background:var(--card);color:var(--text2);border:1px solid var(--border);">0건</span>
+                    </div>
+                    <div class="srch-wrap">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                      <input type="text" class="srch" placeholder="이름, 주소 검색..." oninput="filterTable(this.value)">
+                    </div>
+                  </div>
+                </td>
+                <td id="tbl-foot-rent" style="font-weight:700;font-size:18px;white-space:nowrap;"></td>
+                <td id="tbl-foot-hik" style="font-weight:700;font-size:18px;color:#D9730E;white-space:nowrap;"></td>
+                <td colspan="6"></td>
+              </tr>
               <tr>
                 <th style="min-width:34px;text-align:center;">No.</th>
                 <th style="min-width:72px;">
@@ -376,23 +393,6 @@
                 <th style="min-width:64px;text-align:center;">관리</th>
               </tr>
             </thead>
-            <tbody id="tbl-foot">
-              <tr class="tbl-sum">
-                <td colspan="7">
-                  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                    <span style="font-weight:700;font-size:18px;color:var(--text2);">합계</span>
-                    <span id="tbl-cnt" style="font-size:11px;padding:2px 9px;border-radius:20px;background:var(--card);color:var(--text2);border:1px solid var(--border);">0건</span>
-                    <div class="srch-wrap">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                      <input type="text" class="srch" placeholder="이름, 주소 검색..." oninput="filterTable(this.value)">
-                    </div>
-                  </div>
-                </td>
-                <td id="tbl-foot-rent" style="font-weight:700;font-size:18px;white-space:nowrap;"></td>
-                <td id="tbl-foot-hik" style="font-weight:700;font-size:18px;color:#D9730E;white-space:nowrap;"></td>
-                <td colspan="6"></td>
-              </tr>
-            </tbody>
             <tbody id="tbl-body"></tbody>
           </table>
         </div>
