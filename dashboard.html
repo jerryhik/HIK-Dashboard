@@ -280,23 +280,33 @@
           <div class="card" style="padding:18px 22px;">
             <div style="font-size:21px;font-weight:700;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">✓ 실제 완료 합계</div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:12px;color:var(--text2);">월세</span>
+              <span style="font-size:12px;color:var(--text2);">월세 (수수료 제외)</span>
               <span id="rev-done-rent" style="font-size:17px;font-weight:700;">—</span>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span style="font-size:12px;color:var(--text2);">HIK 수수료</span>
               <span id="rev-done-hik" style="font-size:17px;font-weight:700;color:var(--gold);">—</span>
+            </div>
+            <div style="border-top:1px solid var(--border);margin:8px 0;"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--text2);font-weight:700;">총합</span>
+              <span id="rev-done-total" style="font-size:17px;font-weight:700;">—</span>
             </div>
           </div>
           <div class="card" style="padding:18px 22px;">
             <div style="font-size:21px;font-weight:700;color:var(--amber);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;">◎ 예정 포함 합계</div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:12px;color:var(--text2);">월세</span>
+              <span style="font-size:12px;color:var(--text2);">월세 (수수료 제외)</span>
               <span id="rev-all-rent" style="font-size:17px;font-weight:700;">—</span>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span style="font-size:12px;color:var(--text2);">HIK 수수료</span>
               <span id="rev-all-hik" style="font-size:17px;font-weight:700;color:var(--gold);">—</span>
+            </div>
+            <div style="border-top:1px solid var(--border);margin:8px 0;"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--text2);font-weight:700;">총합</span>
+              <span id="rev-all-total" style="font-size:17px;font-weight:700;">—</span>
             </div>
           </div>
         </div>
@@ -323,7 +333,7 @@
                   <th style="min-width:160px;">주소</th>
                   <th>납입예정일</th>
                   <th>실제납입일</th>
-                  <th>금액</th>
+                  <th>월세 (수수료 제외)</th>
                   <th>HIK 수수료</th>
                   <th>납입여부</th>
                   <th>출처</th>
@@ -364,7 +374,7 @@
                 <th style="min-width:88px;">게스트</th>
                 <th style="min-width:130px;">주소</th>
                 <th style="min-width:84px;">보증금</th>
-                <th style="min-width:84px;">월세</th>
+                <th style="min-width:100px;">월세 (수수료 제외)</th>
                 <th style="min-width:86px;">HIK 수수료</th>
                 <th style="min-width:122px;">호스트 연락처</th>
                 <th style="min-width:108px;">게스트 연락처</th>
@@ -419,23 +429,23 @@
         <div id="mt-1">
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr 2fr;gap:12px;">
             <div><label class="flabel">성사일</label><input type="date" id="f-dealdate" class="finput"></div>
-            <div><label class="flabel">주 담당자</label><input type="text" id="f-manager" class="finput" placeholder="홍길동"></div>
-            <div><label class="flabel">게스트 이름 *</label><input type="text" id="f-name" class="finput" placeholder="이서연"></div>
-            <div><label class="flabel">집 주소 *</label><input type="text" id="f-addr" class="finput" placeholder="서울시 강남구 테헤란로 123, 101호"></div>
+            <div><label class="flabel">주 담당자</label><input type="text" id="f-manager" class="finput" placeholder=""></div>
+            <div><label class="flabel">게스트 이름 *</label><input type="text" id="f-name" class="finput" placeholder=""></div>
+            <div><label class="flabel">집 주소 *</label><input type="text" id="f-addr" class="finput" placeholder=""></div>
           </div>
         </div>
         <!-- TAB 2: 연락처 -->
         <div id="mt-2" style="display:none;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div><label class="flabel">호스트 연락처</label><input type="text" id="f-host" class="finput" placeholder="전화번호, 카카오톡 ID, 이름 등"></div>
-            <div><label class="flabel">게스트 연락처</label><input type="text" id="f-guest" class="finput" placeholder="010-0000-0000"></div>
+            <div><label class="flabel">게스트 연락처</label><input type="text" id="f-guest" class="finput" placeholder="전화번호, 카카오톡 ID 등 연락 경로"></div>
           </div>
         </div>
         <!-- TAB 3: 계약 기간 -->
         <div id="mt-3" style="display:none;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div><label class="flabel">입실일 *</label><input type="date" id="f-start" class="finput"></div>
-            <div><label class="flabel">퇴실일 *</label><input type="text" id="f-end" class="finput" placeholder="2026-12-31 또는 미정, 협의 중 등"></div>
+            <div><label class="flabel">퇴실일 *</label><input type="text" id="f-end" class="finput" placeholder="yy.mm.dd 또는 미정, 협의 중 등"></div>
           </div>
         </div>
         <!-- TAB 4: 납부 방식 -->
@@ -454,8 +464,8 @@
             <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;">
               <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
                 <div id="f-lump-actual-wrap"><label class="flabel" style="font-size:10px;">납입완료일</label><input type="date" id="f-lump-actual" class="finput"></div>
-                <div><label class="flabel" style="font-size:10px;">월세 (원)</label><input type="number" id="f-lump-rent" class="finput" placeholder="0"></div>
-                <div><label class="flabel" style="font-size:10px;">HIK 수수료 (원)</label><input type="number" id="f-lump-hik" class="finput" placeholder="0"></div>
+                <div><label class="flabel" style="font-size:10px;">월세 (수수료 제외)</label><input type="number" id="f-lump-rent" class="finput" placeholder="0"></div>
+                <div><label class="flabel" style="font-size:10px;">HIK 수수료</label><input type="number" id="f-lump-hik" class="finput" placeholder="0"></div>
                 <div><label class="flabel" style="font-size:10px;">납입여부</label>
                   <select id="f-lump-status" class="finput"><option value="scheduled">예정</option><option value="done">완료</option></select>
                 </div>
@@ -492,11 +502,11 @@
                   <input type="number" id="f-payday" class="finput" placeholder="15" min="1" max="31">
                 </div>
                 <div>
-                  <label class="flabel">월세 고정액 (원)</label>
+                  <label class="flabel">월세 고정액 (수수료 제외)</label>
                   <input type="number" id="f4-rent" class="finput" placeholder="0">
                 </div>
                 <div>
-                  <label class="flabel">HIK 수수료 (원)</label>
+                  <label class="flabel">HIK 수수료</label>
                   <input type="number" id="f4-hik" class="finput" placeholder="0">
                 </div>
                 <div style="display:flex;align-items:flex-end;">
@@ -514,7 +524,7 @@
                 </button>
               </div>
               <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
-                <table class="btbl" id="b-tbl"><thead><tr><th>몇월분</th><th>납입예정일</th><th>실제납입일</th><th>금액 (원)</th><th>HIK 수수료 (원)</th><th>납입여부</th><th style="width:28px;"></th></tr></thead>
+                <table class="btbl" id="b-tbl"><thead><tr><th style="width:90px;">몇월분</th><th style="width:90px;">납입예정일</th><th style="width:90px;">실제납입일</th><th style="width:120px;">월세 (수수료 제외)</th><th style="width:90px;">HIK 수수료</th><th style="width:70px;">납입여부</th><th style="width:28px;"></th></tr></thead>
                 <tbody id="b-body"></tbody>
                 <tfoot id="b-foot"><tr><td colspan="3" style="color:var(--text2);font-weight:600;">합계</td><td id="b-sum-amt">—</td><td id="b-sum-hik">—</td><td colspan="2"></td></tr></tfoot></table>
               </div>
@@ -859,26 +869,40 @@
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
     // ── DATE HELPERS ──
+    function parseDateStr(ds) {
+      if (!ds) return null;
+      const m = ds.match(/^(\d{2,4})[.\-](\d{1,2})[.\-](\d{1,2})/);
+      if (m) {
+        let y = parseInt(m[1], 10), mo = parseInt(m[2], 10), d = parseInt(m[3], 10);
+        if (y < 100) y += 2000;
+        const dt = new Date(y, mo - 1, d);
+        return isNaN(dt.getTime()) ? null : dt;
+      }
+      const dt = new Date(ds);
+      return isNaN(dt.getTime()) ? null : dt;
+    }
     function daysTo(ds) {
       if (!ds) return Infinity;
       const t = new Date(); t.setHours(0,0,0,0);
-      const d = new Date(ds); d.setHours(0,0,0,0);
+      const d = parseDateStr(ds);
+      if (!d) return Infinity;
+      d.setHours(0,0,0,0);
       return Math.round((d - t) / 86400000);
     }
     function fmt(ds) {
       if (!ds) return '—';
       if (/^\d{4}-\d{2}-\d{2}/.test(ds)) return `${ds.slice(2,4)}.${ds.slice(5,7)}.${ds.slice(8,10)}`;
-      const d = new Date(ds);
-      if (isNaN(d.getTime())) return ds;
+      const d = parseDateStr(ds);
+      if (!d) return ds;
       return `${String(d.getFullYear()).slice(2)}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
     }
     function getStatus(e) {
       if (!e.startDate || !e.endDate) return null;
       const today = new Date(); today.setHours(0,0,0,0);
-      const [sy,sm,sd] = e.startDate.split('-').map(Number);
-      const [ey,em,ed] = e.endDate.split('-').map(Number);
-      const s  = new Date(sy, sm-1, sd);
-      const en = new Date(ey, em-1, ed);
+      const s  = parseDateStr(e.startDate);
+      const en = parseDateStr(e.endDate);
+      if (!s || !en) return null;
+      s.setHours(0,0,0,0); en.setHours(0,0,0,0);
       if (today < s)  return 'pre';
       if (today > en) return 'done';
       return 'active';
@@ -891,7 +915,7 @@
       if (e.payType !== 'monthly' || !e.payDay) return [];
       const res = [];
       const t = new Date(); t.setHours(0,0,0,0);
-      const end = new Date(e.endDate);
+      const end = parseDateStr(e.endDate) || new Date(0);
       for (let m = 0; m <= 2; m++) {
         const d = new Date(t.getFullYear(), t.getMonth() + m, e.payDay);
         if (d > end) break;
@@ -1228,9 +1252,9 @@
       const status = d.status || 'scheduled';
       const showActual = status === 'done' ? '' : 'display:none;';
       tr.innerHTML = `
-        <td><input type="text" placeholder="2026년 5월분" value="${d.period||''}"></td>
-        <td><input type="date" value="${d.dueDate||''}"></td>
-        <td><input type="date" value="${d.actualDate||''}" style="${showActual}"></td>
+        <td><input type="text" placeholder="" value="${d.period||''}"></td>
+        <td><input type="text" placeholder="yy.mm.dd" value="${d.dueDate||''}"></td>
+        <td><input type="text" placeholder="yy.mm.dd" value="${d.actualDate||''}" style="${showActual}"></td>
         <td><input type="number" placeholder="800000" value="${d.amount||''}" oninput="updateBrowTotals()"></td>
         <td><input type="number" placeholder="0" value="${d.hikFee||''}" oninput="updateBrowTotals()"></td>
         <td><select><option value="scheduled"${status==='scheduled'?' selected':''}>예정</option><option value="done"${status==='done'?' selected':''}>완료</option></select></td>
@@ -1357,7 +1381,7 @@
                 <th style="${thS}">몇월분</th>
                 <th style="${thS}">납입예정일</th>
                 <th style="${thS}">실제납입일</th>
-                <th style="${thS}">금액</th>
+                <th style="${thS}">월세 (수수료 제외)</th>
                 <th style="${thS}">HIK 수수료</th>
                 <th style="${thS}">납입여부</th>
               </tr></thead>
@@ -1481,10 +1505,12 @@
         if (r.status === 'done') { doneRent += amt; doneHik += hik; }
       });
 
-      document.getElementById('rev-done-rent').textContent = items.length ? krw(doneRent) : '—';
-      document.getElementById('rev-done-hik').textContent  = items.length ? krw(doneHik)  : '—';
-      document.getElementById('rev-all-rent').textContent  = items.length ? krw(allRent)  : '—';
-      document.getElementById('rev-all-hik').textContent   = items.length ? krw(allHik)   : '—';
+      document.getElementById('rev-done-rent').textContent  = items.length ? krw(doneRent) : '—';
+      document.getElementById('rev-done-hik').textContent   = items.length ? krw(doneHik)  : '—';
+      document.getElementById('rev-done-total').textContent = items.length ? krw(doneRent + doneHik) : '—';
+      document.getElementById('rev-all-rent').textContent   = items.length ? krw(allRent)  : '—';
+      document.getElementById('rev-all-hik').textContent    = items.length ? krw(allHik)   : '—';
+      document.getElementById('rev-all-total').textContent  = items.length ? krw(allRent + allHik) : '—';
 
       const body = document.getElementById('rev-body');
       const empty = document.getElementById('rev-empty');
@@ -1607,6 +1633,11 @@
       if (id2 >= 0 && id2 <= 7)       statusBadges += `<span class="badge b-urg" style="margin-right:4px;">D-${id2} 입실</span>`;
       else if (od >= 0 && od <= 7)    statusBadges += `<span class="badge b-urg" style="margin-right:4px;">D-${od} 퇴실</span>`;
       else if (!isNaN(od) && od < 0)  statusBadges += `<span class="badge b-exp" style="margin-right:4px;">만료</span>`;
+      const st = getStatus(e);
+      const statusMainBadge = st === 'pre'    ? `<span class="badge b-pre">입실전</span>`
+                            : st === 'active' ? `<span class="badge b-active">거주중</span>`
+                            : st === 'done'   ? `<span class="badge b-done">이용완료</span>`
+                            : '';
       const payBadge = e.payType === 'lump'
         ? `<span class="badge b-lump">일괄납부</span>`
         : `<span class="badge b-mo">분할납부 · 매월${e.payDay ? e.payDay+'일' : ' (수동)' }</span>`;
@@ -1643,7 +1674,7 @@
           <table style="width:100%;border-collapse:collapse;">
             <thead><tr>
               <th style="${thStyle}">몇월분</th><th style="${thStyle}">납입예정일</th>
-              <th style="${thStyle}">실제납입일</th><th style="${thStyle}">금액</th>
+              <th style="${thStyle}">실제납입일</th><th style="${thStyle}">월세 (수수료 제외)</th>
               <th style="${thStyle}">HIK 수수료</th><th style="${thStyle}">납입여부</th>
             </tr></thead>
             <tbody>${rows}</tbody>
@@ -1671,7 +1702,7 @@
         <div class="card" style="padding:24px 28px;margin-bottom:14px;">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
             <div>
-              <div style="font-size:22px;font-weight:700;margin-bottom:4px;">${e.guestName}</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;"><span style="font-size:22px;font-weight:700;">${e.guestName}</span>${statusMainBadge}</div>
               <div style="font-size:14px;color:var(--text2);margin-bottom:10px;">${e.address}</div>
               <div style="display:flex;gap:6px;flex-wrap:wrap;">${statusBadges}${payBadge}</div>
             </div>
