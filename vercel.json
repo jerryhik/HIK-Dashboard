@@ -1,7 +1,4 @@
 {
-  "crons": [
-    { "path": "/api/slack-notify", "schedule": "0 0 * * *" }
-  ],
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/dashboard.html" }
   ]
