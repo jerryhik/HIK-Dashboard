@@ -84,9 +84,9 @@
     .tbl-sum td{background:#F0F9FF;color:#333333;padding:9px 10px;border-bottom:2px solid var(--border2);position:sticky;top:0;z-index:3;}
     #rev-tbl thead tr:first-child td{position:sticky;top:0;z-index:3;background:#F0F9FF;}
     #rev-tbl th{top:46px;}
-    /* 전체 중개건 목록: 페이지 스크롤 기준 sticky (앱 헤더 ~68px 아래) */
-    #list-tbl .tbl-sum td{top:68px;}
-    #list-tbl th{top:110px;}
+    /* 전체 중개건 목록: 로컬 스크롤 컨테이너 기준 sticky */
+    #list-tbl .tbl-sum td{top:0;z-index:4;}
+    #list-tbl th{top:42px;}
     /* Badges */
     .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
     .b-lump{background:var(--green-d);color:var(--green);border:1px solid rgba(76,175,138,.2);}
@@ -376,7 +376,7 @@
       <!-- 전체 중개건 목록 -->
       <div id="list-section">
       <div class="card" style="overflow:clip;">
-        <div class="tbl-scroll-wrap">
+        <div class="tbl-scroll-wrap" style="max-height:calc(100vh - 180px);overflow-y:auto;">
           <table class="tbl" id="list-tbl">
             <thead>
               <tr class="tbl-sum">
@@ -1167,7 +1167,13 @@
       const stActive = document.getElementById('st-active'); if (stActive) stActive.textContent = base.filter(e => getStatus(e) === 'active').length;
     }
 
-    function render() { buildManagerTabs(); buildAlerts(); renderTable(); updateStats(); }
+    function render() { buildManagerTabs(); buildAlerts(); renderTable(); updateStats(); requestAnimationFrame(fixListTblSticky); }
+    function fixListTblSticky() {
+      const sr = document.querySelector('#list-tbl .tbl-sum');
+      if (!sr) return;
+      const h = Math.ceil(sr.getBoundingClientRect().height);
+      document.querySelectorAll('#list-tbl th').forEach(th => th.style.top = h + 'px');
+    }
 
     // ── MODAL ──
     function openModal(id = null) {
