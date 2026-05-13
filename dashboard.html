@@ -1112,9 +1112,9 @@
       tbody.innerHTML = filtered.map((e, idx) => {
         const id = daysTo(e.startDate), od = daysTo(e.endDate);
         let sbadgeParts = [];
-        if (!isNaN(id) && id >= 0 && id <= 7) sbadgeParts.push(`<span class="badge b-urg">입실 D-${id}</span>`);
-        if (!isNaN(od) && od >= 0 && od <= 7) sbadgeParts.push(`<span class="badge b-urg">퇴실 D-${od}</span>`);
-        nextPayDates(e, 7).forEach(p => sbadgeParts.push(`<span class="badge b-urg">월세 D-${p.days}</span>`));
+        if (!isNaN(id) && id >= 0 && id <= 7) sbadgeParts.push(`<span class="badge b-urg">입실-${id}</span>`);
+        if (!isNaN(od) && od >= 0 && od <= 7) sbadgeParts.push(`<span class="badge b-urg">퇴실-${od}</span>`);
+        nextPayDates(e, 7).forEach(p => sbadgeParts.push(`<span class="badge b-urg">월세-${p.days}</span>`));
         const sbadge = sbadgeParts.length ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;">${sbadgeParts.join('')}</div>` : '';
         const pb = e.payType === 'lump'
           ? `<span class="badge b-lump">일괄납부</span>`
