@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>블로그 스터디 문서</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#F7F8FA; --surface:#FFF; --surface2:#F0F4FA;
+  --border:#DDE3EE; --border-light:#EDF0F7;
+  --text-primary:#1A1F2E; --text-secondary:#4A5578; --text-muted:#8892AA;
+  --accent:#2455C8; --accent-light:#E8EFFE; --accent-mid:#B8CAFF;
+  --green:#1A7A4A; --green-bg:#E8F7EF;
+  --amber:#7A5500; --amber-bg:#FFF5E0;
+  --red:#A02020; --red-bg:#FFF0F0;
+  --teal:#0B6E6E; --teal-bg:#E5F5F5;
+  --gray-bg:#F0F1F3; --gray-text:#555;
+}
+body { font-family:'Noto Sans KR','맑은 고딕','Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--text-primary); font-size:14px; line-height:1.7; }
+
+/* HEADER */
+.header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 40px; display:flex; align-items:center; justify-content:space-between; height:58px; position:sticky; top:0; z-index:200; }
+.header-left { display:flex; align-items:center; gap:14px; }
+.header-title { font-size:16px; font-weight:700; color:var(--accent); letter-spacing:-0.3px; }
+.header-meta { font-size:12px; color:var(--text-muted); }
+.header-actions { display:flex; gap:8px; }
+
+/* EDIT BAR */
+.edit-bar { display:none; background:#fffef0; border-bottom:1px solid #e0c840; padding:8px 40px; font-size:13px; color:#7a5500; align-items:center; gap:12px; position:sticky; top:58px; z-index:199; flex-wrap:wrap; }
+.edit-bar.show { display:flex; }
+.edit-bar-label { font-weight:700; }
+
+/* BUTTONS */
+.btn { display:inline-flex; align-items:center; gap:5px; padding:6px 14px; border-radius:6px; font-size:13px; font-family:inherit; font-weight:500; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text-secondary); transition:all 0.15s; white-space:nowrap; }
+.btn:hover { background:var(--surface2); }
+.btn-primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+.btn-primary:hover { background:#1a3ea0; border-color:#1a3ea0; }
+.btn-edit { background:#fffef0; color:#7a5500; border-color:#e0c840; }
+.btn-edit:hover { background:#fff8cc; }
+.btn-edit.on { background:#f5c800; color:#3d2a00; border-color:#c8a000; }
+.btn-save { background:#e8f7ef; color:var(--green); border-color:#9fd8b8; }
+.btn-save:hover { background:#c8f0dc; }
+.btn-del { background:#fff0f0; color:var(--red); border-color:#f0b0b0; font-size:12px; padding:3px 8px; }
+.btn-del:hover { background:#ffe0e0; }
+.btn-add { background:var(--accent-light); color:var(--accent); border-color:var(--accent-mid); font-size:12px; padding:3px 8px; }
+.btn-add:hover { background:var(--accent-mid); }
+
+/* LAYOUT */
+.layout { display:flex; min-height:calc(100vh - 58px); }
+.sidebar { width:220px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border); padding:24px 0; position:sticky; top:58px; height:calc(100vh - 58px); overflow-y:auto; }
+.nav-label { font-size:10px; font-weight:700; color:var(--text-muted); letter-spacing:1.2px; text-transform:uppercase; padding:0 20px 8px; margin-top:16px; }
+.nav-label:first-child { margin-top:0; }
+.nav-item { display:flex; align-items:center; gap:8px; padding:8px 20px; font-size:13px; color:var(--text-secondary); cursor:pointer; text-decoration:none; border-left:2px solid transparent; transition:all 0.15s; }
+.nav-item:hover { background:var(--surface2); color:var(--accent); }
+.nav-item.active { background:var(--accent-light); color:var(--accent); border-left-color:var(--accent); font-weight:500; }
+.nav-dot { width:6px; height:6px; border-radius:50%; background:currentColor; opacity:0.4; flex-shrink:0; }
+
+.main { flex:1; padding:36px 48px; max-width:900px; }
+.section { margin-bottom:60px; }
+.section-title { font-size:20px; font-weight:700; color:var(--text-primary); margin-bottom:6px; letter-spacing:-0.5px; }
+.section-desc { font-size:13px; color:var(--text-muted); margin-bottom:24px; padding-bottom:16px; border-bottom:1.5px solid var(--border); }
+
+/* METRIC CARDS */
+.card-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
+.metric-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 18px; position:relative; }
+.metric-label { font-size:11px; color:var(--text-muted); margin-bottom:4px; font-weight:500; }
+.metric-val { font-size:22px; font-weight:700; color:var(--accent); }
+
+/* CALLOUT */
+.callout { padding:13px 16px; border-radius:8px; font-size:13px; line-height:1.65; margin-bottom:14px; }
+.callout-blue { background:var(--accent-light); color:#1840A0; border-left:3px solid var(--accent); }
+.callout-amber { background:var(--amber-bg); color:var(--amber); border-left:3px solid #D4900A; }
+.callout-green { background:var(--green-bg); color:var(--green); border-left:3px solid #2DA05A; }
+.callout strong { font-weight:700; }
+
+/* TABLE */
+.table-wrap { overflow-x:auto; margin-bottom:8px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead th { background:var(--surface2); color:var(--text-secondary); font-weight:700; padding:9px 12px; text-align:left; border-bottom:2px solid var(--border); font-size:12px; white-space:nowrap; }
+tbody td { padding:8px 12px; border-bottom:1px solid var(--border-light); vertical-align:middle; color:var(--text-secondary); }
+tbody tr:hover td { background:#FAFBFF; }
+tbody tr:last-child td { border-bottom:none; }
+td.del-col { width:32px; padding:4px 4px 4px 0; }
+
+/* BADGES */
+.badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:600; white-space:nowrap; }
+.b-blue { background:var(--accent-light); color:var(--accent); }
+.b-green { background:var(--green-bg); color:var(--green); }
+.b-amber { background:var(--amber-bg); color:var(--amber); }
+.b-red { background:var(--red-bg); color:var(--red); }
+.b-teal { background:var(--teal-bg); color:var(--teal); }
+.b-gray { background:var(--gray-bg); color:var(--gray-text); }
+.vol-high { color:#1A7A4A; font-weight:700; }
+.vol-mid { color:#B07A00; font-weight:600; }
+.vol-low { color:var(--text-muted); }
+
+/* TOPIC LIST */
+.topic-list { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.topic-item { display:flex; align-items:flex-start; gap:14px; padding:13px 16px; border-bottom:1px solid var(--border-light); }
+.topic-item:last-child { border-bottom:none; }
+.topic-num { min-width:26px; height:26px; border-radius:50%; background:var(--accent-light); color:var(--accent); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.topic-body { flex:1; }
+.topic-title-text { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:3px; }
+.topic-sub { font-size:12px; color:var(--text-muted); }
+
+/* VENDOR */
+.vendor-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(195px,1fr)); gap:12px; }
+.vendor-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; position:relative; }
+.vendor-card.featured { border-color:var(--accent); border-width:1.5px; }
+.vendor-name { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:6px; }
+.vendor-tag { font-size:11px; margin-bottom:8px; }
+.vendor-desc { font-size:12px; color:var(--text-secondary); line-height:1.65; }
+
+/* REF */
+.ref-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; }
+.ref-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; position:relative; }
+.ref-name { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:10px; }
+.ref-item { display:flex; gap:8px; align-items:flex-start; padding:5px 0; border-bottom:1px solid var(--border-light); font-size:12px; }
+.ref-item:last-child { border-bottom:none; }
+.ref-cat { font-weight:600; color:var(--accent); min-width:110px; }
+.ref-detail { color:var(--text-secondary); }
+
+/* TYPE GRID */
+.type-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+.type-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; position:relative; }
+.type-card.recommended { border-color:var(--accent); }
+.type-card-title { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:6px; }
+.type-card-body { font-size:13px; color:var(--text-secondary); line-height:1.65; }
+
+/* EDIT MODE STYLES */
+.edit-mode [contenteditable] { outline:none; border-radius:3px; }
+.edit-mode [contenteditable]:hover { background:#fffbe6; box-shadow:0 0 0 1.5px #e0c840; cursor:text; }
+.edit-mode [contenteditable]:focus { background:#fff9d0; box-shadow:0 0 0 2px #c8a000; }
+.edit-mode .del-btn { display:inline-flex !important; }
+.edit-mode .add-area { display:block !important; }
+.edit-mode .add-row { display:block !important; }
+
+/* HIDDEN IN VIEW MODE */
+.del-btn { display:none !important; position:absolute; top:7px; right:7px; width:20px; height:20px; border-radius:50%; background:#fff0f0; border:1px solid #f0b0b0; color:var(--red); font-size:13px; line-height:1; cursor:pointer; align-items:center; justify-content:center; padding:0; font-family:inherit; }
+.add-area { display:none !important; margin-top:10px; }
+.add-row { display:none !important; width:100%; padding:8px; background:var(--surface2); border:1px dashed var(--border); border-radius:6px; font-size:12px; color:var(--text-muted); cursor:pointer; font-family:inherit; transition:all 0.15s; margin-top:8px; }
+.add-row:hover { background:var(--accent-light); color:var(--accent); border-color:var(--accent-mid); }
+.add-card-btn { width:100%; padding:14px; background:var(--surface); border:2px dashed var(--border); border-radius:10px; font-size:13px; color:var(--text-muted); cursor:pointer; font-family:inherit; transition:all 0.15s; }
+.add-card-btn:hover { background:var(--accent-light); color:var(--accent); border-color:var(--accent-mid); }
+.row-del-btn { display:none !important; background:#fff0f0; border:1px solid #f0b0b0; color:var(--red); border-radius:50%; width:20px; height:20px; font-size:13px; cursor:pointer; align-items:center; justify-content:center; flex-shrink:0; padding:0; font-family:inherit; }
+
+/* MODAL */
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:9998; align-items:center; justify-content:center; }
+.modal-bg.open { display:flex; }
+.modal { background:var(--surface); border-radius:12px; padding:24px; width:460px; max-width:90vw; box-shadow:0 8px 40px rgba(0,0,0,0.18); }
+.modal h3 { font-size:15px; font-weight:700; margin-bottom:16px; }
+.modal label { display:block; font-size:12px; color:var(--text-muted); font-weight:600; margin:12px 0 4px; }
+.modal input, .modal textarea, .modal select { width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; font-family:inherit; color:var(--text-primary); background:var(--surface); outline:none; resize:vertical; }
+.modal input:focus, .modal textarea:focus, .modal select:focus { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-light); }
+.modal-footer { display:flex; gap:8px; justify-content:flex-end; margin-top:20px; }
+
+/* TOAST */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(12px); background:#1A1F2E; color:#fff; padding:10px 20px; border-radius:8px; font-size:13px; z-index:9999; opacity:0; transition:all 0.2s; pointer-events:none; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+@media(max-width:700px){ .sidebar{display:none;} .main{padding:24px 16px;} .type-grid{grid-template-columns:1fr;} .header{padding:0 16px;} }
+</style>
+</head>
+<body class="">
+
+<header class="header">
+  <div class="header-left">
+    <span class="header-title">블로그 스터디</span>
+    <span class="header-meta">네이버 블로그 · 키워드 / 외주사 / 콘텐츠 전략</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-edit" id="editBtn" onclick="toggleEdit()">✏️ 편집 모드</button>
+    <button class="btn btn-save" onclick="saveHTML()">💾 HTML 저장</button>
+  </div>
+</header>
+
+<div class="edit-bar" id="editBar">
+  <span class="edit-bar-label">✏️ 편집 중</span>
+  <span style="font-size:12px;">텍스트를 클릭해 직접 수정하세요. 완료 후 <strong>HTML 저장</strong>으로 파일을 내려받으세요.</span>
+</div>
+
+
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-label">키워드</div>
+    <a class="nav-item" href="#sec-kw-strategy"><span class="nav-dot"></span>키워드 전략</a>
+    <a class="nav-item" href="#sec-kw-cat"><span class="nav-dot"></span>카테고리별 키워드</a>
+    <a class="nav-item active" href="#sec-kw-table"><span class="nav-dot"></span>검색량 테이블</a>
+    <div class="nav-label">콘텐츠</div>
+    <a class="nav-item" href="#sec-content-type"><span class="nav-dot"></span>콘텐츠 형태</a>
+    <a class="nav-item" href="#sec-topics"><span class="nav-dot"></span>예시 주제 10개</a>
+    <a class="nav-item" href="#sec-refs"><span class="nav-dot"></span>레퍼런스 블로그</a>
+    <div class="nav-label">외주사</div>
+    <a class="nav-item" href="#sec-vendors"><span class="nav-dot"></span>외주사 후보</a>
+  </nav>
+
+  <main class="main">
+
+    <!-- ── 키워드 전략 ── -->
+    <div class="section" id="sec-kw-strategy">
+      <div class="section-title">키워드 전략</div>
+      <div class="section-desc">키워드 50개 · 카테고리 8개 · 검색 트렌드 기반 분석</div>
+
+      <div class="card-row" id="metric-row">
+        <div class="metric-card">
+          <div class="metric-label">총 키워드</div>
+          <div class="metric-val">50개</div>
+          
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">카테고리</div>
+          <div class="metric-val">8개</div>
+          
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">고검색 키워드 (1000+)</div>
+          <div class="metric-val">6개</div>
+          
+        </div>
+      </div>
+      
+
+      <div class="callout callout-blue"><strong>핵심 인사이트</strong> — 단기임대를 검색하는 사람은 대부분 <strong>호스트가 아닌 임차인</strong>. 삼삼엠투 후기 등도 대부분 게스트 후기. 호스트 입장 콘텐츠는 절대적으로 적음.</div>
+      <div class="callout callout-amber"><strong>C-rank 전략</strong> — 검색량 10 미만이어도 외국인 단기임대 관련 키워드를 꾸준히 쌓으면, 네이버가 해당 주제의 <strong>전문 블로그로 인식</strong>.&nbsp;<div>C-rank 알고리즘은 개별 문서보다 블로그 출처의 신뢰도를 평가.&nbsp;</div><div>핵심은 특정 관심사에 대해 깊이 있는 콘텐츠를 꾸준히 생산하는 것 → 주제 폭을 좁히는 <strong>전문가 포지셔닝</strong>.</div></div>
+    </div>
+
+    <!-- ── 카테고리별 키워드 ── -->
+    <div class="section" id="sec-kw-cat">
+      <div class="section-title">카테고리별 키워드</div>
+      <div class="section-desc">8개 주제 카테고리 및 핵심 키워드 요약</div>
+      <div class="topic-list" id="topic-list">
+        <div class="topic-item"><div class="topic-num">1</div><div class="topic-body"><div class="topic-title-text">단기임대 기본 <span class="badge b-green">고검색</span></div><div class="topic-sub">단기임대, 단기렌탈, 단기임대 방법, 단기임대 조건, 단기임대 기간, 한달살기</div></div></div>
+        <div class="topic-item"><div class="topic-num">2</div><div class="topic-body"><div class="topic-title-text">호스트 시작/운영 <span class="badge b-gray">저검색</span></div><div class="topic-sub">단기임대 호스트, 단기임대 시작, 수익, 수익률, 아파트·오피스텔 단기임대, 청소</div></div></div>
+        <div class="topic-item"><div class="topic-num">3</div><div class="topic-body"><div class="topic-title-text">플랫폼 비교 <span class="badge b-blue">중검색</span></div><div class="topic-sub">단기임대 플랫폼, 플랫폼 비교, 삼삼엠투 수수료/후기, 리브애니웨어 수수료/후기</div></div></div>
+        <div class="topic-item"><div class="topic-num">4</div><div class="topic-body"><div class="topic-title-text">법률/세금/계약 <span class="badge b-blue">중검색</span></div><div class="topic-sub">단기임대 계약서(200), 보증금(40), 세금, 보험, 합법, 신고, 월세 차이</div></div></div>
+        <div class="topic-item"><div class="topic-num">5</div><div class="topic-body"><div class="topic-title-text">외국인 타겟 <span class="badge b-amber">전략 키워드</span></div><div class="topic-sub">외국인 단기임대(90), 외국인 게스트, 외국인 임대 플랫폼, 영어 임대 계약, 외국인 단기 숙박</div></div></div>
+        <div class="topic-item"><div class="topic-num">6</div><div class="topic-body"><div class="topic-title-text">고민/트러블 <span class="badge b-gray">저검색</span></div><div class="topic-sub">단기임대 후기, 단점, 파손, 분쟁, 노하우</div></div></div>
+        <div class="topic-item"><div class="topic-num">7</div><div class="topic-body"><div class="topic-title-text">월세 vs 단기임대 <span class="badge b-gray">저검색</span></div><div class="topic-sub">월세 vs 단기임대, 장단점, 단기임대 vs 에어비앤비, 수요</div></div></div>
+        <div class="topic-item"><div class="topic-num">8</div><div class="topic-body"><div class="topic-title-text">공실 관리 <span class="badge b-gray">저검색</span></div><div class="topic-sub">단기임대 공실, 비수기, 예약률, 공실 줄이는 법, 비어있을 때</div></div></div>
+      </div>
+      
+    </div>
+
+    <!-- ── 검색량 테이블 ── -->
+    <div class="section" id="sec-kw-table">
+      <div class="section-title">검색량 테이블</div>
+      <div class="section-desc" id="kw-table-desc">네이버 기준 월간 검색수 (PC + 모바일) &nbsp;·&nbsp; <span id="sync-status" style="font-size:12px; color:var(--text-muted);">Google Sheets 연동 준비 중...</span></div>
+
+      <!-- CSV UPLOAD BAR -->
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px; padding:10px 14px; background:#F7F9FF; border:1px solid var(--border-light); border-radius:8px; flex-wrap:wrap;">
+        <span style="font-size:12px; color:var(--text-muted);">📂 CSV 업로드</span>
+        <span style="font-size:11px; color:var(--text-muted);">구글 시트 → 파일 → 다운로드 → CSV로 저장 후 업로드</span>
+        <label class="btn" style="font-size:12px; padding:6px 12px; cursor:pointer;">
+          📄 파일 선택
+          <input id="csv-file-input" type="file" accept=".csv" style="display:none;" onchange="loadCSV(event)">
+        </label>
+        <span id="csv-file-name" style="font-size:11px; color:var(--text-muted);"></span>
+        <span id="sheet-last-updated" style="font-size:11px; color:var(--text-muted);"></span>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div id="kw-filter-bar" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;"></div>
+
+      <div class="table-wrap">
+        <table id="kw-table">
+          <thead><tr><th>카테고리</th><th>검색어</th><th>PC</th><th>모바일</th><th>합계</th></tr></thead>
+          <tbody id="kw-tbody">
+            <tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text-muted); font-size:13px;">📂 위의 CSV 업로드 버튼으로 구글 시트 데이터를 가져오세요</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="kw-row-count" style="font-size:12px; color:var(--text-muted); margin-bottom:8px;"></div>
+      <button class="add-row" onclick="openModal('kw')">+ 키워드 행 추가</button>
+      <div class="callout callout-amber" style="margin-top:14px;">검색량이 적더라도 외국인 관련 키워드를 꾸준히 축적하면 네이버 <strong>C-rank 상승</strong>에 기여. 즉시 유입보다 전문성 누적 지표로 활용 권장.</div>
+      <div style="margin-top:10px; padding:10px 14px; background:var(--surface); border:1px solid var(--border-light); border-radius:8px; display:flex; align-items:center; gap:8px; font-size:12px;">
+        <span style="color:var(--text-muted);">📊 원본 시트</span>
+        <a href="https://docs.google.com/spreadsheets/d/1Yc4X1iFzHjn3kXxSm7aouNPwSZ2iKBFbdWiQC64cDTI/edit?usp=sharing" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:500;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Google Sheets에서 보기 →</a>
+      </div>
+    </div>
+
+    <!-- ── 콘텐츠 형태 ── -->
+    <div class="section" id="sec-content-type">
+      <div class="section-title">콘텐츠 형태</div>
+      <div class="section-desc">저가 배포형 vs 브랜드 블로그 비교</div>
+      <div class="type-grid">
+        <div class="type-card">
+          <div class="type-card-title">저가 배포형</div>
+          <div class="type-card-body">업체 소유 블로그 아이디로 키워드만 반복 작성. AI 포스팅, 사진 재사용 다수. 실제 문의 전환 극히 드뭄. 전단지와 비슷한 효과. 초기 브랜드 인지 확산 목적으로 적합.</div>
+          
+        </div>
+        <div class="type-card recommended">
+          <div style="margin-bottom:6px;"><span class="badge b-blue">추천</span></div>
+          <div class="type-card-title">브랜드 블로그</div>
+          <div class="type-card-body">사장님 대화·블로그 세팅까지 신경. 글 1개에 1~3시간. 퀄리티가 높아 문의량 확실히 많음. 한번 구매 전환 시 고단가 오가는 업종에서 효과적.</div>
+          
+        </div>
+      </div>
+      <div class="callout callout-green"><strong>추천 방향</strong> — "외국인 게스트 첫 달, 우리가 겪은 것들", "단기임대 호스트가 자주 묻는 질문 10가지" 같은 <strong>경험 기반 글</strong> 형식이 단기임대 플랫폼 비교 같은 정보성 글보다 신뢰도 높고 전환율 유리.</div>
+    </div>
+
+    <!-- ── 예시 주제 ── -->
+    <div class="section" id="sec-topics">
+      <div class="section-title">예시 주제 10개</div>
+      <div class="section-desc">타겟 호스트별 글 제목 예시</div>
+      <div class="table-wrap">
+        <table id="topics-table">
+          <thead><tr><th>#</th><th>주제</th><th>타겟</th><th>글 제목 예시</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>단기임대 호스트 시작 가이드</td><td><span class="badge b-amber">잠재</span></td><td>단기임대 호스트 처음 시작하는 법 — 등록부터 첫 예약까지</td></tr>
+            <tr><td>2</td><td>단기임대 수익 현실</td><td><span class="badge b-amber">잠재</span></td><td>월세 vs 단기임대, 실제로 얼마나 차이날까</td></tr>
+            <tr><td>3</td><td>한국 체류 외국인 시장 트렌드</td><td><span class="badge b-amber">잠재</span></td><td>한국 찾는 외국인, 어디서 얼마나 머물까 — 단기 숙박 수요 분석</td></tr>
+            <tr><td>4</td><td>단기임대 공실 줄이는 법</td><td><span class="badge b-blue">실 호스트</span></td><td>단기임대 비수기 공실, 이렇게 줄였습니다</td></tr>
+            <tr><td>5</td><td>단기임대 법률/계약 정리</td><td><span class="badge b-blue">실 호스트</span></td><td>단기임대 계약서, 보증금, 세금 - 호스트가 꼭 알아야 할 것들</td></tr>
+            <tr><td>6</td><td>단기임대 파손/트러블 대처</td><td><span class="badge b-blue">실 호스트</span></td><td>단기임대 파손/분쟁, 실제로 겪어보니 이렇더라</td></tr>
+            <tr><td>7</td><td>호스트 FAQ</td><td><span class="badge b-green">잠재/실</span></td><td>단기임대 호스트가 가장 많이 묻는 질문 10가지</td></tr>
+            <tr><td>8</td><td>외국인 게스트 받는 법</td><td><span class="badge b-red">외국인 망설이는</span></td><td>외국인 게스트 처음 받아봤습니다 - 준비부터 체크아웃까지</td></tr>
+            <tr><td>9</td><td>외국인 게스트 소통 노하우</td><td><span class="badge b-red">외국인 망설이는</span></td><td>영어 못해도 외국인 게스트 받을 수 있을까?</td></tr>
+            <tr><td>10</td><td>부동산 단기임대 투자</td><td><span class="badge b-gray">부동산 관심</span></td><td>오피스텔 월세 말고 단기임대로 굴리면 수익이 달라진다</td></tr>
+          </tbody>
+        </table>
+      </div>
+      
+    </div>
+
+    <!-- ── 레퍼런스 블로그 ── -->
+    <div class="section" id="sec-refs">
+      <div class="section-title">레퍼런스 블로그</div>
+      <div class="section-desc">경쟁/유사 서비스 블로그 운영 현황</div>
+      <div class="ref-grid" id="ref-grid">
+        <div class="ref-card">
+          <div class="ref-name">삼삼엠투<div><a href="https://blog.naver.com/33m2_app">https://blog.naver.com/33m2_app</a><br></div></div>
+          <div class="ref-item"><span class="ref-cat">단기임대 놓기</span><span class="ref-detail">임대인 후기 및 인터뷰 / 부동산 투자 tip / 첫 걸음</span></div>
+          <div class="ref-item"><span class="ref-cat">삼삼 사용설명서</span><span class="ref-detail">보증금 절차, 운영 방법, 계약서, 연장 기준 등</span></div>
+          <div class="ref-item"><span class="ref-cat">삼삼엠투 소식</span><span class="ref-detail">베스트 리뷰, 브랜드 캠페인, 이벤트, 박람회 등</span></div>
+          
+        </div>
+        <div class="ref-card">
+          <div class="ref-name">리브애니웨어<div><a href="https://blog.naver.com/live1month">https://blog.naver.com/live1month</a><br></div></div>
+          <div class="ref-item"><span class="ref-cat">호스트 리포트</span><span class="ref-detail">25.05부터 매달 발행. 호스트 이슈, 공지사항, 지역별 분석</span></div>
+          <div class="ref-item"><span class="ref-cat">외국인 트렌드</span><span class="ref-detail">외국인 거래액 증가, 수요 높은 구, 국적 분석, 높은 객단가 언급</span></div>
+          <div class="ref-item"><span class="ref-cat">CTA (글 내)</span><span class="ref-detail">인플루언서/외국인 협찬 후기 릴스, 협찬 참여 링크 포함</span></div>
+          
+        </div>
+        <div class="ref-card">
+          <div class="ref-name">엔코스테이<div><a href="https://host.enko.kr/blog">https://host.enko.kr/blog</a><br></div></div>
+          <div class="ref-item"><span class="ref-cat">호스팅 운영 가이드</span><span class="ref-detail">룸투어 영상 촬영법, 업로드 가이드, 등록·정산 절차</span></div>
+          <div class="ref-item"><span class="ref-cat">엔코스테이 이야기</span><span class="ref-detail">외국인 단기임대 시장 소개, 엔코 소식</span></div>
+          <div class="ref-item"><span class="ref-cat">아쉬운 점</span><span class="ref-detail">카테고리 정리 미흡, 순서 뒤죽박죽</span></div>
+          
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- ── 외주사 후보 ── -->
+    <div class="section" id="sec-vendors">
+      <div class="section-title">외주사 후보</div>
+      <div class="section-desc">예산 10~20만원 · SEO 언급 외주사 기준 (크몽)</div>
+      <div class="vendor-grid" id="vendor-grid">
+        <div class="vendor-card">
+          <div class="vendor-name">만연필공주</div>
+          <div class="vendor-tag"><span class="badge b-blue">SEO/GEO 최적화</span></div>
+          <div class="vendor-desc">자세한 서비스 제공 절차.&nbsp;<div>패키지 설명에도 SEO·GEO 최적화 언급.&nbsp;</div><div><a href="https://kmong.com/gig/693467">https://kmong.com/gig/693467</a><br></div><div>스탠다드: 월 8회 159,000원</div></div>
+          
+        </div>
+        <div class="vendor-card">
+          <div class="vendor-name">스토리슈페너</div>
+          <div class="vendor-tag"><span class="badge b-teal">투명한 단가</span></div>
+          <div class="vendor-desc">블로그 생태계 오해 debunk 스탠스.&nbsp;<div>본인 단가 공개로 신뢰감.&nbsp;</div><div><a href="https://kmong.com/gig/606739">https://kmong.com/gig/606739</a><br></div><div>스탠다드: 월 6회 180,000원</div></div>
+          
+        </div>
+        <div class="vendor-card">
+          <div class="vendor-name">리버풀매니아</div>
+          <div class="vendor-tag"><span class="badge b-amber">부동산 인사이트</span></div>
+          <div class="vendor-desc">프로필에 부동산 업종 인사이트 보유.&nbsp;<div>리뷰 및 포트폴리오 부족이 단점.</div><div><a href="https://kmong.com/gig/582974">https://kmong.com/gig/582974</a><br></div><div>스탠다드: 월 10회 170,000원</div></div>
+          
+        </div>
+        
+      <div class="vendor-card"><div class="vendor-name">도즈마케팅</div><div class="vendor-tag"><span class="badge b-gray">소수정예</span></div><div class="vendor-desc">키워드 SEO + 고객 전환 흐름까지 고려한 콘텐츠 설계.&nbsp;<div><a href="https://kmong.com/gig/668801">https://kmong.com/gig/668801</a><br></div><div>스탠다드: 월 8회 159,000원</div></div></div></div>
+      
+      <div class="callout callout-amber" style="margin-top:14px;">대부분 <strong>직접 촬영한 사진 요청</strong>.&nbsp;<div>주로 문의 &gt; 매출 전환으로 이어지는 후기 작성 스타일 업종 의뢰가 많을터라, 사전 상담/미팅에서 톤앤매너 세팅이 중요할 것.&nbsp;</div><div>우리가 제공할 수 있는 자료들은 뭐가 있는지 검토.&nbsp;</div></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal-box">
+    <h3 id="modal-title">지표 카드 추가</h3>
+    <div id="modal-fields"><label>라벨</label><input id="f-label" type="text" placeholder="예: 월간 발행 목표"><label>값</label><input id="f-val" type="text" placeholder="예: 12개"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary" onclick="submitModal()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">변경사항이 저장되었습니다. HTML 저장 버튼으로 파일을 다운로드하세요.</div>
+
+<script>
+// ── GOOGLE SHEETS SYNC ──
+const CAT_COLOR = {
+  '단기임대 기본':'b-blue','단기임대 관리':'b-green','단기임대 플랫폼':'b-amber',
+  '단기임대 운영':'b-teal','부동산':'b-gray','외국인 타겟':'b-red','외국인타겟':'b-red'
+};
+let allRows = [];
+let activeFilter = null;
+
+function extractSheetId(url) {
+  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+async function loadSheet() {
+  const url = document.getElementById('sheet-url-input').value.trim();
+  const sheetId = extractSheetId(url);
+  if (!sheetId) {
+    setStatus('❌ URL에서 시트 ID를 찾을 수 없어요. 공유 URL을 그대로 붙여넣어 주세요.', 'red');
+    return;
+  }
+
+  setStatus('⟳ 불러오는 중...', '#8892AA');
+  // Use the first sheet (gid=0) exported as CSV — works if the sheet is publicly shared
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+
+  try {
+    const res = await fetch(csvUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    parseAndRender(text);
+    const now = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('sheet-last-updated').textContent = `마지막 업데이트: ${now}`;
+    setStatus('✅ Google Sheets 연동됨', 'var(--green)');
+  } catch(e) {
+    setStatus('❌ 불러오기 실패 — 시트가 "링크가 있는 사람 누구나 볼 수 있음"으로 공개 설정되어 있는지 확인해 주세요.', 'var(--red)');
+    console.error(e);
+  }
+}
+
+function setStatus(msg, color) {
+  const el = document.getElementById('sync-status');
+  el.textContent = msg;
+  el.style.color = color || 'var(--text-muted)';
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += ch; }
+  }
+  result.push(cur);
+  return result.map(c => c.trim().replace(/^"|"$/g, ''));
+}
+
+function parseAndRender(csvText) {
+  const lines = csvText.split('\n').filter(l => l.trim());
+  allRows = [];
+
+  let catIdx = -1, wordIdx = -1, pcIdx = -1, mobIdx = -1, totalIdx = -1;
+
+  for (const line of lines) {
+    const cols = parseCSVLine(line);
+
+    if (catIdx === -1) {
+      const lc = cols.map(c => c.toLowerCase());
+      catIdx   = lc.findIndex(c => c.includes('카테고리'));
+      wordIdx  = lc.findIndex(c => c.includes('검색어'));
+      pcIdx    = lc.findIndex(c => c === 'pc');
+      mobIdx   = lc.findIndex(c => c.includes('모바일'));
+      totalIdx = lc.findIndex(c => c.includes('합계'));
+      if (catIdx !== -1 && wordIdx !== -1) continue;
+      // 헤더 못 찾으면 기본 컬럼 위치 사용 (1,2,3,4,5)
+      catIdx = 1; wordIdx = 2; pcIdx = 3; mobIdx = 4; totalIdx = 5;
+    }
+
+    const cat   = cols[catIdx]   || '';
+    const word  = cols[wordIdx]  || '';
+    const pc    = cols[pcIdx]    || '';
+    const mob   = cols[mobIdx]   || '';
+    const total = cols[totalIdx] || '';
+
+    if (!cat || !word) continue;
+    allRows.push({ cat, word, pc, mob, total });
+  }
+
+  buildFilterBar();
+  renderTable(allRows);
+  document.getElementById('kw-row-count').textContent = `총 ${allRows.length}개 키워드`;
+}
+
+function buildFilterBar() {
+  const cats = [...new Set(allRows.map(r => r.cat))];
+  const bar = document.getElementById('kw-filter-bar');
+  bar.innerHTML = '';
+
+  const allBtn = document.createElement('button');
+  allBtn.className = 'btn' + (activeFilter === null ? ' btn-primary' : '');
+  allBtn.style.cssText = 'font-size:12px;padding:4px 12px;';
+  allBtn.textContent = '전체';
+  allBtn.onclick = () => { activeFilter = null; buildFilterBar(); renderTable(allRows); };
+  bar.appendChild(allBtn);
+
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'btn' + (activeFilter === cat ? ' btn-primary' : '');
+    btn.style.cssText = 'font-size:12px;padding:4px 12px;';
+    btn.textContent = cat;
+    btn.onclick = () => { activeFilter = cat; buildFilterBar(); renderTable(allRows.filter(r => r.cat === cat)); };
+    bar.appendChild(btn);
+  });
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('kw-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">데이터가 없습니다.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const color = CAT_COLOR[r.cat] || 'b-gray';
+    const totalNum = parseInt(r.total.replace(/,/g, ''));
+    const volClass = isNaN(totalNum) ? 'vol-low' : totalNum >= 3000 ? 'vol-high' : totalNum >= 200 ? 'vol-mid' : 'vol-low';
+    return `<tr>
+      <td><span class="badge ${color}">${r.cat}</span></td>
+      <td>${r.word}</td>
+      <td>${r.pc}</td>
+      <td>${r.mob}</td>
+      <td class="${volClass}">${r.total}</td>
+    </tr>`;
+  }).join('');
+}
+
+function loadCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  document.getElementById('csv-file-name').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    parseAndRender(e.target.result);
+    const now = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('sheet-last-updated').textContent = `마지막 업데이트: ${now}`;
+    setStatus('✅ CSV 파일 로드됨', 'var(--green)');
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// sheet-url-input 제거됨 — CSV 업로드 전용
+
+// ── EDIT / MODAL / NAV ──
+let editing = false;
+let modalType = '';
+
+function toggleEdit() {
+  editing = !editing;
+  const btn = document.getElementById('editBtn');
+  const bar = document.getElementById('editBar');
+  document.body.classList.toggle('edit-mode', editing);
+  btn.classList.toggle('on', editing);
+  btn.textContent = editing ? '✅ 편집 완료' : '✏️ 편집 모드';
+  bar.classList.toggle('show', editing);
+
+  // toggle contenteditable on all editable elements
+  document.querySelectorAll('[contenteditable]').forEach(el => {
+    el.contentEditable = editing ? 'true' : 'false';
+  });
+
+  // show/hide table del buttons in tbody
+  document.querySelectorAll('tbody .del-btn').forEach(b => {
+    b.style.display = editing ? 'inline-flex' : 'none';
+  });
+  // show/hide table header del column
+  document.querySelectorAll('thead .del-btn').forEach(b => {
+    b.style.display = editing ? 'table-cell' : 'none';
+  });
+  // show/hide row-del-btns
+  document.querySelectorAll('.row-del-btn').forEach(b => {
+    b.style.display = editing ? 'inline-flex' : 'none';
+  });
+
+  if (!editing) toast('변경사항이 저장되었습니다. HTML 저장 버튼으로 파일을 다운로드하세요.');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function saveHTML() {
+  // strip edit UI before saving
+  const clone = document.documentElement.cloneNode(true);
+  clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+  clone.querySelectorAll('.del-btn').forEach(el => el.remove());
+  clone.querySelectorAll('.row-del-btn').forEach(el => el.remove());
+  clone.querySelectorAll('.add-row').forEach(el => el.remove());
+  clone.querySelectorAll('.add-area').forEach(el => el.remove());
+  clone.querySelectorAll('.del-col').forEach(el => el.remove());
+  clone.querySelectorAll('.edit-bar').forEach(el => el.remove());
+  const editBtn = clone.querySelector('#editBtn');
+  if(editBtn) editBtn.remove();
+  const saveBtn = clone.querySelectorAll('.header-actions .btn');
+  saveBtn.forEach(b => b.remove());
+
+  const blob = new Blob(['<!DOCTYPE html>\n' + clone.outerHTML], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'blog-study.html';
+  a.click();
+  toast('HTML 파일이 저장되었습니다.');
+}
+
+// ── MODALS ──
+const modalConfigs = {
+  metric: {
+    title: '지표 카드 추가',
+    fields: [
+      {label:'라벨', id:'f-label', type:'input', placeholder:'예: 월간 발행 목표'},
+      {label:'값', id:'f-val', type:'input', placeholder:'예: 12개'},
+    ],
+    insert() {
+      const label = document.getElementById('f-label').value.trim();
+      const val = document.getElementById('f-val').value.trim();
+      if (!label || !val) return alert('모두 입력해 주세요.');
+      const div = document.createElement('div');
+      div.className = 'metric-card';
+      div.innerHTML = `<div class="metric-label" contenteditable="${editing}">${label}</div><div class="metric-val" contenteditable="${editing}">${val}</div><button class="del-btn" style="${editing?'':'display:none'}" onclick="this.closest('.metric-card').remove()">×</button>`;
+      document.getElementById('metric-row').appendChild(div);
+    }
+  },
+  topic: {
+    title: '카테고리 추가',
+    fields: [
+      {label:'카테고리 이름', id:'f-tname', type:'input', placeholder:'예: 지역별 단기임대'},
+      {label:'키워드 목록', id:'f-tsub', type:'input', placeholder:'예: 강남 단기임대, 마포 단기임대'},
+      {label:'검색량 수준', id:'f-tbadge', type:'select', options:['고검색','중검색','저검색','전략 키워드']},
+    ],
+    insert() {
+      const name = document.getElementById('f-tname').value.trim();
+      const sub = document.getElementById('f-tsub').value.trim();
+      const badge = document.getElementById('f-tbadge').value;
+      if (!name) return alert('이름을 입력해 주세요.');
+      const colorMap = {'고검색':'b-green','중검색':'b-blue','저검색':'b-gray','전략 키워드':'b-amber'};
+      const list = document.getElementById('topic-list');
+      const num = list.querySelectorAll('.topic-item').length + 1;
+      const div = document.createElement('div');
+      div.className = 'topic-item';
+      div.innerHTML = `<div class="topic-num">${num}</div><div class="topic-body"><div class="topic-title-text" contenteditable="${editing}">${name} <span class="badge ${colorMap[badge]}">${badge}</span></div><div class="topic-sub" contenteditable="${editing}">${sub}</div></div><button class="row-del-btn" style="${editing?'display:inline-flex':'display:none'}" onclick="this.closest('.topic-item').remove()">×</button>`;
+      list.appendChild(div);
+    }
+  },
+  kw: {
+    title: '키워드 행 추가',
+    fields: [
+      {label:'카테고리', id:'f-kcat', type:'select', options:['단기임대 기본','단기임대 관리','단기임대 플랫폼','단기임대 운영','부동산','외국인 타겟']},
+      {label:'검색어', id:'f-kword', type:'input', placeholder:'예: 단기임대후기'},
+      {label:'PC 검색수', id:'f-kpc', type:'input', placeholder:'예: 50'},
+      {label:'모바일 검색수', id:'f-kmob', type:'input', placeholder:'예: 120'},
+      {label:'합계', id:'f-ktotal', type:'input', placeholder:'예: 170'},
+    ],
+    insert() {
+      const cat = document.getElementById('f-kcat').value;
+      const word = document.getElementById('f-kword').value.trim();
+      const pc = document.getElementById('f-kpc').value.trim();
+      const mob = document.getElementById('f-kmob').value.trim();
+      const total = document.getElementById('f-ktotal').value.trim();
+      if (!word) return alert('검색어를 입력해 주세요.');
+      const colorMap = {'단기임대 기본':'b-blue','단기임대 관리':'b-green','단기임대 플랫폼':'b-amber','단기임대 운영':'b-teal','부동산':'b-gray','외국인 타겟':'b-red'};
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><span class="badge ${colorMap[cat]}">${cat}</span></td><td contenteditable="${editing}">${word}</td><td contenteditable="${editing}">${pc}</td><td contenteditable="${editing}">${mob}</td><td contenteditable="${editing}">${total}</td><td class="del-col"><button class="del-btn" style="${editing?'position:static;':'position:static;display:none;'}" onclick="this.closest('tr').remove()">×</button></td>`;
+      document.querySelector('#kw-table tbody').appendChild(tr);
+    }
+  },
+  'topic-row': {
+    title: '주제 행 추가',
+    fields: [
+      {label:'주제', id:'f-rsubject', type:'input', placeholder:'예: 계절별 단기임대 전략'},
+      {label:'타겟', id:'f-rtarget', type:'select', options:['잠재','실 호스트','잠재/실','외국인 망설이는','부동산 관심']},
+      {label:'글 제목 예시', id:'f-rtitle', type:'input', placeholder:'예: 여름 비수기, 이렇게 채웠습니다'},
+    ],
+    insert() {
+      const subject = document.getElementById('f-rsubject').value.trim();
+      const target = document.getElementById('f-rtarget').value;
+      const title = document.getElementById('f-rtitle').value.trim();
+      if (!subject || !title) return alert('주제와 글 제목을 입력해 주세요.');
+      const colorMap = {'잠재':'b-amber','실 호스트':'b-blue','잠재/실':'b-green','외국인 망설이는':'b-red','부동산 관심':'b-gray'};
+      const tbody = document.querySelector('#topics-table tbody');
+      const num = tbody.querySelectorAll('tr').length + 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td contenteditable="${editing}">${num}</td><td contenteditable="${editing}">${subject}</td><td><span class="badge ${colorMap[target]}">${target}</span></td><td contenteditable="${editing}">${title}</td><td class="del-col"><button class="del-btn" style="${editing?'position:static;':'position:static;display:none;'}" onclick="this.closest('tr').remove()">×</button></td>`;
+      tbody.appendChild(tr);
+    }
+  },
+  ref: {
+    title: '레퍼런스 블로그 추가',
+    fields: [
+      {label:'블로그 이름', id:'f-rname', type:'input', placeholder:'예: 에어비앤비 공식 블로그'},
+      {label:'카테고리 1', id:'f-rc1', type:'input', placeholder:'예: 호스트 팁'},
+      {label:'내용 1', id:'f-rd1', type:'input', placeholder:'예: 수익 최대화 전략 등'},
+      {label:'카테고리 2 (선택)', id:'f-rc2', type:'input', placeholder:''},
+      {label:'내용 2 (선택)', id:'f-rd2', type:'input', placeholder:''},
+    ],
+    insert() {
+      const name = document.getElementById('f-rname').value.trim();
+      const c1 = document.getElementById('f-rc1').value.trim();
+      const d1 = document.getElementById('f-rd1').value.trim();
+      const c2 = document.getElementById('f-rc2').value.trim();
+      const d2 = document.getElementById('f-rd2').value.trim();
+      if (!name) return alert('블로그 이름을 입력해 주세요.');
+      let items = `<div class="ref-item"><span class="ref-cat" contenteditable="${editing}">${c1||'—'}</span><span class="ref-detail" contenteditable="${editing}">${d1||'—'}</span></div>`;
+      if (c2) items += `<div class="ref-item"><span class="ref-cat" contenteditable="${editing}">${c2}</span><span class="ref-detail" contenteditable="${editing}">${d2}</span></div>`;
+      const div = document.createElement('div');
+      div.className = 'ref-card';
+      div.innerHTML = `<div class="ref-name" contenteditable="${editing}">${name}</div>${items}<button class="del-btn" style="${editing?'':'display:none'}" onclick="this.closest('.ref-card').remove()">×</button>`;
+      document.getElementById('ref-grid').appendChild(div);
+    }
+  },
+  vendor: {
+    title: '외주사 카드 추가',
+    fields: [
+      {label:'업체명', id:'f-vname', type:'input', placeholder:'예: 콘텐츠랩'},
+      {label:'특징 태그', id:'f-vtag', type:'input', placeholder:'예: 부동산 특화'},
+      {label:'설명', id:'f-vdesc', type:'textarea', placeholder:'예: 부동산 전문 콘텐츠 제작사. 포트폴리오 다수.'},
+    ],
+    insert() {
+      const name = document.getElementById('f-vname').value.trim();
+      const tag = document.getElementById('f-vtag').value.trim();
+      const desc = document.getElementById('f-vdesc').value.trim();
+      if (!name) return alert('업체명을 입력해 주세요.');
+      const div = document.createElement('div');
+      div.className = 'vendor-card';
+      div.innerHTML = `<div class="vendor-name" contenteditable="${editing}">${name}</div><div class="vendor-tag"><span class="badge b-gray">${tag}</span></div><div class="vendor-desc" contenteditable="${editing}">${desc}</div><button class="del-btn" style="${editing?'':'display:none'}" onclick="this.closest('.vendor-card').remove()">×</button>`;
+      document.getElementById('vendor-grid').appendChild(div);
+    }
+  }
+};
+
+function openModal(type) {
+  modalType = type;
+  const cfg = modalConfigs[type];
+  document.getElementById('modal-title').textContent = cfg.title;
+  const fieldsEl = document.getElementById('modal-fields');
+  fieldsEl.innerHTML = cfg.fields.map(f => {
+    if (f.type === 'select') {
+      return `<label>${f.label}</label><select id="${f.id}">${f.options.map(o=>`<option>${o}</option>`).join('')}</select>`;
+    } else if (f.type === 'textarea') {
+      return `<label>${f.label}</label><textarea id="${f.id}" rows="3" placeholder="${f.placeholder||''}"></textarea>`;
+    }
+    return `<label>${f.label}</label><input id="${f.id}" type="text" placeholder="${f.placeholder||''}">`;
+  }).join('');
+  document.getElementById('modal-bg').classList.add('open');
+  fieldsEl.querySelector('input,textarea,select')?.focus();
+}
+
+function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+function submitModal() {
+  modalConfigs[modalType]?.insert();
+  closeModal();
+  toast('항목이 추가되었습니다.');
+}
+document.getElementById('modal-bg').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+
+// NAV SCROLL HIGHLIGHT
+const navItems = document.querySelectorAll('.nav-item');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  document.querySelectorAll('.section').forEach(s => { if (window.scrollY >= s.offsetTop - 110) cur = s.id; });
+  navItems.forEach(n => { n.classList.toggle('active', n.getAttribute('href') === '#' + cur); });
+});
+</script>
+
+
+</body></html>
