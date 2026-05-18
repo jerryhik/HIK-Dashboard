@@ -402,6 +402,63 @@ td.del-col { width:32px; padding:4px 4px 4px 0; }
 <div class="toast" id="toast">변경사항이 저장되었습니다. HTML 저장 버튼으로 파일을 다운로드하세요.</div>
 
 <script>
+// ── EMBEDDED KEYWORD DATA ──
+const EMBEDDED_ROWS = [
+  {cat:'단기임대 관리', word:'단기임대합법',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 관리', word:'단기임대단점',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 관리', word:'단기임대분쟁',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 관리', word:'단기임대파손',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 관리', word:'단기임대계약서',       pc:'80',  mob:'120',   total:'200'},
+  {cat:'단기임대 관리', word:'단기임대보증금',       pc:'10',  mob:'30',    total:'40'},
+  {cat:'단기임대 관리', word:'단기임대후기',         pc:'10',  mob:'20',    total:'30'},
+  {cat:'단기임대 관리', word:'단기임대세금',         pc:'<10', mob:'10',    total:'10'},
+  {cat:'단기임대 관리', word:'단기임대신고',         pc:'<10', mob:'10',    total:'10'},
+  {cat:'단기임대 기본', word:'단기임대',             pc:'4600',mob:'13200', total:'17800'},
+  {cat:'단기임대 기본', word:'한달살기',             pc:'1660',mob:'5290',  total:'6950'},
+  {cat:'단기임대 기본', word:'단기월세',             pc:'1250',mob:'5270',  total:'6520'},
+  {cat:'단기임대 기본', word:'한달단기임대',         pc:'630', mob:'2660',  total:'3290'},
+  {cat:'단기임대 기본', word:'서울단기임대',         pc:'730', mob:'2500',  total:'3230'},
+  {cat:'단기임대 기본', word:'단기임대어플',         pc:'230', mob:'1040',  total:'1270'},
+  {cat:'단기임대 기본', word:'원룸단기임대',         pc:'130', mob:'400',   total:'530'},
+  {cat:'단기임대 기본', word:'3개월단기임대',        pc:'40',  mob:'140',   total:'180'},
+  {cat:'단기임대 기본', word:'6개월단기임대',        pc:'50',  mob:'120',   total:'170'},
+  {cat:'단기임대 운영', word:'단기임대공실',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 운영', word:'단기임대수익',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 운영', word:'단기임대수익률',       pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 운영', word:'단기임대시작',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 운영', word:'단기임대전략',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 운영', word:'단기임대운영',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 운영', word:'단기임대등록',         pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'단기임대 운영', word:'단기임대기간',         pc:'20',  mob:'110',   total:'130'},
+  {cat:'단기임대 운영', word:'단기임대사업',         pc:'30',  mob:'40',    total:'70'},
+  {cat:'단기임대 운영', word:'단기임대청소',         pc:'<10', mob:'20',    total:'20'},
+  {cat:'단기임대 운영', word:'단기임대창업',         pc:'<10', mob:'10',    total:'10'},
+  {cat:'단기임대 운영', word:'단기임대호스트',       pc:'10',  mob:'<10',   total:'10'},
+  {cat:'단기임대 플랫폼', word:'단기임대플랫폼',    pc:'130', mob:'150',   total:'280'},
+  {cat:'단기임대 플랫폼', word:'단기임대사이트',    pc:'90',  mob:'160',   total:'250'},
+  {cat:'단기임대 플랫폼', word:'단기임대수수료',    pc:'10',  mob:'30',    total:'40'},
+  {cat:'단기임대 플랫폼', word:'단기임대후기',      pc:'10',  mob:'20',    total:'30'},
+  {cat:'부동산',          word:'부동산단기임대',    pc:'40',  mob:'120',   total:'160'},
+  {cat:'부동산',          word:'단기임대사업',      pc:'30',  mob:'40',    total:'70'},
+  {cat:'부동산',          word:'오피스텔단기임대',  pc:'300', mob:'940',   total:'1240'},
+  {cat:'부동산',          word:'주택단기임대',      pc:'20',  mob:'50',    total:'70'},
+  {cat:'부동산',          word:'부동산부업',        pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'외국인 타겟',     word:'외국인게스트',      pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'외국인 타겟',     word:'외국인단기숙박',    pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'외국인 타겟',     word:'외국인임대플랫폼',  pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'외국인 타겟',     word:'외국인단기임대후기',pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'외국인 타겟',     word:'외국인단기임대',    pc:'30',  mob:'60',    total:'90'},
+  {cat:'외국인타겟',      word:'외국인관광객증가',  pc:'60',  mob:'40',    total:'100'},
+  {cat:'외국인타겟',      word:'영어임대계약',      pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'외국인타겟',      word:'외국인월세계약',    pc:'<10', mob:'40',    total:'40'},
+  {cat:'외국인타겟',      word:'유학생주거',        pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'외국인타겟',      word:'외국인주거',        pc:'<10', mob:'<10',   total:'매우적음'},
+  {cat:'외국인타겟',      word:'한국사는외국인',    pc:'<10', mob:'10',    total:'10'},
+  {cat:'외국인타겟',      word:'외국인숙박',        pc:'10',  mob:'30',    total:'40'},
+  {cat:'외국인타겟',      word:'외국인쉐어하우스',  pc:'20',  mob:'80',    total:'100'},
+  {cat:'외국인타겟',      word:'외국인고시원',      pc:'10',  mob:'20',    total:'30'},
+];
+
 // ── GOOGLE SHEETS SYNC ──
 const CAT_COLOR = {
   '단기임대 기본':'b-blue','단기임대 관리':'b-green','단기임대 플랫폼':'b-amber',
@@ -553,7 +610,14 @@ function loadCSV(event) {
   reader.readAsText(file, 'UTF-8');
 }
 
-// sheet-url-input 제거됨 — CSV 업로드 전용
+// 페이지 로드 시 내장 데이터 자동 렌더링
+window.addEventListener('DOMContentLoaded', () => {
+  allRows = EMBEDDED_ROWS.slice();
+  buildFilterBar();
+  renderTable(allRows);
+  document.getElementById('kw-row-count').textContent = `총 ${allRows.length}개 키워드`;
+  setStatus('✅ 내장 데이터 로드됨', 'var(--green)');
+});
 
 // ── EDIT / MODAL / NAV ──
 let editing = false;
