@@ -1120,8 +1120,13 @@
         empty.style.display='block'; return;
       }
       empty.style.display = 'none';
+      // 합계 행: 상태 필터 무관하게 전체(담당자·검색 필터만 적용) 합산
+      const allForTotal = entries.filter(e =>
+        (!activeManager || e.manager === activeManager) &&
+        (!fq || e.guestName?.toLowerCase().includes(fq) || e.address?.toLowerCase().includes(fq))
+      );
       let totRent = 0, totHik = 0;
-      filtered.forEach(e => {
+      allForTotal.forEach(e => {
         const s = bdDoneSum(e);
         totRent += s.amount !== null ? s.amount : (e.monthlyRent ? Number(e.monthlyRent) : 0);
         totHik  += s.hikFee !== null ? s.hikFee : (e.hikFee ? Number(e.hikFee) : 0);
@@ -1574,11 +1579,12 @@
 
       // 요약 카드: 필터 적용된 항목 기준
       let doneRent = 0, doneHik = 0, allRent = 0, allHik = 0;
-      items.forEach(({ r }) => {
+      items.forEach(({ e, r }) => {
         const amt = r.amount ? Number(r.amount) : 0;
         const hik = r.hikFee ? Number(r.hikFee) : 0;
         allRent += amt; allHik += hik;
-        if (r.status === 'done') { doneRent += amt; doneHik += hik; }
+        // 이용완료 중개건이거나 개별 납입 항목이 완료인 경우 실제 완료 합계에 포함
+        if (r.status === 'done' || getStatus(e) === 'done') { doneRent += amt; doneHik += hik; }
       });
 
       document.getElementById('rev-done-rent').textContent  = items.length ? krw(doneRent) : '—';
