@@ -903,15 +903,35 @@
     // ── DATE HELPERS ──
     function parseDateStr(ds) {
       if (!ds) return null;
-      const m = ds.match(/^(\d{2,4})[.\-](\d{1,2})[.\-](\d{1,2})/);
-      if (m) {
-        let y = parseInt(m[1], 10), mo = parseInt(m[2], 10), d = parseInt(m[3], 10);
+      // 한국어 형식: "26년 5월 16일" / "2026년 5월 16일"
+      const kor = ds.match(/(\d{2,4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+      if (kor) {
+        let y = parseInt(kor[1], 10), mo = parseInt(kor[2], 10), d = parseInt(kor[3], 10);
+        if (y < 100) y += 2000;
+        const dt = new Date(y, mo - 1, d);
+        return isNaN(dt.getTime()) ? null : dt;
+      }
+      // 구분자 형식: "26.05.16" / "2026-05-16" / "2026/05/16"
+      const sep = ds.match(/^(\d{2,4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+      if (sep) {
+        let y = parseInt(sep[1], 10), mo = parseInt(sep[2], 10), d = parseInt(sep[3], 10);
         if (y < 100) y += 2000;
         const dt = new Date(y, mo - 1, d);
         return isNaN(dt.getTime()) ? null : dt;
       }
       const dt = new Date(ds);
       return isNaN(dt.getTime()) ? null : dt;
+    }
+    function normalizeDate(ds) {
+      if (!ds) return null;
+      // 이미 ISO 형식이면 그대로 반환
+      if (/^\d{4}-\d{2}-\d{2}$/.test(ds)) return ds;
+      const d = parseDateStr(ds);
+      if (!d) return null;
+      const y = d.getFullYear();
+      const mo = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${mo}-${day}`;
     }
     function daysTo(ds) {
       if (!ds) return Infinity;
@@ -1329,8 +1349,10 @@
       const name = document.getElementById('f-name').value.trim();
       const addr = document.getElementById('f-addr').value.trim();
       const start = document.getElementById('f-start').value;
-      const end = document.getElementById('f-end').value;
-      if (!name || !addr || !start || !end) { alert('게스트 이름, 주소, 계약 기간은 필수입니다.'); return; }
+      const rawEnd = document.getElementById('f-end').value.trim();
+      // 퇴실일: 다양한 형식을 ISO로 정규화 (파싱 실패 시 원문 유지)
+      const end = normalizeDate(rawEnd) || rawEnd;
+      if (!name || !addr || !start) { alert('게스트 이름, 주소, 입실일은 필수입니다.'); return; }
       const bd = [];
       if (payType === 'monthly') {
         document.querySelectorAll('#b-body tr').forEach(tr => {
