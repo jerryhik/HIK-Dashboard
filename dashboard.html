@@ -891,7 +891,12 @@
     }
 
     function save() {
-      localStorage.setItem('re_entries', JSON.stringify(entries));
+      try {
+        localStorage.setItem('re_entries', JSON.stringify(entries));
+      } catch(e) {
+        // localStorage 용량 초과 시 Supabase로만 저장
+        console.warn('[localStorage] 용량 초과, Supabase로만 저장합니다.');
+      }
       if (_sb) {
         _sb.from('app_data')
           .upsert({ key: 'entries', value: entries, updated_at: new Date().toISOString() })
@@ -1419,15 +1424,7 @@
       const savedId = entry.id;
       if (editId) { const i = entries.findIndex(x=>x.id===editId); if (i!==-1) entries[i]=entry; }
       else entries.unshift(entry);
-      try {
-        save();
-      } catch(err) {
-        const errEl = document.getElementById('modal-err');
-        errEl.textContent = '저장 실패: ' + err.message;
-        errEl.style.display = 'inline';
-        return;
-      }
-      render(); closeModal();
+      save(); render(); closeModal();
       // 상세 페이지 열려 있으면 즉시 재렌더
       if (document.getElementById('detail-view').style.display !== 'none') {
         const updated = entries.find(x => x.id === savedId);
