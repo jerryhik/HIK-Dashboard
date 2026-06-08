@@ -1358,7 +1358,15 @@
       const rawEnd = document.getElementById('f-end').value.trim();
       // 퇴실일: 다양한 형식을 ISO로 정규화 (파싱 실패 시 원문 유지)
       const end = normalizeDate(rawEnd) || rawEnd;
-      if (!name || !addr || !start) { alert('게스트 이름, 주소, 입실일은 필수입니다.'); return; }
+      if (!name || !addr || !start) {
+        const errEl = document.getElementById('modal-err');
+        errEl.textContent = '게스트 이름, 주소, 입실일은 필수입니다.';
+        errEl.style.display = 'inline';
+        switchModalTab(1);
+        setTimeout(() => { errEl.style.display = 'none'; }, 4000);
+        return;
+      }
+      document.getElementById('modal-err').style.display = 'none';
       const bd = [];
       if (payType === 'monthly') {
         document.querySelectorAll('#b-body tr').forEach(tr => {
