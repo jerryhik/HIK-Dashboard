@@ -1419,7 +1419,15 @@
       const savedId = entry.id;
       if (editId) { const i = entries.findIndex(x=>x.id===editId); if (i!==-1) entries[i]=entry; }
       else entries.unshift(entry);
-      save(); render(); closeModal();
+      try {
+        save();
+      } catch(err) {
+        const errEl = document.getElementById('modal-err');
+        errEl.textContent = '저장 실패: ' + err.message;
+        errEl.style.display = 'inline';
+        return;
+      }
+      render(); closeModal();
       // 상세 페이지 열려 있으면 즉시 재렌더
       if (document.getElementById('detail-view').style.display !== 'none') {
         const updated = entries.find(x => x.id === savedId);
