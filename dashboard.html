@@ -1231,6 +1231,7 @@
       document.getElementById('rd-fixed').checked = true;
       document.getElementById('payday-fixed-wrap').style.display = 'block';
       setPay('lump');
+      document.getElementById('btn-save').style.display = 'inline-flex';
       document.getElementById('modal-title').textContent = id ? '중개건 수정' : '새 중개건 등록';
       if (id) {
         const e = entries.find(x => x.id === id);
@@ -1268,7 +1269,12 @@
       }
       document.getElementById('modal-ov').classList.add('on');
     }
-    function closeModal() { document.getElementById('modal-ov').classList.remove('on'); editId = null; }
+    function closeModal() {
+      document.getElementById('modal-ov').classList.remove('on');
+      document.getElementById('btn-save').style.display = 'none';
+      document.getElementById('modal-err').style.display = 'none';
+      editId = null;
+    }
 
     let curModalTab = 1;
     function switchModalTab(n) {
@@ -1278,7 +1284,6 @@
       document.getElementById(`mt-${n}`).style.display = 'block';
       document.getElementById('btn-mt-prev').style.display = n > 1 ? 'inline-flex' : 'none';
       document.getElementById('btn-mt-next').style.display = n < 5 ? 'inline-flex' : 'none';
-      document.getElementById('btn-save').style.display    = n === 5 ? 'inline-flex' : 'none';
     }
 
     function autoGenerateBreakdown() {
@@ -1360,10 +1365,12 @@
       const end = normalizeDate(rawEnd) || rawEnd;
       if (!name || !addr || !start) {
         const errEl = document.getElementById('modal-err');
-        errEl.textContent = '게스트 이름, 주소, 입실일은 필수입니다.';
+        const missing = [];
+        if (!name || !addr) missing.push('① 기본정보');
+        if (!start) missing.push('③ 계약기간');
+        errEl.textContent = `필수 항목 누락: ${missing.join(', ')} 탭을 확인하세요.`;
         errEl.style.display = 'inline';
-        switchModalTab(1);
-        setTimeout(() => { errEl.style.display = 'none'; }, 4000);
+        setTimeout(() => { errEl.style.display = 'none'; }, 6000);
         return;
       }
       document.getElementById('modal-err').style.display = 'none';
