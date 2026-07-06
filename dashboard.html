@@ -1000,15 +1000,12 @@
           isDone: true
         };
       }
-      // 수동설정(payDay 없음): 완료 항목이 없어도 가장 가까운 예정 항목의 금액을 표시
+      // 수동설정(payDay 없음): 완료 항목이 없어도 전체 예정 합계를 표시
       if (!e.payDay) {
-        const upcoming = e.breakdown.find(r => r.amount !== null && r.amount !== undefined && r.amount !== '');
-        if (upcoming) {
-          return {
-            amount: Number(upcoming.amount),
-            hikFee: upcoming.hikFee !== null && upcoming.hikFee !== undefined && upcoming.hikFee !== '' ? Number(upcoming.hikFee) : 0,
-            isDone: false
-          };
+        const schedAmt = e.breakdown.reduce((s, r) => s + (r.amount ? Number(r.amount) : 0), 0);
+        const schedHik = e.breakdown.reduce((s, r) => s + (r.hikFee ? Number(r.hikFee) : 0), 0);
+        if (schedAmt > 0 || schedHik > 0) {
+          return { amount: schedAmt, hikFee: schedHik, isDone: false };
         }
       }
       return { amount: null, hikFee: null };
