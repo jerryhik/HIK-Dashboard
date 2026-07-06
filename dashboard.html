@@ -993,11 +993,25 @@
     function bdDoneSum(e) {
       if (e.payType !== 'monthly' || !e.breakdown?.length) return { amount: null, hikFee: null };
       const done = e.breakdown.filter(r => r.status === 'done');
-      if (!done.length) return { amount: null, hikFee: null };
-      return {
-        amount: done.reduce((s, r) => s + (r.amount ? Number(r.amount) : 0), 0),
-        hikFee: done.reduce((s, r) => s + (r.hikFee ? Number(r.hikFee) : 0), 0)
-      };
+      if (done.length) {
+        return {
+          amount: done.reduce((s, r) => s + (r.amount ? Number(r.amount) : 0), 0),
+          hikFee: done.reduce((s, r) => s + (r.hikFee ? Number(r.hikFee) : 0), 0),
+          isDone: true
+        };
+      }
+      // 수동설정(payDay 없음): 완료 항목이 없어도 가장 가까운 예정 항목의 금액을 표시
+      if (!e.payDay) {
+        const upcoming = e.breakdown.find(r => r.amount !== null && r.amount !== undefined && r.amount !== '');
+        if (upcoming) {
+          return {
+            amount: Number(upcoming.amount),
+            hikFee: upcoming.hikFee !== null && upcoming.hikFee !== undefined && upcoming.hikFee !== '' ? Number(upcoming.hikFee) : 0,
+            isDone: false
+          };
+        }
+      }
+      return { amount: null, hikFee: null };
     }
 
     // ── ALERTS ──
