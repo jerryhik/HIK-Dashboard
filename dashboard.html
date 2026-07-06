@@ -1191,8 +1191,8 @@
           <td><div style="font-weight:600;font-size:13px;">${e.guestName||'—'}</div>${sbadge}</td>
           <td><div style="font-size:12px;color:var(--text2);max-width:170px;">${e.address||'—'}</div></td>
           <td><div style="font-weight:500;">${krw(e.deposit)}</div></td>
-          <td>${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="font-weight:500;">${krw(s.amount)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;">${krw(e.monthlyRent)}</div>`; })()}</td>
-          <td>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="font-weight:500;color:#D9730E;">${krw(s.hikFee)}</div><div style="font-size:10.5px;color:var(--green);">완료분 합계</div>` : `<div style="font-weight:500;color:#D9730E;">${krw(e.hikFee)}</div>`; })()}</td>
+          <td>${(() => { const s=bdDoneSum(e); if (s.amount!==null) { const lbl = s.isDone ? '<div style="font-size:10.5px;color:var(--green);">완료분 합계</div>' : '<div style="font-size:10.5px;color:var(--amber);">예정</div>'; return `<div style="font-weight:500;">${krw(s.amount)}</div>${lbl}`; } return `<div style="font-weight:500;">${krw(e.monthlyRent)}</div>`; })()}</td>
+          <td>${(() => { const s=bdDoneSum(e); if (s.hikFee!==null) { const lbl = s.isDone ? '<div style="font-size:10.5px;color:var(--green);">완료분 합계</div>' : '<div style="font-size:10.5px;color:var(--amber);">예정</div>'; return `<div style="font-weight:500;color:#D9730E;">${krw(s.hikFee)}</div>${lbl}`; } return `<div style="font-weight:500;color:#D9730E;">${krw(e.hikFee)}</div>`; })()}</td>
           <td><div style="font-size:12px;color:var(--text2);">${e.hostContact||'—'}</div></td>
           <td><div style="font-size:12px;color:var(--text2);">${e.guestContact||'—'}</div></td>
           <td>
