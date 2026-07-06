@@ -1557,8 +1557,8 @@
         if (e.breakdown?.length) {
           e.breakdown.forEach(r => {
             if (!r.dueDate) return;
-            const d = new Date(r.dueDate);
-            if (isNaN(d)) return;
+            const d = parseDateStr(r.dueDate);
+            if (!d) return;
             if (d >= s && d <= e2) {
               items.push({ e, r, source: e.payType === 'lump' ? '일괄' : (e.payDay ? `분할·${e.payDay}일` : '분할·수동') });
             }
