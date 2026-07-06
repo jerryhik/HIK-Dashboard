@@ -1616,8 +1616,8 @@
         const amt = r.amount ? Number(r.amount) : 0;
         const hik = r.hikFee ? Number(r.hikFee) : 0;
         allRent += amt; allHik += hik;
-        // 이용완료 중개건이거나 개별 납입 항목이 완료인 경우 실제 완료 합계에 포함
-        if (r.status === 'done' || getStatus(e) === 'done') { doneRent += amt; doneHik += hik; }
+        // 개별 납입 항목 status가 완료인 경우에만 실제 완료 합계에 포함
+        if (r.status === 'done') { doneRent += amt; doneHik += hik; }
       });
 
       document.getElementById('rev-done-rent').textContent  = items.length ? krw(doneRent) : '—';
