@@ -1150,6 +1150,7 @@
         const s = bdDoneSum(e);
         totRent += s.amount !== null ? s.amount : (e.monthlyRent ? Number(e.monthlyRent) : 0);
         totHik  += s.hikFee !== null ? s.hikFee : (e.hikFee ? Number(e.hikFee) : 0);
+        // 수동설정 breakdown 금액이 반영됐으므로 별도 처리 불필요 (bdDoneSum이 처리)
       });
       if (footRent) footRent.textContent = krw(totRent);
       if (footHik)  footHik.textContent  = krw(totHik);
