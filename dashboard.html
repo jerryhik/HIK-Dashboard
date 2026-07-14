@@ -1759,7 +1759,7 @@
       const thStyle = `background:rgba(226,217,206,.45);color:var(--text2);font-size:11px;padding:9px 14px;text-align:left;font-weight:600;letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);`;
       let bdHTML = '';
       if (e.payType === 'monthly' && e.breakdown?.length) {
-        let detSumAmt = 0, detSumHik = 0;
+        let detSumAmt = 0, detSumHik = 0, doneSumAmt = 0, doneSumHik = 0;
         const rows = e.breakdown.map(r => {
           const dl = r.dueDate ? daysTo(r.dueDate) : null;
           let db = '';
@@ -1775,6 +1775,10 @@
             : `<span class="status-sched">예정</span>`;
           if (r.amount) detSumAmt += Number(r.amount);
           if (r.hikFee) detSumHik += Number(r.hikFee);
+          if (r.status === 'done') {
+            if (r.amount) doneSumAmt += Number(r.amount);
+            if (r.hikFee) doneSumHik += Number(r.hikFee);
+          }
           return `<tr style="border-bottom:1px solid var(--border);">
             <td style="padding:10px 14px;font-size:13px;">${r.period||'—'}</td>
             <td style="padding:10px 14px;font-size:13px;color:var(--text2);">${fmt(r.dueDate)}${db}</td>
@@ -1793,10 +1797,16 @@
             </tr></thead>
             <tbody>${rows}</tbody>
             <tfoot><tr>
-              <td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">합계</td>
+              <td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">합계 (전체)</td>
               <td style="padding:9px 14px;font-size:13px;font-weight:700;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${detSumAmt?krw(detSumAmt):'—'}</td>
               <td style="padding:9px 14px;font-size:13px;font-weight:700;color:#D9730E;background:rgba(226,217,206,.35);border-top:2px solid var(--border2);">${detSumHik?krw(detSumHik):'—'}</td>
               <td style="background:rgba(226,217,206,.35);border-top:2px solid var(--border2);"></td>
+            </tr>
+            <tr>
+              <td colspan="3" style="padding:9px 14px;font-size:12px;font-weight:700;color:var(--green);background:rgba(42,110,70,.08);">납입 완료</td>
+              <td style="padding:9px 14px;font-size:13px;font-weight:700;color:var(--green);background:rgba(42,110,70,.08);">${doneSumAmt?krw(doneSumAmt):'₩0'}</td>
+              <td style="padding:9px 14px;font-size:13px;font-weight:700;color:var(--green);background:rgba(42,110,70,.08);">${doneSumHik?krw(doneSumHik):'₩0'}</td>
+              <td style="background:rgba(42,110,70,.08);"></td>
             </tr></tfoot>
           </table></div>`;
       }
@@ -1841,8 +1851,8 @@
           <div class="card" style="padding:20px;">
             <div class="detail-section-title">계약 금액</div>
             <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;">보증금</div><div style="font-weight:600;">${krw(e.deposit)}</div></div>
-            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;font-size:16.5px;">월세</div>${(() => { const s=bdDoneSum(e); return s.amount!==null ? `<div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;"><div style="font-weight:600;">${krw(s.amount)}</div><div style="font-size:11px;color:var(--green);">납입 완료분 합계</div></div>` : `<div style="font-weight:600;">${krw(e.monthlyRent)}</div>`; })()}</div>
-            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;font-size:16.5px;">HIK 수수료</div>${(() => { const s=bdDoneSum(e); return s.hikFee!==null ? `<div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;"><div style="font-weight:600;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:11px;color:var(--green);">납입 완료분 합계</div></div>` : `<div style="font-weight:600;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;font-size:16.5px;">월세</div>${(() => { const s=bdDoneSum(e); if (s.amount!==null && s.isDone) { return `<div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;"><div style="font-weight:600;">${krw(s.amount)}</div><div style="font-size:11px;color:var(--green);">납입 완료분 합계</div></div>`; } return `<div style="font-weight:600;">${krw(e.monthlyRent)}</div>`; })()}</div>
+            <div class="detail-info-row"><div class="flabel" style="margin-bottom:2px;font-size:16.5px;">HIK 수수료</div>${(() => { const s=bdDoneSum(e); if (s.hikFee!==null && s.isDone) { return `<div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;"><div style="font-weight:600;color:var(--gold);">${krw(s.hikFee)}</div><div style="font-size:11px;color:var(--green);">납입 완료분 합계</div></div>`; } return `<div style="font-weight:600;color:var(--gold);">${krw(e.hikFee)}</div>`; })()}</div>
           </div>
         </div>
 
