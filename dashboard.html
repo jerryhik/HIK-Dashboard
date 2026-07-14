@@ -1742,7 +1742,9 @@
       switchTab(manager ? `mgr:${manager}` : 'list', false);
     }
 
+    let _detailEntry = null;
     function renderDetail(e) {
+      _detailEntry = e;
       const od = daysTo(e.endDate), id2 = daysTo(e.startDate);
       let statusBadges = '';
       if (id2 >= 0 && id2 <= 7)       statusBadges += `<span class="badge b-urg" style="margin-right:4px;">D-${id2} 입실</span>`;
@@ -1760,7 +1762,7 @@
       let bdHTML = '';
       if (e.payType === 'monthly' && e.breakdown?.length) {
         let detSumAmt = 0, detSumHik = 0, doneSumAmt = 0, doneSumHik = 0;
-        const rows = e.breakdown.map(r => {
+        const rows = e.breakdown.map((r, idx) => {
           const dl = r.dueDate ? daysTo(r.dueDate) : null;
           let db = '';
           if (r.status === 'done') {
@@ -1770,9 +1772,10 @@
             else if (dl <= 7) db = `<span class="dbadge" style="background:var(--red-d);color:var(--red);margin-left:5px;">D-${dl}</span>`;
             else if (dl <=14) db = `<span class="dbadge" style="background:var(--amber-d);color:var(--amber);margin-left:5px;">D-${dl}</span>`;
           }
-          const statusLabel = r.status === 'done'
-            ? `<span class="status-done">완료</span>`
-            : `<span class="status-sched">예정</span>`;
+          const statusSelect = `<select class="bd-status-inline" data-bd-idx="${idx}" title="납입여부를 바꾸면 즉시 저장됩니다" style="padding:3px 8px;font-size:12px;font-weight:600;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit;background:transparent;color:${r.status==='done'?'var(--green)':'var(--amber)'};">
+            <option value="scheduled"${r.status!=='done'?' selected':''}>예정</option>
+            <option value="done"${r.status==='done'?' selected':''}>완료</option>
+          </select>`;
           if (r.amount) detSumAmt += Number(r.amount);
           if (r.hikFee) detSumHik += Number(r.hikFee);
           if (r.status === 'done') {
@@ -1785,7 +1788,7 @@
             <td style="padding:10px 14px;font-size:13px;color:var(--text2);">${fmt(r.actualDate)}</td>
             <td style="padding:10px 14px;font-size:13px;font-weight:600;">${r.amount?krw(r.amount):'—'}</td>
             <td style="padding:10px 14px;font-size:13px;font-weight:600;color:#D9730E;">${r.hikFee?krw(r.hikFee):'—'}</td>
-            <td style="padding:10px 14px;font-size:12.5px;">${statusLabel}</td>
+            <td style="padding:10px 14px;font-size:12.5px;">${statusSelect}</td>
           </tr>`;
         }).join('');
         bdHTML = `<div style="margin-top:14px;border:1px solid var(--border);border-radius:8px;overflow:hidden;">
@@ -1912,14 +1915,33 @@
       document.getElementById('d-edit').addEventListener('click', () => openModal(e.id));
       document.getElementById('d-del').addEventListener('click', () => { delEntry(e.id); showList(); });
 
-      // 미리보기 버튼 이벤트 위임
-      document.getElementById('detail-content').addEventListener('click', ev => {
-        const btn = ev.target.closest('[data-preview-idx]');
-        if (!btn) return;
-        const idx = Number(btn.dataset.previewIdx);
-        const att = e.attachments?.[idx];
-        if (att) previewAttachment(att);
-      });
+      // detail-content 이벤트 위임 (한 번만 바인딩 — 현재 항목은 _detailEntry로 참조)
+      const _dc = document.getElementById('detail-content');
+      if (!_dc._bound) {
+        _dc._bound = true;
+        // 미리보기 버튼
+        _dc.addEventListener('click', ev => {
+          const btn = ev.target.closest('[data-preview-idx]');
+          if (!btn || !_detailEntry) return;
+          const att = _detailEntry.attachments?.[Number(btn.dataset.previewIdx)];
+          if (att) previewAttachment(att);
+        });
+        // 납부 방식 표: 납입여부 인라인 편집 → 즉시 저장 + 재렌더
+        _dc.addEventListener('change', ev => {
+          const sel = ev.target.closest('.bd-status-inline');
+          if (!sel || !_detailEntry) return;
+          const row = _detailEntry.breakdown?.[Number(sel.dataset.bdIdx)];
+          if (!row) return;
+          row.status = sel.value;
+          if (sel.value === 'done') {
+            if (!row.actualDate) row.actualDate = new Date().toISOString().slice(0, 10);
+          } else {
+            row.actualDate = '';
+          }
+          save();
+          renderDetail(_detailEntry);
+        });
+      }
     }
 
     // ── EVENT LISTENERS ──
